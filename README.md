@@ -1,4 +1,5 @@
 # CRM
+<<<<<<< HEAD
 
 A modern CRM built with Django 6.0.5 + Tailwind CSS + Alpine.js + HTMX.
 
@@ -88,3 +89,6 @@ All models inherit from `TimeStampedModel` (created_at, updated_at, created_by, 
 ## UX Pattern
 
 All record creation and editing happens through a semi-transparent slide-over panel that slides in from the left side of the screen. This keeps the main content area stable and provides a focused form experience.
+=======
+CRM for manufacturing
+>>>>>>> bd5b93737937f96c42d2df063442686378b2509b
