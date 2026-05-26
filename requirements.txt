@@ -1,2 +1,5 @@
+asgiref==3.11.1
 django==6.0.5
-Pillow>=10.0.0
+Pillow==12.2.0
+sqlparse==0.5.5
+tzdata==2026.2
