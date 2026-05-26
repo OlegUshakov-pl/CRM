@@ -1,0 +1,61 @@
+<aside class="fixed inset-y-0 left-0 z-30 w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col transition-all duration-300 lg:translate-x-0" :class="mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'">
+    <div class="flex items-center gap-3 px-6 h-16 border-b border-gray-200 dark:border-gray-700">
+        <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+            <span class="text-white font-bold text-sm">C</span>
+        </div>
+        <span class="text-xl font-bold text-gray-900 dark:text-white">CRM</span>
+    </div>
+
+    <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+        {% url 'core:dashboard' as dashboard_url %}
+        <a href="{{ dashboard_url }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors {% if request.path == dashboard_url %}bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300{% else %}text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700{% endif %}">
+            <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+            Dashboard
+        </a>
+
+        {% url 'projects:list' as projects_url %}
+        <a href="{{ projects_url }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors {% if request.path|slice:'8' == projects_url|slice:'8' %}bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300{% else %}text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700{% endif %}">
+            <i data-lucide="folder-kanban" class="w-5 h-5"></i>
+            Projects
+        </a>
+
+        {% url 'contacts:company_list' as companies_url %}
+        <a href="{{ companies_url }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors {% if '/contacts/companies/' in request.path %}bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300{% else %}text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700{% endif %}">
+            <i data-lucide="building-2" class="w-5 h-5"></i>
+            Companies
+        </a>
+
+        {% url 'contacts:contact_list' as contacts_url %}
+        <a href="{{ contacts_url }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors {% if request.path == contacts_url %}bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300{% else %}text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700{% endif %}">
+            <i data-lucide="users" class="w-5 h-5"></i>
+            Contacts
+        </a>
+
+        {% url 'tasks:list' as tasks_url %}
+        <a href="{{ tasks_url }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors {% if request.path|slice:'7' == tasks_url|slice:'7' %}bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300{% else %}text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700{% endif %}">
+            <i data-lucide="check-square" class="w-5 h-5"></i>
+            Tasks
+        </a>
+
+        {% url 'notes:list' as notes_url %}
+        <a href="{{ notes_url }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors {% if request.path|slice:'7' == notes_url|slice:'7' %}bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300{% else %}text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700{% endif %}">
+            <i data-lucide="sticky-note" class="w-5 h-5"></i>
+            Notes
+        </a>
+    </nav>
+
+    <div class="border-t border-gray-200 dark:border-gray-700 p-4">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/50 rounded-full flex items-center justify-center">
+                <span class="text-sm font-semibold text-indigo-700 dark:text-indigo-300">{{ user.get_initials }}</span>
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ user.get_full_name|default:user.username }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ user.email }}</p>
+            </div>
+            <a href="{% url 'accounts:profile' %}" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                <i data-lucide="settings" class="w-4 h-4"></i>
+            </a>
+        </div>
+    </div>
+</aside>

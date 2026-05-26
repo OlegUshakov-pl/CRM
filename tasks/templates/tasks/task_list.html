@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% block title %}Tasks - CRM{% endblock %}
+{% block content %}
+<div class="space-y-6">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Tasks</h1>
+            <p class="text-gray-500 dark:text-gray-400 mt-1">Manage your tasks</p>
+        </div>
+        <button onclick="openSlideOver('{% url 'tasks:create_slide' %}')" class="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors shadow-sm">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            Add Task
+        </button>
+    </div>
+
+    <div class="flex flex-col sm:flex-row gap-3">
+        <div class="relative flex-1">
+            <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"></i>
+            <input type="text" placeholder="Search tasks..." value="{{ query }}" hx-get="{% url 'tasks:list' %}" hx-trigger="keyup changed delay:300ms" hx-target="#task-list" hx-include="#status-filter, #priority-filter" name="q" class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none dark:text-gray-200">
+        </div>
+        <select id="status-filter" name="status" hx-get="{% url 'tasks:list' %}" hx-target="#task-list" hx-include="[name='q'], #priority-filter" class="px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none dark:text-gray-200">
+            <option value="">All statuses</option>
+            <option value="todo" {% if status_filter == 'todo' %}selected{% endif %}>To Do</option>
+            <option value="in_progress" {% if status_filter == 'in_progress' %}selected{% endif %}>In Progress</option>
+            <option value="review" {% if status_filter == 'review' %}selected{% endif %}>Review</option>
+            <option value="done" {% if status_filter == 'done' %}selected{% endif %}>Done</option>
+        </select>
+        <select id="priority-filter" name="priority" hx-get="{% url 'tasks:list' %}" hx-target="#task-list" hx-include="[name='q'], #status-filter" class="px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none dark:text-gray-200">
+            <option value="">All priorities</option>
+            <option value="low" {% if priority_filter == 'low' %}selected{% endif %}>Low</option>
+            <option value="medium" {% if priority_filter == 'medium' %}selected{% endif %}>Medium</option>
+            <option value="high" {% if priority_filter == 'high' %}selected{% endif %}>High</option>
+            <option value="urgent" {% if priority_filter == 'urgent' %}selected{% endif %}>Urgent</option>
+        </select>
+    </div>
+
+    <div id="task-list" class="space-y-2">
+        {% for task in tasks %}
+            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 hover:shadow-md transition-shadow">
+                <div class="flex items-start gap-4">
+                    <div class="w-5 h-5 rounded-full border-2 mt-0.5 flex-shrink-0
+                        {% if task.status == 'done' %}bg-green-500 border-green-500
+                        {% else %}
+                            {% if task.priority == 'urgent' %}border-red-400
+                            {% elif task.priority == 'high' %}border-orange-400
+                            {% elif task.priority == 'medium' %}border-blue-400
+                            {% else %}border-gray-400{% endif %}
+                        {% endif %}">
+                        {% if task.status == 'done' %}
+                            <i data-lucide="check" class="w-3 h-3 text-white"></i>
+                        {% endif %}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <h3 class="font-medium text-gray-900 dark:text-white">{{ task.title }}</h3>
+                                <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{{ task.description|truncatewords:20|default:'No description' }}</p>
+                            </div>
+                            <div class="flex gap-2 flex-shrink-0 ml-4">
+                                <button onclick="openSlideOver('{% url 'tasks:edit_slide' task.pk %}')" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">Edit</button>
+                                <form method="post" action="{% url 'tasks:delete' task.pk %}" class="inline" onsubmit="return confirm('Delete this task?')">
+                                    {% csrf_token %}
+                                    <button type="submit" class="text-sm text-red-600 dark:text-red-400 hover:underline">Delete</button>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 mt-2 text-xs">
+                            <span class="px-2 py-0.5 rounded-full
+                                {% if task.status == 'done' %}bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300
+                                {% elif task.status == 'in_progress' %}bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300
+                                {% elif task.status == 'review' %}bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300
+                                {% else %}bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300{% endif %}">
+                                {{ task.get_status_display }}
+                            </span>
+                            <span class="px-2 py-0.5 rounded-full
+                                {% if task.priority == 'urgent' %}bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300
+                                {% elif task.priority == 'high' %}bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300
+                                {% elif task.priority == 'medium' %}bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300
+                                {% else %}bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300{% endif %}">
+                                {{ task.get_priority_display }}
+                            </span>
+                            {% if task.project %}
+                                <span class="text-gray-500 dark:text-gray-400">{{ task.project.name }}</span>
+                            {% endif %}
+                            {% if task.due_date %}
+                                <span class="text-gray-500 dark:text-gray-400">Due: {{ task.due_date|date:'M d' }}</span>
+                            {% endif %}
+                            {% if task.assigned_to %}
+                                <span class="text-gray-500 dark:text-gray-400">{{ task.assigned_to.get_full_name|default:task.assigned_to.username }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="text-center py-16">
+                <i data-lucide="check-square" class="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4"></i>
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">No tasks yet</h3>
+                <p class="text-gray-500 dark:text-gray-400 mb-4">Create your first task to get started</p>
+                <button onclick="openSlideOver('{% url 'tasks:create_slide' %}')" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors">
+                    <i data-lucide="plus" class="w-4 h-4"></i>
+                    Add Task
+                </button>
+            </div>
+        {% endfor %}
+    </div>
+
+    {% include 'includes/pagination.html' with page_obj=tasks %}
+</div>
+{% endblock %}

@@ -1,0 +1,18 @@
+<form method="post" action="{% if note %}{% url 'notes:edit' note.pk %}{% else %}{% url 'notes:create' %}{% endif %}" class="space-y-4">
+    {% csrf_token %}
+    {% for field in form %}
+        <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}
+                <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ field.errors.0 }}</p>
+            {% endif %}
+        </div>
+    {% endfor %}
+    <div class="flex gap-3 pt-2">
+        <button type="submit" class="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors">
+            {% if note %}Save Changes{% else %}Create{% endif %}
+        </button>
+        <button type="button" @click="closeSlideOver()" class="px-4 py-2.5 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">Cancel</button>
+    </div>
+</form>

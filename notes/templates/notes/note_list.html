@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block title %}Notes - CRM{% endblock %}
+{% block content %}
+<div class="space-y-6">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Notes</h1>
+            <p class="text-gray-500 dark:text-gray-400 mt-1">All your notes in one place</p>
+        </div>
+        <button onclick="openSlideOver('{% url 'notes:create_slide' %}')" class="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors shadow-sm">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            Add Note
+        </button>
+    </div>
+
+    <div class="relative">
+        <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"></i>
+        <input type="text" placeholder="Search notes..." value="{{ query }}" hx-get="{% url 'notes:list' %}" hx-trigger="keyup changed delay:300ms" hx-target="#note-list" name="q" class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none dark:text-gray-200">
+    </div>
+
+    <div id="note-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {% for note in notes %}
+            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md transition-shadow">
+                <div class="flex items-start justify-between mb-2">
+                    <h3 class="font-semibold text-gray-900 dark:text-white">{{ note.title }}</h3>
+                    <div class="flex gap-1">
+                        <button onclick="openSlideOver('{% url 'notes:edit_slide' note.pk %}')" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                            <i data-lucide="edit-3" class="w-4 h-4"></i>
+                        </button>
+                        <form method="post" action="{% url 'notes:delete' note.pk %}" class="inline" onsubmit="return confirm('Delete this note?')">
+                            {% csrf_token %}
+                            <button type="submit" class="text-gray-400 hover:text-red-600 dark:hover:text-red-400">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-4 mb-3">{{ note.content }}</p>
+                <div class="flex items-center gap-2 text-xs text-gray-400 pt-3 border-t border-gray-100 dark:border-gray-700">
+                    {% if note.project %}
+                        <span class="px-2 py-0.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-full">{{ note.project.name }}</span>
+                    {% endif %}
+                    {% if note.company %}
+                        <span class="px-2 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 rounded-full">{{ note.company.name }}</span>
+                    {% endif %}
+                    <span class="ml-auto">{{ note.created_at|date:'M d, Y' }}</span>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-span-full text-center py-16">
+                <i data-lucide="sticky-note" class="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4"></i>
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">No notes yet</h3>
+                <p class="text-gray-500 dark:text-gray-400 mb-4">Create your first note</p>
+                <button onclick="openSlideOver('{% url 'notes:create_slide' %}')" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors">
+                    <i data-lucide="plus" class="w-4 h-4"></i>
+                    Add Note
+                </button>
+            </div>
+        {% endfor %}
+    </div>
+
+    {% include 'includes/pagination.html' with page_obj=notes %}
+</div>
+{% endblock %}

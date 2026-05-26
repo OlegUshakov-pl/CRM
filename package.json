@@ -1,0 +1,13 @@
+{
+  "name": "crm",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "tailwindcss -i ./static/src/styles.css -o ./static/dist/styles.css --watch",
+    "build": "tailwindcss -i ./static/src/styles.css -o ./static/dist/styles.css --minify"
+  },
+  "devDependencies": {
+    "tailwindcss": "^4.1.4",
+    "@tailwindcss/cli": "^4.1.4"
+  }
+}

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full" x-data="{ theme: localStorage.getItem('theme') || 'light', mobileSidebarOpen: false }" :class="{ 'dark': theme === 'dark' }">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}CRM{% endblock %}</title>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/dist/styles.css">
+    <style>
+        * { font-family: 'Montserrat', sans-serif; }
+        .slide-over-enter { transform: translateX(-100%); }
+        .slide-over-enter-active { transform: translateX(0); transition: transform 0.3s ease-out; }
+        [x-cloak] { display: none !important; }
+        .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .line-clamp-4 { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="h-full bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+    <div class="flex h-full">
+        {% include 'includes/sidebar.html' %}
+        <div class="flex-1 flex flex-col min-w-0 lg:pl-64">
+            {% include 'includes/topbar.html' %}
+            <main class="flex-1 overflow-y-auto p-4 lg:p-6">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="mb-4 p-4 rounded-lg {% if message.tags == 'error' %}bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200{% elif message.tags == 'success' %}bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200{% else %}bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+                {% block content %}{% endblock %}
+            </main>
+        </div>
+    </div>
+
+    {% include 'includes/slide_over.html' %}
+
+    <script>
+        lucide.createIcons();
+        document.addEventListener('htmx:afterSettle', function() { lucide.createIcons(); });
+
+        function openSlideOver(url) {
+            const backdrop = document.getElementById('slide-over-backdrop');
+            const panel = document.getElementById('slide-over');
+            backdrop.classList.remove('opacity-0', 'pointer-events-none');
+            backdrop.classList.add('opacity-100');
+            panel.classList.remove('translate-x-full');
+            panel.classList.add('translate-x-0');
+            htmx.ajax('GET', url, {target: '#slide-over-content', swap: 'innerHTML'});
+        }
+
+        function closeSlideOver() {
+            const backdrop = document.getElementById('slide-over-backdrop');
+            const panel = document.getElementById('slide-over');
+            panel.classList.remove('translate-x-0');
+            panel.classList.add('translate-x-full');
+            backdrop.classList.remove('opacity-100');
+            backdrop.classList.add('opacity-0', 'pointer-events-none');
+        }
+
+        document.addEventListener('htmx:afterSwap', function(evt) {
+            if (evt.detail.target && evt.detail.target.id === 'slide-over-content') {
+                lucide.createIcons();
+            }
+        });
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const current = localStorage.getItem('theme') || 'light';
+            const next = current === 'dark' ? 'light' : 'dark';
+            localStorage.setItem('theme', next);
+            if (next === 'dark') {
+                html.classList.add('dark');
+            } else {
+                html.classList.remove('dark');
+            }
+            lucide.createIcons();
+        }
+    </script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block title %}Contacts - CRM{% endblock %}
+{% block content %}
+<div class="space-y-6">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Contacts</h1>
+            <p class="text-gray-500 dark:text-gray-400 mt-1">Manage your contacts</p>
+        </div>
+        <button onclick="openSlideOver('{% url 'contacts:contact_create_slide' %}')" class="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors shadow-sm">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            Add Contact
+        </button>
+    </div>
+
+    <div class="relative">
+        <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"></i>
+        <input type="text" placeholder="Search contacts..." value="{{ query }}" hx-get="{% url 'contacts:contact_list' %}" hx-trigger="keyup changed delay:300ms" hx-target="#contact-list" name="q" class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none dark:text-gray-200">
+    </div>
+
+    <div id="contact-list" class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+        {% if contacts %}
+            <div class="divide-y divide-gray-200 dark:divide-gray-700">
+                {% for contact in contacts %}
+                    <div class="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                        {% if contact.avatar %}
+                            <img src="{{ contact.avatar.url }}" alt="{{ contact.get_full_name }}" class="w-10 h-10 rounded-full object-cover">
+                        {% else %}
+                            <div class="w-10 h-10 bg-indigo-100 dark:bg-indigo-900/50 rounded-full flex items-center justify-center flex-shrink-0">
+                                <span class="text-sm font-semibold text-indigo-700 dark:text-indigo-300">{{ contact.first_name|first }}{{ contact.last_name|first }}</span>
+                            </div>
+                        {% endif %}
+                        <div class="flex-1 min-w-0">
+                            <p class="font-medium text-gray-900 dark:text-white">{{ contact.get_full_name }}</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 truncate">{{ contact.position|default:contact.email|default:'No position' }}</p>
+                        </div>
+                        <div class="hidden sm:block text-sm text-gray-500 dark:text-gray-400">
+                            {{ contact.company.name|default:'—' }}
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="openSlideOver('{% url 'contacts:contact_edit_slide' contact.pk %}')" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">Edit</button>
+                            <form method="post" action="{% url 'contacts:contact_delete' contact.pk %}" class="inline" onsubmit="return confirm('Delete this contact?')">
+                                {% csrf_token %}
+                                <button type="submit" class="text-sm text-red-600 dark:text-red-400 hover:underline">Delete</button>
+                            </form>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-16">
+                <i data-lucide="users" class="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4"></i>
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">No contacts yet</h3>
+                <p class="text-gray-500 dark:text-gray-400 mb-4">Add your first contact to get started</p>
+                <button onclick="openSlideOver('{% url 'contacts:contact_create_slide' %}')" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors">
+                    <i data-lucide="plus" class="w-4 h-4"></i>
+                    Add Contact
+                </button>
+            </div>
+        {% endif %}
+    </div>
+
+    {% include 'includes/pagination.html' with page_obj=contacts %}
+</div>
+{% endblock %}

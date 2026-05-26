@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+*.whl
+
+# Virtual environment
+venv/
+.env
+
+# Django
+*.sqlite3
+db.sqlite3
+media/
+staticfiles/
+
+# Node
+node_modules/
+package-lock.json
+
+# Tailwind
+static/dist/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Environment
+*.env.local
+*.env

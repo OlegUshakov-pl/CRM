@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Dashboard - CRM{% endblock %}
+{% block content %}
+<div class="space-y-6">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+            <p class="text-gray-500 dark:text-gray-400 mt-1">Welcome back, {{ user.first_name|default:user.username }}</p>
+        </div>
+        <button onclick="openSlideOver('{% url 'projects:create_slide' %}')" class="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors shadow-sm">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            New Project
+        </button>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Total Projects</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ project_count }}</p>
+                </div>
+                <div class="w-10 h-10 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg flex items-center justify-center">
+                    <i data-lucide="folder-kanban" class="w-5 h-5 text-indigo-600 dark:text-indigo-400"></i>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Active Projects</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ active_projects }}</p>
+                </div>
+                <div class="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
+                    <i data-lucide="play-circle" class="w-5 h-5 text-green-600 dark:text-green-400"></i>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Companies</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ company_count }}</p>
+                </div>
+                <div class="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center">
+                    <i data-lucide="building-2" class="w-5 h-5 text-amber-600 dark:text-amber-400"></i>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Tasks</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ task_count }}</p>
+                </div>
+                <div class="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
+                    <i data-lucide="check-square" class="w-5 h-5 text-purple-600 dark:text-purple-400"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+            <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Recent Projects</h2>
+            </div>
+            <div class="p-5">
+                {% if recent_projects %}
+                    <div class="space-y-3">
+                        {% for project in recent_projects %}
+                            <a href="{% url 'projects:detail' project.pk %}" class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-2 h-2 rounded-full
+                                        {% if project.status == 'active' %}bg-green-500
+                                        {% elif project.status == 'planning' %}bg-blue-500
+                                        {% elif project.status == 'on_hold' %}bg-amber-500
+                                        {% elif project.status == 'completed' %}bg-gray-500
+                                        {% else %}bg-red-500{% endif %}">
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-gray-900 dark:text-white">{{ project.name }}</p>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ project.company.name|default:'No company' }}</p>
+                                    </div>
+                                </div>
+                                <span class="text-xs px-2 py-1 rounded-full
+                                    {% if project.status == 'active' %}bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300
+                                    {% elif project.status == 'planning' %}bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300
+                                    {% elif project.status == 'on_hold' %}bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300
+                                    {% elif project.status == 'completed' %}bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300
+                                    {% else %}bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300{% endif %}">
+                                    {{ project.get_status_display }}
+                                </span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-10">
+                        <i data-lucide="folder-kanban" class="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3"></i>
+                        <p class="text-gray-500 dark:text-gray-400">No projects yet</p>
+                        <button onclick="openSlideOver('{% url 'projects:create_slide' %}')" class="mt-3 text-indigo-600 dark:text-indigo-400 font-medium text-sm hover:underline">Create your first project</button>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+            <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Today's Tasks</h2>
+            </div>
+            <div class="p-5">
+                {% if today_tasks %}
+                    <div class="space-y-2">
+                        {% for task in today_tasks %}
+                            <div class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                <div class="w-5 h-5 rounded-full border-2
+                                    {% if task.priority == 'urgent' %}border-red-400
+                                    {% elif task.priority == 'high' %}border-orange-400
+                                    {% elif task.priority == 'medium' %}border-blue-400
+                                    {% else %}border-gray-400{% endif %}">
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="font-medium text-gray-900 dark:text-white truncate">{{ task.title }}</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ task.project.name|default:'No project' }}</p>
+                                </div>
+                                <span class="text-xs px-2 py-1 rounded-full
+                                    {% if task.priority == 'urgent' %}bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300
+                                    {% elif task.priority == 'high' %}bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300
+                                    {% elif task.priority == 'medium' %}bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300
+                                    {% else %}bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300{% endif %}">
+                                    {{ task.get_priority_display }}
+                                </span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-10">
+                        <i data-lucide="check-circle" class="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3"></i>
+                        <p class="text-gray-500 dark:text-gray-400">All clear! No pending tasks</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
