@@ -44,8 +44,11 @@ def project_create(request):
             form.save_m2m()
             log_activity(request.user, 'created', f'Project "{project.name}"', project)
             messages.success(request, 'Project created successfully.')
+            next_url = request.GET.get('next')
+            if next_url == 'dashboard':
+                return redirect('core:dashboard')
             return redirect('projects:list')
-    return render(request, 'projects/project_form.html', {'form': form, 'title': 'Add Project'})
+    return render(request, 'projects/project_create_page.html', {'form': form, 'title': 'Add Project', 'is_page': True})
 
 
 @login_required
