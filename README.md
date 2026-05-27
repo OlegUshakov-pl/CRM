@@ -1,3 +1,4 @@
+![CRM](image.png)
 # CRM
 
 A modern CRM built with Django 6.0.5 + Tailwind CSS + Alpine.js + HTMX.
