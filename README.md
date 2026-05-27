@@ -89,3 +89,8 @@ All models inherit from `TimeStampedModel` (created_at, updated_at, created_by, 
 ## UX Pattern
 
 All record creation and editing happens through a semi-transparent slide-over panel that slides in from the left side of the screen. This keeps the main content area stable and provides a focused form experience.
+
+## P.S.
+
+The first version. CRM will be updated and I have a lot of ideas about it. I'm working on changings.
+You can to take CRM and change it for yourself if you want.
