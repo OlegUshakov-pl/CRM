@@ -1,4 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
@@ -30,6 +31,10 @@ def company_create(request):
             company.save()
             log_activity(request.user, 'created', f'Company "{company.name}"', company)
             messages.success(request, 'Company created successfully.')
+            if request.headers.get('HX-Request'):
+                response = HttpResponse('<script>closeSlideOver()</script>')
+                response['HX-Refresh'] = 'true'
+                return response
             return redirect('contacts:company_list')
     return render(request, 'contacts/company_form.html', {'form': form, 'title': 'Add Company'})
 
@@ -44,6 +49,10 @@ def company_edit(request, pk):
             form.save()
             log_activity(request.user, 'updated', f'Company "{company.name}"', company)
             messages.success(request, 'Company updated successfully.')
+            if request.headers.get('HX-Request'):
+                response = HttpResponse('<script>closeSlideOver()</script>')
+                response['HX-Refresh'] = 'true'
+                return response
             return redirect('contacts:company_list')
     return render(request, 'contacts/company_form.html', {'form': form, 'title': 'Edit Company', 'company': company})
 
