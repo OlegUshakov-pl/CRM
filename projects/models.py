@@ -70,3 +70,15 @@ class Material(TimeStampedModel):
         if not self.slug:
             self.slug = generate_unique_slug(self, 'name', Material)
         super().save(*args, **kwargs)
+
+
+class ProjectImage(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='images')
+    image = models.ImageField(upload_to='projects/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['uploaded_at']
+
+    def __str__(self):
+        return f"{self.project.name} - Image"

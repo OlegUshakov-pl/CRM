@@ -40,7 +40,7 @@
                 {% endif %}
                 <div class="p-4">
                     <div class="flex items-start justify-between mb-2">
-                        <h3 class="font-semibold text-gray-900 dark:text-white">{{ project.name }}</h3>
+                        <a href="{% url 'projects:detail' project.slug %}" class="font-semibold text-gray-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">{{ project.name }}</a>
                         <span class="text-xs px-2 py-1 rounded-full
                             {% if project.status == 'active' %}bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300
                             {% elif project.status == 'planning' %}bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300
@@ -57,9 +57,9 @@
                     <div class="flex items-center justify-between text-xs text-gray-400">
                         <span>{{ project.created_at|date:'M d, Y' }}</span>
                         <div class="flex gap-2">
-                            <a href="{% url 'projects:detail' project.slug %}" class="text-indigo-600 dark:text-indigo-400 hover:underline">View</a>
+                            <a href="{% url 'projects:detail' project.slug %}" class="text-indigo-600 dark:text-indigo-400 hover:underline">Open</a>
                             <a href="{% url 'projects:edit' project.slug %}" class="text-gray-600 dark:text-gray-400 hover:underline">Edit</a>
-                            <form method="post" action="{% url 'projects:delete' project.slug %}" class="inline" onsubmit="return confirm('Delete this project?')">
+                            <form method="post" action="{% url 'projects:delete' project.slug %}" class="inline" onsubmit="return confirm('Delete project &quot;{{ project.name }}&quot;? This action cannot be undone.')">
                                 {% csrf_token %}
                                 <button type="submit" class="text-red-600 dark:text-red-400 hover:underline">Delete</button>
                             </form>

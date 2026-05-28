@@ -1,5 +1,5 @@
 from django import forms
-from .models import Project, Material
+from .models import Project, Material, ProjectImage
 from contacts.models import Contact
 
 

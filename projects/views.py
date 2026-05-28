@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
-from .models import Project, Material
+from .models import Project, Material, ProjectImage
 from .forms import ProjectForm, MaterialForm
 from core.models import log_activity
 
@@ -28,7 +28,7 @@ def project_list(request):
 
 @login_required
 def project_detail(request, slug):
-    project = get_object_or_404(Project.objects.prefetch_related('materials', 'contacts', 'tasks', 'note_entries'), slug=slug)
+    project = get_object_or_404(Project.objects.prefetch_related('materials', 'contacts', 'tasks', 'note_entries', 'images'), slug=slug)
     return render(request, 'projects/project_detail.html', {'project': project})
 
 
@@ -42,6 +42,8 @@ def project_create(request):
             project.created_by = request.user
             project.save()
             form.save_m2m()
+            for f in request.FILES.getlist('images'):
+                ProjectImage.objects.create(project=project, image=f)
             log_activity(request.user, 'created', f'Project "{project.name}"', project)
             messages.success(request, 'Project created successfully.')
             next_url = request.GET.get('next')
@@ -59,6 +61,11 @@ def project_edit(request, slug):
         form = ProjectForm(request.POST, request.FILES, instance=project)
         if form.is_valid():
             form.save()
+            for f in request.FILES.getlist('images'):
+                ProjectImage.objects.create(project=project, image=f)
+            delete_ids = request.POST.getlist('delete_images')
+            if delete_ids:
+                ProjectImage.objects.filter(id__in=delete_ids, project=project).delete()
             log_activity(request.user, 'updated', f'Project "{project.name}"', project)
             messages.success(request, 'Project updated successfully.')
             return redirect('projects:detail', slug=project.slug)
