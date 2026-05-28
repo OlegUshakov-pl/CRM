@@ -27,13 +27,8 @@
             <div id="gallery" class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Gallery</h2>
-                    <div class="flex gap-1" id="gallery-dots">
-                        {% for img in project.images.all %}
-                        <button type="button" onclick="galleryGo({{ forloop.counter0 }})" class="gallery-dot h-2 rounded-full bg-gray-300 dark:bg-gray-600 transition-all duration-300" data-index="{{ forloop.counter0 }}"></button>
-                        {% endfor %}
-                    </div>
                 </div>
-                <div class="relative overflow-hidden bg-gray-100 dark:bg-gray-700" style="aspect-ratio: 16/9">
+                <div class="relative overflow-hidden bg-gray-100 dark:bg-gray-700 rounded-lg" style="aspect-ratio: 16/9">
                     {% for img in project.images.all %}
                     <div class="gallery-slide absolute inset-0" data-index="{{ forloop.counter0 }}" {% if not forloop.first %}style="display:none"{% endif %}>
                         <a href="{{ img.image.url }}" target="_blank">
@@ -41,12 +36,17 @@
                         </a>
                     </div>
                     {% endfor %}
-                    <button type="button" onclick="galleryPrev()" id="gallery-prev" class="absolute left-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/40 text-white hover:bg-black/60 transition-colors">
+                    <button type="button" onclick="galleryPrev()" id="gallery-prev" class="absolute left-2 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-black/40 text-white hover:bg-black/60 transition-colors">
                         <i data-lucide="chevron-left" class="w-5 h-5"></i>
                     </button>
-                    <button type="button" onclick="galleryNext()" id="gallery-next" class="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/40 text-white hover:bg-black/60 transition-colors">
+                    <button type="button" onclick="galleryNext()" id="gallery-next" class="absolute right-2 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-black/40 text-white hover:bg-black/60 transition-colors">
                         <i data-lucide="chevron-right" class="w-5 h-5"></i>
                     </button>
+                    <div class="absolute bottom-2 left-1/2 -translate-x-1/2 z-10 flex gap-1" id="gallery-dots">
+                        {% for img in project.images.all %}
+                        <button type="button" onclick="galleryGo({{ forloop.counter0 }})" class="gallery-dot h-2 w-2 rounded-full bg-gray-300 dark:bg-gray-600 transition-all duration-300" data-index="{{ forloop.counter0 }}"></button>
+                        {% endfor %}
+                    </div>
                 </div>
             </div>
             {% endif %}
