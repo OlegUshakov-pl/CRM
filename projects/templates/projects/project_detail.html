@@ -13,7 +13,7 @@
             </div>
         </div>
         <div class="flex gap-2">
-            <button onclick="openSlideOver('{% url 'projects:edit_slide' project.pk %}')" class="px-4 py-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Edit</button>
+            <a href="{% url 'projects:edit' project.pk %}" class="px-4 py-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Edit</a>
             <form method="post" action="{% url 'projects:delete' project.pk %}" onsubmit="return confirm('Delete this project?')">
                 {% csrf_token %}
                 <button type="submit" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors">Delete</button>

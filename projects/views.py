@@ -61,8 +61,8 @@ def project_edit(request, pk):
             form.save()
             log_activity(request.user, 'updated', f'Project "{project.name}"', project)
             messages.success(request, 'Project updated successfully.')
-            return redirect('projects:list')
-    return render(request, 'projects/project_form.html', {'form': form, 'title': 'Edit Project', 'project': project})
+            return redirect('projects:detail', pk=project.pk)
+    return render(request, 'projects/project_edit_page.html', {'form': form, 'title': 'Edit Project', 'project': project, 'is_page': True})
 
 
 @login_required

@@ -16,6 +16,6 @@
         <button type="submit" class="w-[200px] h-[100px] px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors">
             {% if project %}Save Changes{% else %}Create{% endif %}
         </button>
-        <button type="button" {% if is_page %}onclick="window.location.href='{% url 'core:dashboard' %}'"{% else %}@click="closeSlideOver()"{% endif %} class="px-4 py-2.5 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">Cancel</button>
+        <button type="button" {% if is_page %}onclick="window.location.href='{% if project %}{% url 'projects:detail' project.pk %}{% else %}{% url 'core:dashboard' %}{% endif %}'"{% else %}@click="closeSlideOver()"{% endif %} class="px-4 py-2.5 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">Cancel</button>
     </div>
 </form>
