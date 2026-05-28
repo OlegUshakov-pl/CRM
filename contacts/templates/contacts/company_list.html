@@ -20,7 +20,7 @@
 
     <div id="company-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {% for company in companies %}
-            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md transition-shadow">
+            <a href="{% url 'contacts:company_detail' company.pk %}" class="block bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md transition-shadow cursor-pointer">
                 <div class="flex items-center gap-4 mb-3">
                     {% if company.logo %}
                         <img src="{{ company.logo.url }}" alt="{{ company.name }}" class="w-12 h-12 rounded-lg object-cover">
@@ -42,25 +42,15 @@
                 {% endif %}
                 <div class="flex items-center justify-between text-xs text-gray-400 pt-3 border-t border-gray-100 dark:border-gray-700">
                     <span>{{ company.created_at|date:'M d, Y' }}</span>
-                    <div class="flex gap-2">
-                        <button onclick="openSlideOver('{% url 'contacts:company_edit_slide' company.pk %}')" class="text-gray-600 dark:text-gray-400 hover:underline">Edit</button>
+                    <div class="flex gap-2" onclick="event.stopPropagation()">
+                        <button onclick="event.stopPropagation(); openSlideOver('{% url 'contacts:company_edit_slide' company.pk %}')" class="text-gray-600 dark:text-gray-400 hover:underline">Edit</button>
                         <form method="post" action="{% url 'contacts:company_delete' company.pk %}" class="inline" onsubmit="return confirm('Delete this company?')">
                             {% csrf_token %}
                             <button type="submit" class="text-red-600 dark:text-red-400 hover:underline">Delete</button>
                         </form>
                     </div>
                 </div>
-            </div>
-        {% empty %}
-            <div class="col-span-full text-center py-16">
-                <i data-lucide="building-2" class="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4"></i>
-                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">No companies yet</h3>
-                <p class="text-gray-500 dark:text-gray-400 mb-4">Get started by adding your first company</p>
-                <button onclick="openSlideOver('{% url 'contacts:company_create_slide' %}')" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors">
-                    <i data-lucide="plus" class="w-4 h-4"></i>
-                    Add Company
-                </button>
-            </div>
+            </a>
         {% endfor %}
     </div>
 

@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block title %}{{ company.name }} - CRM{% endblock %}
+{% block content %}
+<div class="space-y-6">
+    <div class="flex items-center justify-between">
+        <div class="flex items-center gap-4">
+            <a href="{% url 'contacts:company_list' %}" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                <i data-lucide="arrow-left" class="w-5 h-5"></i>
+            </a>
+            <div class="flex items-center gap-4">
+                {% if company.logo %}
+                    <img src="{{ company.logo.url }}" alt="{{ company.name }}" class="w-12 h-12 rounded-lg object-cover">
+                {% else %}
+                    <div class="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg flex items-center justify-center">
+                        <span class="text-lg font-bold text-indigo-600 dark:text-indigo-400">{{ company.name|first }}</span>
+                    </div>
+                {% endif %}
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ company.name }}</h1>
+                    <p class="text-gray-500 dark:text-gray-400">{{ company.contacts.count }} contact{{ company.contacts.count|pluralize }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="flex gap-2">
+            <button onclick="openSlideOver('{% url 'contacts:company_edit_slide' company.pk %}')" class="px-4 py-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Edit</button>
+            <form method="post" action="{% url 'contacts:company_delete' company.pk %}" onsubmit="return confirm('Delete this company?')">
+                {% csrf_token %}
+                <button type="submit" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors">Delete</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Company Information</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Name</p>
+                <p class="font-medium text-gray-900 dark:text-white">{{ company.name }}</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Email</p>
+                <p class="font-medium text-gray-900 dark:text-white">{{ company.email|default:'—' }}</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Phone</p>
+                <p class="font-medium text-gray-900 dark:text-white">{{ company.phone|default:'—' }}</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Website</p>
+                <p class="font-medium text-gray-900 dark:text-white">{% if company.website %}<a href="{{ company.website }}" target="_blank" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ company.website }}</a>{% else %}—{% endif %}</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Address</p>
+                <p class="font-medium text-gray-900 dark:text-white">{{ company.address|default:'—' }}</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Created by</p>
+                <p class="font-medium text-gray-900 dark:text-white">{{ company.created_by|default:'System' }}</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Created at</p>
+                <p class="font-medium text-gray-900 dark:text-white">{{ company.created_at|date:'M d, Y H:i' }}</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Updated at</p>
+                <p class="font-medium text-gray-900 dark:text-white">{{ company.updated_at|date:'M d, Y H:i' }}</p>
+            </div>
+        </div>
+    </div>
+
+    {% if company.notes %}
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Notes</h2>
+        <p class="text-gray-600 dark:text-gray-400 whitespace-pre-wrap">{{ company.notes }}</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

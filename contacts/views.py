@@ -21,6 +21,12 @@ def company_list(request):
 
 
 @login_required
+def company_detail(request, pk):
+    company = get_object_or_404(Company.objects.prefetch_related('contacts'), pk=pk)
+    return render(request, 'contacts/company_detail.html', {'company': company})
+
+
+@login_required
 def company_create(request):
     form = CompanyForm()
     if request.method == 'POST':
@@ -78,6 +84,12 @@ def contact_list(request):
     page = request.GET.get('page', 1)
     contacts_page = paginator.get_page(page)
     return render(request, 'contacts/contact_list.html', {'contacts': contacts_page, 'query': query})
+
+
+@login_required
+def contact_detail(request, pk):
+    contact = get_object_or_404(Contact.objects.select_related('company', 'created_by'), pk=pk)
+    return render(request, 'contacts/contact_detail.html', {'contact': contact})
 
 
 @login_required

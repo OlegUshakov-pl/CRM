@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% block title %}{{ contact.get_full_name }} - CRM{% endblock %}
+{% block content %}
+<div class="space-y-6">
+    <div class="flex items-center justify-between">
+        <div class="flex items-center gap-4">
+            <a href="{% url 'contacts:contact_list' %}" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                <i data-lucide="arrow-left" class="w-5 h-5"></i>
+            </a>
+            <div class="flex items-center gap-4">
+                {% if contact.avatar %}
+                    <img src="{{ contact.avatar.url }}" alt="{{ contact.get_full_name }}" class="w-12 h-12 rounded-full object-cover">
+                {% else %}
+                    <div class="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/50 rounded-full flex items-center justify-center">
+                        <span class="text-lg font-bold text-indigo-700 dark:text-indigo-300">{{ contact.first_name|first }}{{ contact.last_name|first }}</span>
+                    </div>
+                {% endif %}
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ contact.get_full_name }}</h1>
+                    <p class="text-gray-500 dark:text-gray-400">{{ contact.position|default:contact.company.name|default:'No position' }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="flex gap-2">
+            <button onclick="openSlideOver('{% url 'contacts:contact_edit_slide' contact.pk %}')" class="px-4 py-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Edit</button>
+            <form method="post" action="{% url 'contacts:contact_delete' contact.pk %}" onsubmit="return confirm('Delete this contact?')">
+                {% csrf_token %}
+                <button type="submit" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors">Delete</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Contact Information</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <p class="text-sm text-gray-500 dark:text-gray-400">First Name</p>
+                <p class="font-medium text-gray-900 dark:text-white">{{ contact.first_name }}</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Last Name</p>
+                <p class="font-medium text-gray-900 dark:text-white">{{ contact.last_name }}</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Email</p>
+                <p class="font-medium text-gray-900 dark:text-white">{{ contact.email|default:'—' }}</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Phone</p>
+                <p class="font-medium text-gray-900 dark:text-white">{{ contact.phone|default:'—' }}</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Position</p>
+                <p class="font-medium text-gray-900 dark:text-white">{{ contact.position|default:'—' }}</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Company</p>
+                <p class="font-medium text-gray-900 dark:text-white">{{ contact.company.name|default:'—' }}</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Created by</p>
+                <p class="font-medium text-gray-900 dark:text-white">{{ contact.created_by|default:'System' }}</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Created at</p>
+                <p class="font-medium text-gray-900 dark:text-white">{{ contact.created_at|date:'M d, Y H:i' }}</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Updated at</p>
+                <p class="font-medium text-gray-900 dark:text-white">{{ contact.updated_at|date:'M d, Y H:i' }}</p>
+            </div>
+        </div>
+    </div>
+
+    {% if contact.notes %}
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Notes</h2>
+        <p class="text-gray-600 dark:text-gray-400 whitespace-pre-wrap">{{ contact.notes }}</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

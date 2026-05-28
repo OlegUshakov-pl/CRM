@@ -22,7 +22,7 @@
         {% if contacts %}
             <div class="divide-y divide-gray-200 dark:divide-gray-700">
                 {% for contact in contacts %}
-                    <div class="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                    <a href="{% url 'contacts:contact_detail' contact.pk %}" class="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer">
                         {% if contact.avatar %}
                             <img src="{{ contact.avatar.url }}" alt="{{ contact.get_full_name }}" class="w-10 h-10 rounded-full object-cover">
                         {% else %}
@@ -37,14 +37,14 @@
                         <div class="hidden sm:block text-sm text-gray-500 dark:text-gray-400">
                             {{ contact.company.name|default:'—' }}
                         </div>
-                        <div class="flex gap-2">
-                            <button onclick="openSlideOver('{% url 'contacts:contact_edit_slide' contact.pk %}')" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">Edit</button>
+                        <div class="flex gap-2" onclick="event.stopPropagation()">
+                            <button onclick="event.stopPropagation(); openSlideOver('{% url 'contacts:contact_edit_slide' contact.pk %}')" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">Edit</button>
                             <form method="post" action="{% url 'contacts:contact_delete' contact.pk %}" class="inline" onsubmit="return confirm('Delete this contact?')">
                                 {% csrf_token %}
                                 <button type="submit" class="text-sm text-red-600 dark:text-red-400 hover:underline">Delete</button>
                             </form>
                         </div>
-                    </div>
+                    </a>
                 {% endfor %}
             </div>
         {% else %}
