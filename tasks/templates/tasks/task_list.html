@@ -57,8 +57,8 @@
                                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{{ task.description|truncatewords:20|default:'No description' }}</p>
                             </div>
                             <div class="flex gap-2 flex-shrink-0 ml-4">
-                                <button onclick="openSlideOver('{% url 'tasks:edit_slide' task.pk %}')" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">Edit</button>
-                                <form method="post" action="{% url 'tasks:delete' task.pk %}" class="inline" onsubmit="return confirm('Delete this task?')">
+                                <button onclick="openSlideOver('{% url 'tasks:edit_slide' task.slug %}')" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">Edit</button>
+                                <form method="post" action="{% url 'tasks:delete' task.slug %}" class="inline" onsubmit="return confirm('Delete this task?')">
                                     {% csrf_token %}
                                     <button type="submit" class="text-sm text-red-600 dark:text-red-400 hover:underline">Delete</button>
                                 </form>

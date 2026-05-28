@@ -21,8 +21,8 @@ def company_list(request):
 
 
 @login_required
-def company_detail(request, pk):
-    company = get_object_or_404(Company.objects.prefetch_related('contacts'), pk=pk)
+def company_detail(request, slug):
+    company = get_object_or_404(Company.objects.prefetch_related('contacts'), slug=slug)
     return render(request, 'contacts/company_detail.html', {'company': company})
 
 
@@ -46,8 +46,8 @@ def company_create(request):
 
 
 @login_required
-def company_edit(request, pk):
-    company = get_object_or_404(Company, pk=pk)
+def company_edit(request, slug):
+    company = get_object_or_404(Company, slug=slug)
     form = CompanyForm(instance=company)
     if request.method == 'POST':
         form = CompanyForm(request.POST, request.FILES, instance=company)
@@ -64,8 +64,8 @@ def company_edit(request, pk):
 
 
 @login_required
-def company_delete(request, pk):
-    company = get_object_or_404(Company, pk=pk)
+def company_delete(request, slug):
+    company = get_object_or_404(Company, slug=slug)
     if request.method == 'POST':
         company.is_active = False
         company.save()
@@ -87,8 +87,8 @@ def contact_list(request):
 
 
 @login_required
-def contact_detail(request, pk):
-    contact = get_object_or_404(Contact.objects.select_related('company', 'created_by'), pk=pk)
+def contact_detail(request, slug):
+    contact = get_object_or_404(Contact.objects.select_related('company', 'created_by'), slug=slug)
     return render(request, 'contacts/contact_detail.html', {'contact': contact})
 
 
@@ -108,8 +108,8 @@ def contact_create(request):
 
 
 @login_required
-def contact_edit(request, pk):
-    contact = get_object_or_404(Contact, pk=pk)
+def contact_edit(request, slug):
+    contact = get_object_or_404(Contact, slug=slug)
     form = ContactForm(instance=contact)
     if request.method == 'POST':
         form = ContactForm(request.POST, request.FILES, instance=contact)
@@ -122,8 +122,8 @@ def contact_edit(request, pk):
 
 
 @login_required
-def contact_delete(request, pk):
-    contact = get_object_or_404(Contact, pk=pk)
+def contact_delete(request, slug):
+    contact = get_object_or_404(Contact, slug=slug)
     if request.method == 'POST':
         contact.is_active = False
         contact.save()
@@ -139,8 +139,8 @@ def company_create_slide(request):
 
 
 @login_required
-def company_edit_slide(request, pk):
-    company = get_object_or_404(Company, pk=pk)
+def company_edit_slide(request, slug):
+    company = get_object_or_404(Company, slug=slug)
     form = CompanyForm(instance=company)
     return render(request, 'contacts/company_form.html', {'form': form, 'title': 'Edit Company', 'company': company})
 
@@ -152,7 +152,7 @@ def contact_create_slide(request):
 
 
 @login_required
-def contact_edit_slide(request, pk):
-    contact = get_object_or_404(Contact, pk=pk)
+def contact_edit_slide(request, slug):
+    contact = get_object_or_404(Contact, slug=slug)
     form = ContactForm(instance=contact)
     return render(request, 'contacts/contact_form.html', {'form': form, 'title': 'Edit Contact', 'contact': contact})

@@ -27,8 +27,8 @@ def project_list(request):
 
 
 @login_required
-def project_detail(request, pk):
-    project = get_object_or_404(Project.objects.prefetch_related('materials', 'contacts', 'tasks', 'note_entries'), pk=pk)
+def project_detail(request, slug):
+    project = get_object_or_404(Project.objects.prefetch_related('materials', 'contacts', 'tasks', 'note_entries'), slug=slug)
     return render(request, 'projects/project_detail.html', {'project': project})
 
 
@@ -52,8 +52,8 @@ def project_create(request):
 
 
 @login_required
-def project_edit(request, pk):
-    project = get_object_or_404(Project, pk=pk)
+def project_edit(request, slug):
+    project = get_object_or_404(Project, slug=slug)
     form = ProjectForm(instance=project)
     if request.method == 'POST':
         form = ProjectForm(request.POST, request.FILES, instance=project)
@@ -61,13 +61,13 @@ def project_edit(request, pk):
             form.save()
             log_activity(request.user, 'updated', f'Project "{project.name}"', project)
             messages.success(request, 'Project updated successfully.')
-            return redirect('projects:detail', pk=project.pk)
+            return redirect('projects:detail', slug=project.slug)
     return render(request, 'projects/project_edit_page.html', {'form': form, 'title': 'Edit Project', 'project': project, 'is_page': True})
 
 
 @login_required
-def project_delete(request, pk):
-    project = get_object_or_404(Project, pk=pk)
+def project_delete(request, slug):
+    project = get_object_or_404(Project, slug=slug)
     if request.method == 'POST':
         project.is_active = False
         project.save()
@@ -83,15 +83,15 @@ def project_create_slide(request):
 
 
 @login_required
-def project_edit_slide(request, pk):
-    project = get_object_or_404(Project, pk=pk)
+def project_edit_slide(request, slug):
+    project = get_object_or_404(Project, slug=slug)
     form = ProjectForm(instance=project)
     return render(request, 'projects/project_form.html', {'form': form, 'title': 'Edit Project', 'project': project})
 
 
 @login_required
-def material_create(request, project_pk):
-    project = get_object_or_404(Project, pk=project_pk)
+def material_create(request, project_slug):
+    project = get_object_or_404(Project, slug=project_slug)
     form = MaterialForm()
     if request.method == 'POST':
         form = MaterialForm(request.POST)
@@ -102,13 +102,13 @@ def material_create(request, project_pk):
             material.save()
             log_activity(request.user, 'created', f'Material "{material.name}" in "{project.name}"', material)
             messages.success(request, 'Material added successfully.')
-            return redirect('projects:detail', pk=project_pk)
+            return redirect('projects:detail', slug=project_slug)
     return render(request, 'projects/material_form.html', {'form': form, 'project': project, 'title': 'Add Material'})
 
 
 @login_required
-def material_edit(request, pk):
-    material = get_object_or_404(Material, pk=pk)
+def material_edit(request, slug):
+    material = get_object_or_404(Material, slug=slug)
     form = MaterialForm(instance=material)
     if request.method == 'POST':
         form = MaterialForm(request.POST, instance=material)
@@ -116,23 +116,23 @@ def material_edit(request, pk):
             form.save()
             log_activity(request.user, 'updated', f'Material "{material.name}"')
             messages.success(request, 'Material updated successfully.')
-            return redirect('projects:detail', pk=material.project.pk)
+            return redirect('projects:detail', slug=material.project.slug)
     return render(request, 'projects/material_form.html', {'form': form, 'project': material.project, 'title': 'Edit Material', 'material': material})
 
 
 @login_required
-def material_delete(request, pk):
-    material = get_object_or_404(Material, pk=pk)
-    project_pk = material.project.pk
+def material_delete(request, slug):
+    material = get_object_or_404(Material, slug=slug)
+    project_slug = material.project.slug
     if request.method == 'POST':
         log_activity(request.user, 'deleted', f'Material "{material.name}"')
         material.delete()
         messages.success(request, 'Material deleted successfully.')
-    return redirect('projects:detail', pk=project_pk)
+    return redirect('projects:detail', slug=project_slug)
 
 
 @login_required
-def material_create_slide(request, project_pk):
-    project = get_object_or_404(Project, pk=project_pk)
+def material_create_slide(request, project_slug):
+    project = get_object_or_404(Project, slug=project_slug)
     form = MaterialForm()
     return render(request, 'projects/material_form.html', {'form': form, 'project': project, 'title': 'Add Material'})

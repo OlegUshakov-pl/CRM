@@ -1,4 +1,4 @@
-<form method="post" action="{% if contact %}{% url 'contacts:contact_edit' contact.pk %}{% else %}{% url 'contacts:contact_create' %}{% endif %}" enctype="multipart/form-data" class="space-y-4">
+<form method="post" action="{% if contact %}{% url 'contacts:contact_edit' contact.slug %}{% else %}{% url 'contacts:contact_create' %}{% endif %}" enctype="multipart/form-data" class="space-y-4">
     {% csrf_token %}
     {% for field in form %}
         <div>

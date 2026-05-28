@@ -70,7 +70,7 @@
                 {% if recent_projects %}
                     <div class="space-y-3">
                         {% for project in recent_projects %}
-                            <a href="{% url 'projects:detail' project.pk %}" class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                            <a href="{% url 'projects:detail' project.slug %}" class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                                 <div class="flex items-center gap-3">
                                     <div class="w-2 h-2 rounded-full
                                         {% if project.status == 'active' %}bg-green-500

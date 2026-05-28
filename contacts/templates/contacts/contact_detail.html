@@ -22,8 +22,8 @@
             </div>
         </div>
         <div class="flex gap-2">
-            <button onclick="openSlideOver('{% url 'contacts:contact_edit_slide' contact.pk %}')" class="px-4 py-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Edit</button>
-            <form method="post" action="{% url 'contacts:contact_delete' contact.pk %}" onsubmit="return confirm('Delete this contact?')">
+            <button onclick="openSlideOver('{% url 'contacts:contact_edit_slide' contact.slug %}')" class="px-4 py-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Edit</button>
+            <form method="post" action="{% url 'contacts:contact_delete' contact.slug %}" onsubmit="return confirm('Delete this contact?')">
                 {% csrf_token %}
                 <button type="submit" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors">Delete</button>
             </form>

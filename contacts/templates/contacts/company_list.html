@@ -20,7 +20,7 @@
 
     <div id="company-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {% for company in companies %}
-            <a href="{% url 'contacts:company_detail' company.pk %}" class="block bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md transition-shadow cursor-pointer">
+            <a href="{% url 'contacts:company_detail' company.slug %}" class="block bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md transition-shadow cursor-pointer">
                 <div class="flex items-center gap-4 mb-3">
                     {% if company.logo %}
                         <img src="{{ company.logo.url }}" alt="{{ company.name }}" class="w-12 h-12 rounded-lg object-cover">
@@ -43,8 +43,8 @@
                 <div class="flex items-center justify-between text-xs text-gray-400 pt-3 border-t border-gray-100 dark:border-gray-700">
                     <span>{{ company.created_at|date:'M d, Y' }}</span>
                     <div class="flex gap-2" onclick="event.stopPropagation()">
-                        <button onclick="event.stopPropagation(); openSlideOver('{% url 'contacts:company_edit_slide' company.pk %}')" class="text-gray-600 dark:text-gray-400 hover:underline">Edit</button>
-                        <form method="post" action="{% url 'contacts:company_delete' company.pk %}" class="inline" onsubmit="return confirm('Delete this company?')">
+                        <button onclick="event.stopPropagation(); openSlideOver('{% url 'contacts:company_edit_slide' company.slug %}')" class="text-gray-600 dark:text-gray-400 hover:underline">Edit</button>
+                        <form method="post" action="{% url 'contacts:company_delete' company.slug %}" class="inline" onsubmit="return confirm('Delete this company?')">
                             {% csrf_token %}
                             <button type="submit" class="text-red-600 dark:text-red-400 hover:underline">Delete</button>
                         </form>

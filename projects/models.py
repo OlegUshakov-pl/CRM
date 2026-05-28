@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-from core.models import TimeStampedModel
+from core.models import TimeStampedModel, generate_unique_slug
 from contacts.models import Company, Contact
 
 
@@ -14,6 +14,7 @@ class Project(TimeStampedModel):
     ]
 
     name = models.CharField(max_length=255)
+    slug = models.SlugField(max_length=255, unique=True, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='planning')
     company = models.ForeignKey(Company, on_delete=models.SET_NULL, null=True, blank=True, related_name='projects')
@@ -29,6 +30,11 @@ class Project(TimeStampedModel):
     def __str__(self):
         return self.name
 
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = generate_unique_slug(self, 'name', Project)
+        super().save(*args, **kwargs)
+
 
 class Material(TimeStampedModel):
     UNIT_CHOICES = [
@@ -43,6 +49,7 @@ class Material(TimeStampedModel):
 
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='materials')
     name = models.CharField(max_length=255)
+    slug = models.SlugField(max_length=255, unique=True, blank=True, null=True)
     quantity = models.DecimalField(max_digits=10, decimal_places=2, default=1)
     unit = models.CharField(max_length=10, choices=UNIT_CHOICES, default='pcs')
     unit_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
@@ -58,3 +65,8 @@ class Material(TimeStampedModel):
         if self.unit_price and self.quantity:
             return self.quantity * self.unit_price
         return None
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = generate_unique_slug(self, 'name', Material)
+        super().save(*args, **kwargs)

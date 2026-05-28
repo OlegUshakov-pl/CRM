@@ -1,10 +1,12 @@
 from django.db import models
 from django.contrib.auth.models import User
-from core.models import TimeStampedModel
+from django.utils.text import slugify
+from core.models import TimeStampedModel, generate_unique_slug
 
 
 class Company(TimeStampedModel):
     name = models.CharField(max_length=255)
+    slug = models.SlugField(max_length=255, unique=True, blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
     phone = models.CharField(max_length=50, blank=True, null=True)
     website = models.URLField(blank=True, null=True)
@@ -19,11 +21,17 @@ class Company(TimeStampedModel):
     def __str__(self):
         return self.name
 
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = generate_unique_slug(self, 'name', Company)
+        super().save(*args, **kwargs)
+
 
 class Contact(TimeStampedModel):
     company = models.ForeignKey(Company, on_delete=models.SET_NULL, null=True, blank=True, related_name='contacts')
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
+    slug = models.SlugField(max_length=255, unique=True, blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
     phone = models.CharField(max_length=50, blank=True, null=True)
     position = models.CharField(max_length=255, blank=True, null=True)
@@ -38,3 +46,16 @@ class Contact(TimeStampedModel):
 
     def get_full_name(self):
         return f"{self.first_name} {self.last_name}"
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            base_slug = slugify(f'{self.first_name} {self.last_name}')
+            if not base_slug:
+                base_slug = 'contact'
+            slug = base_slug
+            counter = 1
+            while Contact.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+                slug = f'{base_slug}-{counter}'
+                counter += 1
+            self.slug = slug
+        super().save(*args, **kwargs)

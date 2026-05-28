@@ -13,8 +13,8 @@
             </div>
         </div>
         <div class="flex gap-2">
-            <a href="{% url 'projects:edit' project.pk %}" class="px-4 py-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Edit</a>
-            <form method="post" action="{% url 'projects:delete' project.pk %}" onsubmit="return confirm('Delete this project?')">
+            <a href="{% url 'projects:edit' project.slug %}" class="px-4 py-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Edit</a>
+            <form method="post" action="{% url 'projects:delete' project.slug %}" onsubmit="return confirm('Delete this project?')">
                 {% csrf_token %}
                 <button type="submit" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors">Delete</button>
             </form>
@@ -31,7 +31,7 @@
             <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Materials</h2>
-                    <button onclick="openSlideOver('{% url 'projects:material_create_slide' project.pk %}')" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">+ Add Material</button>
+                    <button onclick="openSlideOver('{% url 'projects:material_create_slide' project.slug %}')" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">+ Add Material</button>
                 </div>
                 {% if project.materials.all %}
                     <div class="overflow-x-auto">
@@ -55,8 +55,8 @@
                                     <td class="py-2 text-gray-600 dark:text-gray-400">{% if material.unit_price %}${{ material.unit_price }}{% else %}—{% endif %}</td>
                                     <td class="py-2 text-gray-900 dark:text-white font-medium">{% if material.total_price %}${{ material.total_price }}{% else %}—{% endif %}</td>
                                     <td class="py-2">
-                                        <a href="{% url 'projects:material_edit' material.pk %}" class="text-indigo-600 dark:text-indigo-400 hover:underline mr-2">Edit</a>
-                                        <form method="post" action="{% url 'projects:material_delete' material.pk %}" class="inline" onsubmit="return confirm('Delete this material?')">
+                                        <a href="{% url 'projects:material_edit' material.slug %}" class="text-indigo-600 dark:text-indigo-400 hover:underline mr-2">Edit</a>
+                                        <form method="post" action="{% url 'projects:material_delete' material.slug %}" class="inline" onsubmit="return confirm('Delete this material?')">
                                             {% csrf_token %}
                                             <button type="submit" class="text-red-600 dark:text-red-400 hover:underline">Delete</button>
                                         </form>

@@ -1,4 +1,4 @@
-<form method="post" action="{% if note %}{% url 'notes:edit' note.pk %}{% else %}{% url 'notes:create' %}{% endif %}" class="space-y-4">
+<form method="post" action="{% if note %}{% url 'notes:edit' note.slug %}{% else %}{% url 'notes:create' %}{% endif %}" class="space-y-4">
     {% csrf_token %}
     {% for field in form %}
         <div>

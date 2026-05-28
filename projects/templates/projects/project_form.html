@@ -1,4 +1,4 @@
-<form method="post" action="{% if project %}{% url 'projects:edit' project.pk %}{% else %}{% url 'projects:create' %}{% endif %}" enctype="multipart/form-data" class="space-y-4">
+<form method="post" action="{% if project %}{% url 'projects:edit' project.slug %}{% else %}{% url 'projects:create' %}{% endif %}" enctype="multipart/form-data" class="space-y-4">
     {% csrf_token %}
     {% if form.non_field_errors %}
         <div class="p-3 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg text-sm">{{ form.non_field_errors.0 }}</div>
@@ -16,6 +16,6 @@
         <button type="submit" class="w-[200px] h-[100px] px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors">
             {% if project %}Save Changes{% else %}Create{% endif %}
         </button>
-        <button type="button" {% if is_page %}onclick="window.location.href='{% if project %}{% url 'projects:detail' project.pk %}{% else %}{% url 'core:dashboard' %}{% endif %}'"{% else %}@click="closeSlideOver()"{% endif %} class="px-4 py-2.5 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">Cancel</button>
+        <button type="button" {% if is_page %}onclick="window.location.href='{% if project %}{% url 'projects:detail' project.slug %}{% else %}{% url 'core:dashboard' %}{% endif %}'"{% else %}@click="closeSlideOver()"{% endif %} class="px-4 py-2.5 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">Cancel</button>
     </div>
 </form>

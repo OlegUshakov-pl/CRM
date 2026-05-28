@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
+from django.utils.text import slugify
 
 
 class TimeStampedModel(models.Model):
@@ -47,3 +48,15 @@ def log_activity(user, action, description, obj=None):
         kwargs['content_type'] = ContentType.objects.get_for_model(obj)
         kwargs['object_id'] = obj.pk
     Activity.objects.create(**kwargs)
+
+
+def generate_unique_slug(instance, source_field, ModelClass):
+    base_slug = slugify(getattr(instance, source_field))
+    if not base_slug:
+        base_slug = 'untitled'
+    slug = base_slug
+    counter = 1
+    while ModelClass.objects.filter(slug=slug).exclude(pk=instance.pk).exists():
+        slug = f"{base_slug}-{counter}"
+        counter += 1
+    return slug

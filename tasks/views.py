@@ -47,8 +47,8 @@ def task_create(request):
 
 
 @login_required
-def task_edit(request, pk):
-    task = get_object_or_404(Task, pk=pk)
+def task_edit(request, slug):
+    task = get_object_or_404(Task, slug=slug)
     form = TaskForm(instance=task)
     if request.method == 'POST':
         form = TaskForm(request.POST, instance=task)
@@ -61,8 +61,8 @@ def task_edit(request, pk):
 
 
 @login_required
-def task_delete(request, pk):
-    task = get_object_or_404(Task, pk=pk)
+def task_delete(request, slug):
+    task = get_object_or_404(Task, slug=slug)
     if request.method == 'POST':
         task.is_active = False
         task.save()
@@ -78,7 +78,7 @@ def task_create_slide(request):
 
 
 @login_required
-def task_edit_slide(request, pk):
-    task = get_object_or_404(Task, pk=pk)
+def task_edit_slide(request, slug):
+    task = get_object_or_404(Task, slug=slug)
     form = TaskForm(instance=task)
     return render(request, 'tasks/task_form.html', {'form': form, 'title': 'Edit Task', 'task': task})

@@ -1,4 +1,4 @@
-<form method="post" action="{% if company %}{% url 'contacts:company_edit' company.pk %}{% else %}{% url 'contacts:company_create' %}{% endif %}" enctype="multipart/form-data" hx-post="{% if company %}{% url 'contacts:company_edit' company.pk %}{% else %}{% url 'contacts:company_create' %}{% endif %}" hx-target="#slide-over-content" hx-swap="innerHTML" hx-encoding="multipart/form-data" class="space-y-4">
+<form method="post" action="{% if company %}{% url 'contacts:company_edit' company.slug %}{% else %}{% url 'contacts:company_create' %}{% endif %}" enctype="multipart/form-data" hx-post="{% if company %}{% url 'contacts:company_edit' company.slug %}{% else %}{% url 'contacts:company_create' %}{% endif %}" hx-target="#slide-over-content" hx-swap="innerHTML" hx-encoding="multipart/form-data" class="space-y-4">
     {% csrf_token %}
     {% for field in form %}
         <div>

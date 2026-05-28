@@ -57,9 +57,9 @@
                     <div class="flex items-center justify-between text-xs text-gray-400">
                         <span>{{ project.created_at|date:'M d, Y' }}</span>
                         <div class="flex gap-2">
-                            <a href="{% url 'projects:detail' project.pk %}" class="text-indigo-600 dark:text-indigo-400 hover:underline">View</a>
-                            <a href="{% url 'projects:edit' project.pk %}" class="text-gray-600 dark:text-gray-400 hover:underline">Edit</a>
-                            <form method="post" action="{% url 'projects:delete' project.pk %}" class="inline" onsubmit="return confirm('Delete this project?')">
+                            <a href="{% url 'projects:detail' project.slug %}" class="text-indigo-600 dark:text-indigo-400 hover:underline">View</a>
+                            <a href="{% url 'projects:edit' project.slug %}" class="text-gray-600 dark:text-gray-400 hover:underline">Edit</a>
+                            <form method="post" action="{% url 'projects:delete' project.slug %}" class="inline" onsubmit="return confirm('Delete this project?')">
                                 {% csrf_token %}
                                 <button type="submit" class="text-red-600 dark:text-red-400 hover:underline">Delete</button>
                             </form>

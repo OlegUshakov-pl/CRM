@@ -35,8 +35,8 @@ def note_create(request):
 
 
 @login_required
-def note_edit(request, pk):
-    note = get_object_or_404(Note, pk=pk)
+def note_edit(request, slug):
+    note = get_object_or_404(Note, slug=slug)
     form = NoteForm(instance=note)
     if request.method == 'POST':
         form = NoteForm(request.POST, instance=note)
@@ -49,8 +49,8 @@ def note_edit(request, pk):
 
 
 @login_required
-def note_delete(request, pk):
-    note = get_object_or_404(Note, pk=pk)
+def note_delete(request, slug):
+    note = get_object_or_404(Note, slug=slug)
     if request.method == 'POST':
         note.is_active = False
         note.save()
@@ -66,7 +66,7 @@ def note_create_slide(request):
 
 
 @login_required
-def note_edit_slide(request, pk):
-    note = get_object_or_404(Note, pk=pk)
+def note_edit_slide(request, slug):
+    note = get_object_or_404(Note, slug=slug)
     form = NoteForm(instance=note)
     return render(request, 'notes/note_form.html', {'form': form, 'title': 'Edit Note', 'note': note})
