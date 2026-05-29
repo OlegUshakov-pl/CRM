@@ -12,7 +12,7 @@
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="border border-light p-5">
+        <a href="{% url 'projects:list' %}" class="border border-light p-5 block hover:border-violet-300 transition-colors">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-soft text-[12px]">Total Projects</p>
@@ -22,8 +22,8 @@
                     <i data-lucide="briefcase" class="w-5 h-5 purple"></i>
                 </div>
             </div>
-        </div>
-        <div class="border border-light p-5">
+        </a>
+        <a href="{% url 'projects:list' %}?status=active" class="border border-light p-5 block hover:border-violet-300 transition-colors">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-soft text-[12px]">Active Projects</p>
@@ -33,8 +33,8 @@
                     <i data-lucide="play-circle" class="w-5 h-5 text-green-600"></i>
                 </div>
             </div>
-        </div>
-        <div class="border border-light p-5">
+        </a>
+        <a href="{% url 'contacts:company_list' %}" class="border border-light p-5 block hover:border-violet-300 transition-colors">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-soft text-[12px]">Companies</p>
@@ -44,8 +44,8 @@
                     <i data-lucide="building-2" class="w-5 h-5 text-amber-600"></i>
                 </div>
             </div>
-        </div>
-        <div class="border border-light p-5">
+        </a>
+        <a href="{% url 'tasks:list' %}" class="border border-light p-5 block hover:border-violet-300 transition-colors">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-soft text-[12px]">Tasks</p>
@@ -55,7 +55,7 @@
                     <i data-lucide="check-square" class="w-5 h-5 text-purple-600"></i>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">

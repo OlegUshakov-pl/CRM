@@ -54,8 +54,10 @@
         <!-- Sidebar -->
         <aside id="sidebar" class="w-[210px] bg-white border border-light min-h-[900px] px-5 py-5 flex flex-col transition-all duration-300">
             <div class="flex items-center gap-2 mb-7">
-                <div class="w-4 h-4 rounded bg-violet-400 flex-shrink-0"></div>
-                <span class="sidebar-text text-[12px] font-semibold tracking-wide">CRM</span>
+                <a href="{% url 'core:dashboard' %}" class="flex items-center gap-2">
+                    <div class="w-4 h-4 rounded bg-violet-400 flex-shrink-0"></div>
+                    <span class="sidebar-text text-[12px] font-semibold tracking-wide">CRM</span>
+                </a>
             </div>
 
             <nav class="space-y-3 text-[13px] flex-1">
@@ -128,14 +130,7 @@
 
             <!-- Search -->
             <div class="px-6 py-5 border-b border-light">
-                <div class="border border-light rounded-sm h-[120px] flex items-start justify-between px-4 pt-3 text-soft text-[12px]">
-                    <span>What would you like to know?</span>
-                    <div class="flex items-center gap-4">
-                        <i data-lucide="plus" class="w-4 h-4"></i>
-                        <i data-lucide="mic" class="w-4 h-4"></i>
-                        <i data-lucide="arrow-up-circle" class="w-4 h-4"></i>
-                    </div>
-                </div>
+                <textarea placeholder="What would you like to know?" class="border border-light rounded-sm w-full px-4 pt-3 text-soft text-[12px] resize-y min-h-[120px] outline-none focus:border-violet-300 transition-colors" style="font-family: 'Montserrat', sans-serif;"></textarea>
             </div>
 
             <!-- Messages -->
