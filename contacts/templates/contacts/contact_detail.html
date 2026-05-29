@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% block title %}{{ contact.get_full_name }} - CRM{% endblock %}
+{% block breadcrumb %}{{ contact.get_full_name }}{% endblock %}
 {% block content %}
 <div class="space-y-6">
     <div class="flex items-center justify-between">

@@ -1,32 +1,43 @@
-{% extends 'base.html' %}
-{% block title %}Sign In - CRM{% endblock %}
-{% block content %}
-<div class="min-h-screen flex items-center justify-center">
-    <div class="w-full max-w-md">
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-8">
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In - CRM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: "Montserrat", sans-serif; background: #f5f5f5; color: #222; }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen flex items-center justify-center px-4">
+        <div class="w-full max-w-md bg-white border border-[#e8e8e8] p-8">
             <div class="text-center mb-8">
-                <div class="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <div class="w-12 h-12 bg-violet-400 rounded flex items-center justify-center mx-auto mb-4">
                     <span class="text-white font-bold text-xl">C</span>
                 </div>
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Welcome back</h1>
-                <p class="text-gray-500 dark:text-gray-400 mt-1">Sign in to your CRM account</p>
+                <h1 class="text-xl font-semibold">Welcome back</h1>
+                <p class="text-[#8d8d8d] text-[13px] mt-1">Sign in to your CRM account</p>
             </div>
             <form method="post" class="space-y-4">
                 {% csrf_token %}
                 {% if form.non_field_errors %}
-                    <div class="p-3 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg text-sm">{{ form.non_field_errors.0 }}</div>
+                    <div class="p-3 bg-red-50 text-red-700 border border-red-200 rounded text-sm">{{ form.non_field_errors.0 }}</div>
                 {% endif %}
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Username</label>
+                    <label class="block text-[13px] text-[#8d8d8d] mb-1">Username</label>
                     {{ form.username }}
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Password</label>
+                    <label class="block text-[13px] text-[#8d8d8d] mb-1">Password</label>
                     {{ form.password }}
                 </div>
-                <button type="submit" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors">Sign in</button>
+                <button type="submit" class="w-full py-2.5 bg-violet-400 hover:opacity-90 text-white font-medium text-[13px] transition-opacity">Sign in</button>
             </form>
         </div>
     </div>
-</div>
-{% endblock %}
+</body>
+</html>
