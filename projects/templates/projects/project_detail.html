@@ -42,11 +42,11 @@
                     <button type="button" onclick="galleryNext()" id="gallery-next" class="absolute right-2 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-black/40 text-white hover:bg-black/60 transition-colors">
                         <i data-lucide="chevron-right" class="w-5 h-5"></i>
                     </button>
-                    <div class="absolute bottom-2 left-1/2 -translate-x-1/2 z-10 flex gap-1" id="gallery-dots">
-                        {% for img in project.images.all %}
-                        <button type="button" onclick="galleryGo({{ forloop.counter0 }})" class="gallery-dot h-2 w-2 rounded-full bg-gray-300 dark:bg-gray-600 transition-all duration-300" data-index="{{ forloop.counter0 }}"></button>
-                        {% endfor %}
-                    </div>
+                </div>
+                <div class="flex justify-center gap-1 mt-3" id="gallery-dots">
+                    {% for img in project.images.all %}
+                    <button type="button" onclick="galleryGo({{ forloop.counter0 }})" class="gallery-dot h-2 w-2 rounded-full bg-gray-300 dark:bg-gray-600 transition-all duration-300" data-index="{{ forloop.counter0 }}"></button>
+                    {% endfor %}
                 </div>
             </div>
             {% endif %}
