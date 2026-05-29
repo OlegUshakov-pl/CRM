@@ -16,18 +16,18 @@
 
     <div id="project-list" class="space-y-4">
         {% for project in projects %}
-            <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow">
+            <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow flex">
                 {% if project.image %}
-                    <img src="{{ project.image.url }}" alt="{{ project.name }}" class="w-full h-40 object-cover">
+                    <img src="{{ project.image.url }}" alt="{{ project.name }}" class="w-[250px] flex-shrink-0 object-cover">
                 {% else %}
-                    <div class="w-full h-40 bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                    <div class="w-[250px] flex-shrink-0 bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
                         <i data-lucide="folder-kanban" class="w-12 h-12 text-white/60"></i>
                     </div>
                 {% endif %}
-                <div class="p-4">
+                <div class="p-4 flex-1 flex flex-col">
                     <div class="flex items-start justify-between mb-2">
                         <a href="{% url 'projects:detail' project.slug %}" class="font-semibold text-gray-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">{{ project.name }}</a>
-                        <span class="text-xs px-2 py-1
+                        <span class="text-xs px-2 py-1 flex-shrink-0 ml-2
                             {% if project.status == 'active' %}bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300
                             {% elif project.status == 'planning' %}bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300
                             {% elif project.status == 'on_hold' %}bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300
@@ -39,30 +39,32 @@
                     {% if project.description %}
                         <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-3">{{ project.description }}</p>
                     {% endif %}
-                    <div class="flex items-center justify-between text-xs text-gray-400 mb-2">
-                        <span>{{ project.created_at|date:'M d, Y' }}</span>
-                        <div class="flex gap-2">
-                            <a href="{% url 'projects:detail' project.slug %}" class="text-indigo-600 dark:text-indigo-400 hover:underline">Open</a>
-                            <a href="{% url 'projects:edit' project.slug %}" class="text-gray-600 dark:text-gray-400 hover:underline">Edit</a>
-                            <button type="button" onclick="showDeleteModal('{{ project.slug }}', '{{ project.name|escapejs }}')" class="text-red-600 dark:text-red-400 hover:underline cursor-pointer">Delete</button>
+                    <div class="mt-auto">
+                        <div class="flex items-center justify-between text-xs text-gray-400 mb-2">
+                            <span>{{ project.created_at|date:'M d, Y' }}</span>
+                            <div class="flex gap-2">
+                                <a href="{% url 'projects:detail' project.slug %}" class="text-indigo-600 dark:text-indigo-400 hover:underline">Open</a>
+                                <a href="{% url 'projects:edit' project.slug %}" class="text-gray-600 dark:text-gray-400 hover:underline">Edit</a>
+                                <button type="button" onclick="showDeleteModal('{{ project.slug }}', '{{ project.name|escapejs }}')" class="text-red-600 dark:text-red-400 hover:underline cursor-pointer">Delete</button>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between text-xs border-t border-gray-100 dark:border-gray-700 pt-2">
+                            <span>
+                                {% if project.company %}
+                                    <a href="{% url 'contacts:company_detail' project.company.slug %}" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ project.company.name }}</a>
+                                {% else %}
+                                    <span class="text-gray-400">No company</span>
+                                {% endif %}
+                            </span>
+                            <span class="flex gap-2 flex-wrap justify-end">
+                                {% for contact in project.contacts.all %}
+                                    <a href="{% url 'contacts:contact_detail' contact.slug %}" class="text-indigo-600 dark:text-indigo-400 hover:underline whitespace-nowrap">{{ contact.get_full_name }}</a>
+                                {% empty %}
+                                    <span class="text-gray-400">No contacts</span>
+                                {% endfor %}
+                            </span>
                         </div>
                     </div>
-                <div class="flex items-center justify-between text-xs border-t border-gray-100 dark:border-gray-700 pt-2">
-                    <span>
-                        {% if project.company %}
-                            <a href="{% url 'contacts:company_detail' project.company.slug %}" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ project.company.name }}</a>
-                        {% else %}
-                            <span class="text-gray-400">No company</span>
-                        {% endif %}
-                    </span>
-                    <span class="flex gap-2 flex-wrap justify-end">
-                        {% for contact in project.contacts.all %}
-                            <a href="{% url 'contacts:contact_detail' contact.slug %}" class="text-indigo-600 dark:text-indigo-400 hover:underline whitespace-nowrap">{{ contact.get_full_name }}</a>
-                        {% empty %}
-                            <span class="text-gray-400">No contacts</span>
-                        {% endfor %}
-                    </span>
-                </div>
                 </div>
             </div>
         {% empty %}
