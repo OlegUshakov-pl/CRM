@@ -168,15 +168,15 @@
                 {% if project.contacts.all %}
                     <div class="space-y-3">
                         {% for contact in project.contacts.all %}
-                            <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/50 rounded-full flex items-center justify-center">
+                            <a href="{% url 'contacts:contact_detail' contact.slug %}" class="flex items-center gap-3 hover:bg-gray-50 transition-colors -mx-2 px-2 py-1 rounded">
+                                <div class="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/50 rounded-full flex items-center justify-center flex-shrink-0">
                                     <span class="text-xs font-semibold text-indigo-700 dark:text-indigo-300">{{ contact.first_name|first }}{{ contact.last_name|first }}</span>
                                 </div>
                                 <div>
                                     <p class="text-sm font-medium text-gray-900 dark:text-white">{{ contact.get_full_name }}</p>
                                     <p class="text-xs text-gray-500 dark:text-gray-400">{{ contact.position|default:contact.email }}</p>
                                 </div>
-                            </div>
+                            </a>
                         {% endfor %}
                     </div>
                 {% else %}

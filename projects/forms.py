@@ -4,27 +4,22 @@ from .models import Project, Material, ProjectImage
 from contacts.models import Contact, Company
 
 
-class SearchableSelectMultiple(forms.SelectMultiple):
+class SearchableCheckboxSelectMultiple(forms.CheckboxSelectMultiple):
     def __init__(self, search_placeholder='Search...', *args, **kwargs):
         self.search_placeholder = search_placeholder
         super().__init__(*args, **kwargs)
 
     def render(self, name, value, attrs=None, renderer=None):
-        attrs = attrs or {}
-        attrs['class'] = attrs.get('class', '') + ' searchable-select'
-        attrs['size'] = attrs.get('size', 6)
         html = super().render(name, value, attrs, renderer)
         return mark_safe(
-            f'<div class="searchable-select-group">'
+            f'<div class="searchable-checkbox-group">'
             f'<input type="text" placeholder="{self.search_placeholder}" '
-            f'class="w-full px-3 py-2 border border-[#e8e8e8] text-[13px] outline-none focus:border-violet-300 transition-colors mb-2 searchable-select-input" '
-            f'onkeyup="filterSelectOptions(this)">'
+            f'class="w-full px-3 py-2 border border-[#e8e8e8] text-[13px] outline-none focus:border-violet-300 transition-colors mb-2" '
+            f'onkeyup="(function(el){{var q=el.value.toLowerCase();el.parentNode.querySelectorAll(\'label\').forEach(function(l){{l.style.display=l.textContent.toLowerCase().indexOf(q)>-1?\'\':\'none\'}})}})(this)">'
+            f'<div class="max-h-48 overflow-y-auto space-y-1">'
             f'{html}'
-            f'</div>'
+            f'</div></div>'
         )
-
-    class Media:
-        js = ('js/searchable-select.js',)
 
 
 class ProjectForm(forms.ModelForm):
@@ -36,7 +31,7 @@ class ProjectForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'rows': 4, 'class': 'w-full px-4 py-2.5 border border-[#e8e8e8] text-[14px] outline-none focus:border-violet-300 transition-colors', 'placeholder': 'Project description...'}),
             'status': forms.Select(attrs={'class': 'w-full px-4 py-2.5 border border-[#e8e8e8] text-[14px] outline-none focus:border-violet-300 transition-colors'}),
             'company': forms.Select(attrs={'class': 'w-full px-4 py-2.5 border border-[#e8e8e8] text-[14px] outline-none focus:border-violet-300 transition-colors'}),
-            'contacts': SearchableSelectMultiple(search_placeholder='Search contacts...'),
+            'contacts': SearchableCheckboxSelectMultiple(search_placeholder='Search contacts...'),
             'start_date': forms.DateInput(attrs={'type': 'date', 'class': 'w-full px-4 py-2.5 border border-[#e8e8e8] text-[14px] outline-none focus:border-violet-300 transition-colors'}),
             'end_date': forms.DateInput(attrs={'type': 'date', 'class': 'w-full px-4 py-2.5 border border-[#e8e8e8] text-[14px] outline-none focus:border-violet-300 transition-colors'}),
             'budget': forms.NumberInput(attrs={'class': 'w-full px-4 py-2.5 border border-[#e8e8e8] text-[14px] outline-none focus:border-violet-300 transition-colors', 'placeholder': '0.00'}),
