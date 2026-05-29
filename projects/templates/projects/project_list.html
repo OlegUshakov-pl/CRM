@@ -59,10 +59,7 @@
                         <div class="flex gap-2">
                             <a href="{% url 'projects:detail' project.slug %}" class="text-indigo-600 dark:text-indigo-400 hover:underline">Open</a>
                             <a href="{% url 'projects:edit' project.slug %}" class="text-gray-600 dark:text-gray-400 hover:underline">Edit</a>
-                            <form method="post" action="{% url 'projects:delete' project.slug %}" class="inline" onsubmit="return confirm('Delete project &quot;{{ project.name }}&quot;? This action cannot be undone.')">
-                                {% csrf_token %}
-                                <button type="submit" class="text-red-600 dark:text-red-400 hover:underline">Delete</button>
-                            </form>
+                            <button type="button" onclick="showDeleteModal('{{ project.slug }}', '{{ project.name|escapejs }}')" class="text-red-600 dark:text-red-400 hover:underline cursor-pointer">Delete</button>
                         </div>
                     </div>
                 </div>
@@ -82,4 +79,41 @@
 
     {% include 'includes/pagination.html' with page_obj=projects %}
 </div>
+
+<div id="delete-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 opacity-0 pointer-events-none transition-opacity duration-200">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 p-6 max-w-md w-full mx-4">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Delete Project</h3>
+        <p class="text-gray-600 dark:text-gray-400 mb-6">Are you sure you want to delete project <strong id="delete-project-name"></strong>? This action cannot be undone.</p>
+        <div class="flex justify-end gap-3">
+            <button type="button" onclick="hideDeleteModal()" class="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">Cancel</button>
+            <form method="post" action="" id="delete-form">
+                {% csrf_token %}
+                <button type="submit" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors">Delete</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function showDeleteModal(slug, name) {
+    document.getElementById('delete-project-name').textContent = name;
+    document.getElementById('delete-form').action = '/projects/' + slug + '/delete/';
+    var m = document.getElementById('delete-modal');
+    m.classList.remove('opacity-0', 'pointer-events-none');
+    m.classList.add('opacity-100');
+}
+function hideDeleteModal() {
+    var m = document.getElementById('delete-modal');
+    m.classList.remove('opacity-100');
+    m.classList.add('opacity-0', 'pointer-events-none');
+}
+document.addEventListener('DOMContentLoaded', function() {
+    var m = document.getElementById('delete-modal');
+    if (m) m.addEventListener('click', function(e) {
+        if (e.target === this) hideDeleteModal();
+    });
+});
+</script>
 {% endblock %}
