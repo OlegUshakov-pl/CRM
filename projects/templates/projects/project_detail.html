@@ -14,15 +14,15 @@
             </div>
         </div>
         <div class="flex gap-2">
-            <a href="{% url 'projects:edit' project.slug %}" class="px-4 py-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Edit</a>
-            <button type="button" onclick="showDeleteModal()" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors">Delete</button>
+            <a href="{% url 'projects:edit' project.slug %}" class="px-4 py-2 text-[#666] bg-white border border-[#e8e8e8] hover:bg-gray-50 transition-colors text-[14px]">Edit</a>
+            <button type="button" onclick="showDeleteModal()" class="px-4 py-2 bg-red-400 hover:bg-red-500 text-white transition-colors text-[14px]">Delete</button>
         </div>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="lg:col-span-2 space-y-6">
             {% if project.images.all %}
-            <div id="gallery" class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+            <div id="gallery" class="bg-white border border-[#e8e8e8] p-6">
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Gallery</h2>
                 </div>
@@ -49,12 +49,12 @@
             </div>
             {% endif %}
 
-            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Description</h2>
+            <div class="bg-white border border-[#e8e8e8] p-6">
+                <h2 class="text-lg font-semibold text-[#222] mb-4">Description</h2>
                 <p class="text-gray-600 dark:text-gray-400">{{ project.description|default:'No description provided.' }}</p>
             </div>
 
-            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+            <div class="bg-white border border-[#e8e8e8] p-6">
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Materials</h2>
                     <button onclick="openSlideOver('{% url 'projects:material_create_slide' project.slug %}')" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">+ Add Material</button>
@@ -97,8 +97,8 @@
                 {% endif %}
             </div>
 
-            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Project Tasks</h2>
+            <div class="bg-white border border-[#e8e8e8] p-6">
+                <h2 class="text-lg font-semibold text-[#222] mb-4">Project Tasks</h2>
                 {% if project.tasks.all %}
                     <div class="space-y-2">
                         {% for task in project.tasks.all %}
@@ -130,8 +130,8 @@
         </div>
 
         <div class="space-y-6">
-            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Details</h2>
+            <div class="bg-white border border-[#e8e8e8] p-6">
+                <h2 class="text-lg font-semibold text-[#222] mb-4">Details</h2>
                 <div class="space-y-3">
                     <div>
                         <p class="text-sm text-gray-500 dark:text-gray-400">Status</p>
@@ -163,8 +163,8 @@
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Contacts</h2>
+            <div class="bg-white border border-[#e8e8e8] p-6">
+                <h2 class="text-lg font-semibold text-[#222] mb-4">Contacts</h2>
                 {% if project.contacts.all %}
                     <div class="space-y-3">
                         {% for contact in project.contacts.all %}
@@ -185,7 +185,7 @@
             </div>
 
             {% if project.note_entries.all %}
-            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+            <div class="bg-white border border-[#e8e8e8] p-6">
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Notes</h2>
                 <div class="space-y-3">
                     {% for note in project.note_entries.all %}
@@ -202,7 +202,7 @@
 </div>
 
 <div id="delete-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 opacity-0 pointer-events-none transition-opacity duration-200">
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 p-6 max-w-md w-full mx-4">
+    <div class="bg-white shadow-2xl border border-[#e8e8e8] p-6 max-w-md w-full mx-4">
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Delete Project</h3>
         <p class="text-gray-600 dark:text-gray-400 mb-6">Are you sure you want to delete project <strong>{{ project.name }}</strong>? This action cannot be undone.</p>
         <div class="flex justify-end gap-3">
