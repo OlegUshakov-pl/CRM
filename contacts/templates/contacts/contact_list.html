@@ -18,70 +18,60 @@
         <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"></i>
         <input type="text" placeholder="Search contacts..." value="{{ query }}" hx-get="{% url 'contacts:contact_list' %}" hx-trigger="keyup changed delay:300ms" hx-target="#contact-list" name="q" class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-[14px] outline-none focus:border-violet-300 transition-colors">
     </div>
-</div>
-    <div id="contact-list" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-        {% if contacts %}
-                {% for contact in contacts %}
-                <!--<div class="divide-y divide-gray-200 dark:divide-gray-700">-->
-                <div class="flex items-center gap-2 p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer" style="flex-wrap:nowrap;min-width:0" >
-                    <a href="{% url 'contacts:contact_detail' contact.slug %}">
-                        {% if contact.avatar %}
-                            <img src="{{ contact.avatar.url }}" alt="{{ contact.get_full_name }}" class="w-8 h-8 rounded-full object-cover flex-shrink-0">
+
+    <div id="contact-list" class="space-y-3">
+        {% for contact in contacts %}
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow">
+            <div class="flex items-center gap-3 p-4">
+                <a href="{% url 'contacts:contact_detail' contact.slug %}">
+                    {% if contact.avatar %}
+                        <img src="{{ contact.avatar.url }}" alt="{{ contact.get_full_name }}" class="w-10 h-10 rounded-full object-cover flex-shrink-0">
+                    {% else %}
+                        <div class="w-10 h-10 bg-indigo-100 dark:bg-indigo-900/50 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span class="text-sm font-semibold text-indigo-700 dark:text-indigo-300">{{ contact.first_name|first }}{{ contact.last_name|first }}</span>
+                        </div>
+                    {% endif %}
+                </a>
+                <a href="{% url 'contacts:contact_detail' contact.slug %}" class="font-medium text-gray-900 dark:text-white w-[150px] flex-shrink-0">{{ contact.get_full_name }}</a>
+                <div class="flex-1 text-sm min-w-0">
+                    {% with projects=contact.projects.all %}
+                        {% if projects %}
+                            {% for project in projects %}
+                                <a href="{% url 'projects:detail' project.slug %}" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ project.name }}</a>{% if not forloop.last %}, {% endif %}
+                            {% endfor %}
                         {% else %}
-                            <div class="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/50 rounded-full flex items-center justify-center flex-shrink-0">
-                                <span class="text-xs font-semibold text-indigo-700 dark:text-indigo-300">{{ contact.first_name|first }}{{ contact.last_name|first }}</span>
-                            </div>
+                            <span class="text-gray-400">—</span>
                         {% endif %}
-                    </a>
-                        <div class="font-medium text-gray-900 dark:text-white flex-shrink-0" style="width:130px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ contact.get_full_name }}</span>
-                        <span style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" class="text-sm">
-                            {% with projects=contact.projects.all %}
-                                {% if projects %}
-                                    {% for project in projects %}
-                                        <a href="{% url 'projects:detail' project.slug %}" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ project.name }}</a>{% if not forloop.last %}, {% endif %}
-                                    {% endfor %}
-                                {% else %}
-                                    <span class="text-gray-400">—</span>
-                                {% endif %}
-                            {% endwith %}
-                            {% if contact.company %}
-                                <a href="{% url 'companies:company_detail' contact.company.slug %}" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ contact.company.name }}</a>
-                            {% else %}
-                                <span class="text-gray-400">—</span>
-                            {% endif %}
-                        <span/>
-                        <span class="flex items-center gap-2 flex-shrink-0 text-sm" style="white-space:nowrap" onclick="event.stopPropagation()">
-                            <button onclick="event.stopPropagation(); openSlideOver('{% url 'contacts:contact_edit_slide' contact.slug %}')" class="text-indigo-600 dark:text-indigo-400 hover:underline">Edit</button>
-                            <span class="text-gray-300">|</span>
-                            <form method="post" action="{% url 'contacts:contact_delete' contact.slug %}" class="inline" onsubmit="return confirm('Delete this contact?')">
-                                {% csrf_token %}
-                                <button type="submit" class="text-red-600 dark:text-red-400 hover:underline">Delete</button>
-                            </form>
-                        <span/>
+                    {% endwith %}
                 </div>
-
-                        <span class="flex items-center gap-2 flex-shrink-0 text-sm" style="white-space:nowrap" onclick="event.stopPropagation()">
-                            <button onclick="event.stopPropagation(); openSlideOver('{% url 'contacts:contact_edit_slide' contact.slug %}')" class="text-indigo-600 dark:text-indigo-400 hover:underline">Edit</button>
-                            <span class="text-gray-300">|</span>
-                            <form method="post" action="{% url 'contacts:contact_delete' contact.slug %}" class="inline" onsubmit="return confirm('Delete this contact?')">
-                                {% csrf_token %}
-                                <button type="submit" class="text-red-600 dark:text-red-400 hover:underline">Delete</button>
-                            </form>
-                        <span/>
-                {% endfor %}
-
-        {% else %}
-            <div class="text-center py-16">
-                <i data-lucide="users" class="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4"></i>
-                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">No contacts yet</h3>
-                <p class="text-gray-500 dark:text-gray-400 mb-4">Add your first contact to get started</p>
-                <button onclick="openSlideOver('{% url 'contacts:contact_create_slide' %}')" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors">
-                    <i data-lucide="plus" class="w-4 h-4"></i>
-                    Add Contact
-                </button>
+                <div class="text-sm w-[130px] flex-shrink-0 text-center">
+                    {% if contact.company %}
+                        <a href="{% url 'companies:company_detail' contact.company.slug %}" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ contact.company.name }}</a>
+                    {% else %}
+                        <span class="text-gray-400">—</span>
+                    {% endif %}
+                </div>
+                <div class="flex items-center gap-2 flex-shrink-0 text-sm whitespace-nowrap">
+                    <button onclick="event.stopPropagation(); openSlideOver('{% url 'contacts:contact_edit_slide' contact.slug %}')" class="text-indigo-600 dark:text-indigo-400 hover:underline">Edit</button>
+                    <span class="text-gray-300">|</span>
+                    <form method="post" action="{% url 'contacts:contact_delete' contact.slug %}" class="inline" onsubmit="return confirm('Delete this contact?');">
+                        {% csrf_token %}
+                        <button type="submit" class="text-red-600 dark:text-red-400 hover:underline">Delete</button>
+                    </form>
+                </div>
             </div>
-        {% endif %}
-    </div>
+        </div>
+        {% empty %}
+        <div class="text-center py-16 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+            <i data-lucide="users" class="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4"></i>
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">No contacts yet</h3>
+            <p class="text-gray-500 dark:text-gray-400 mb-4">Add your first contact to get started</p>
+            <button onclick="openSlideOver('{% url 'contacts:contact_create_slide' %}')" class="inline-flex items-center gap-2 px-4 py-2 bg-red-400 hover:bg-red-500 text-white text-[14px] font-medium transition-colors">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                Add Contact
+            </button>
+        </div>
+        {% endfor %}
     </div>
 
     {% include 'includes/pagination.html' with page_obj=contacts %}
