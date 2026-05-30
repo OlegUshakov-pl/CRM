@@ -1,6 +1,7 @@
 from django.db import models
 from core.models import TimeStampedModel, generate_unique_slug
-from contacts.models import Contact, Company
+from companies.models import Company
+from contacts.models import Contact
 from projects.models import Project
 
 

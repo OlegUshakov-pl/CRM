@@ -5,7 +5,7 @@
 <div class="space-y-6">
     <div class="flex items-center justify-between">
         <div class="flex items-center gap-4">
-            <a href="{% url 'contacts:company_list' %}" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+            <a href="{% url 'companies:company_list' %}" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                 <i data-lucide="arrow-left" class="w-5 h-5"></i>
             </a>
             <div class="flex items-center gap-4">
@@ -23,8 +23,8 @@
             </div>
         </div>
         <div class="flex gap-2">
-            <button onclick="openSlideOver('{% url 'contacts:company_edit_slide' company.slug %}')" class="px-4 py-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Edit</button>
-            <form method="post" action="{% url 'contacts:company_delete' company.slug %}" onsubmit="return confirm('Delete this company?')">
+            <button onclick="openSlideOver('{% url 'companies:company_edit_slide' company.slug %}')" class="px-4 py-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Edit</button>
+            <form method="post" action="{% url 'companies:company_delete' company.slug %}" onsubmit="return confirm('Delete this company?')">
                 {% csrf_token %}
                 <button type="submit" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors">Delete</button>
             </form>

@@ -1,7 +1,8 @@
 from django import forms
 from django.utils.safestring import mark_safe
 from .models import Project, Material, ProjectImage
-from contacts.models import Contact, Company
+from companies.models import Company
+from contacts.models import Contact
 
 
 class SearchableCheckboxSelectMultiple(forms.CheckboxSelectMultiple):

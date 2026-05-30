@@ -37,7 +37,7 @@
                         </div>
                         <div class="flex-1 flex items-center justify-center gap-3 text-sm">
                             {% if contact.company %}
-                                <a href="{% url 'contacts:company_detail' contact.company.slug %}" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ contact.company.name }}</a>
+                                <a href="{% url 'companies:company_detail' contact.company.slug %}" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ contact.company.name }}</a>
                             {% else %}
                                 <span class="text-gray-400">—</span>
                             {% endif %}

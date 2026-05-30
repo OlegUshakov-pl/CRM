@@ -8,7 +8,7 @@
             <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Companies</h1>
             <p class="text-gray-500 dark:text-gray-400 mt-1">Manage your companies</p>
         </div>
-        <button onclick="openSlideOver('{% url 'contacts:company_create_slide' %}')" class="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors shadow-sm">
+        <button onclick="openSlideOver('{% url 'companies:company_create_slide' %}')" class="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors shadow-sm">
             <i data-lucide="plus" class="w-4 h-4"></i>
             Add Company
         </button>
@@ -16,12 +16,12 @@
 
     <div class="relative">
         <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"></i>
-        <input type="text" placeholder="Search companies..." value="{{ query }}" hx-get="{% url 'contacts:company_list' %}" hx-trigger="keyup changed delay:300ms" hx-target="#company-list" name="q" class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none dark:text-gray-200">
+        <input type="text" placeholder="Search companies..." value="{{ query }}" hx-get="{% url 'companies:company_list' %}" hx-trigger="keyup changed delay:300ms" hx-target="#company-list" name="q" class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none dark:text-gray-200">
     </div>
 
     <div id="company-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {% for company in companies %}
-            <a href="{% url 'contacts:company_detail' company.slug %}" class="block bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md transition-shadow cursor-pointer">
+            <a href="{% url 'companies:company_detail' company.slug %}" class="block bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md transition-shadow cursor-pointer">
                 <div class="flex items-center gap-4 mb-3">
                     {% if company.logo %}
                         <img src="{{ company.logo.url }}" alt="{{ company.name }}" class="w-12 h-12 rounded-lg object-cover">
@@ -44,8 +44,8 @@
                 <div class="flex items-center justify-between text-xs text-gray-400 pt-3 border-t border-gray-100 dark:border-gray-700">
                     <span>{{ company.created_at|date:'M d, Y' }}</span>
                     <div class="flex gap-2" onclick="event.stopPropagation()">
-                        <button onclick="event.stopPropagation(); openSlideOver('{% url 'contacts:company_edit_slide' company.slug %}')" class="text-gray-600 dark:text-gray-400 hover:underline">Edit</button>
-                        <form method="post" action="{% url 'contacts:company_delete' company.slug %}" class="inline" onsubmit="return confirm('Delete this company?')">
+                        <button onclick="event.stopPropagation(); openSlideOver('{% url 'companies:company_edit_slide' company.slug %}')" class="text-gray-600 dark:text-gray-400 hover:underline">Edit</button>
+                        <form method="post" action="{% url 'companies:company_delete' company.slug %}" class="inline" onsubmit="return confirm('Delete this company?')">
                             {% csrf_token %}
                             <button type="submit" class="text-red-600 dark:text-red-400 hover:underline">Delete</button>
                         </form>

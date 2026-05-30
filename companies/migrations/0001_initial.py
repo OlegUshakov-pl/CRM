@@ -10,30 +10,30 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('companies', '0001_initial'),
-        ('contacts', '0001_initial'),
-        ('projects', '0001_initial'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Note',
+            name='Company',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
                 ('is_active', models.BooleanField(default=True)),
-                ('title', models.CharField(max_length=255)),
+                ('name', models.CharField(max_length=255)),
                 ('slug', models.SlugField(blank=True, max_length=255, null=True, unique=True)),
-                ('content', models.TextField()),
-                ('company', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='note_entries', to='companies.company')),
-                ('contact', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='note_entries', to='contacts.contact')),
+                ('email', models.EmailField(blank=True, max_length=254, null=True)),
+                ('phone', models.CharField(blank=True, max_length=50, null=True)),
+                ('website', models.URLField(blank=True, null=True)),
+                ('address', models.TextField(blank=True, null=True)),
+                ('logo', models.ImageField(blank=True, null=True, upload_to='companies/')),
+                ('notes', models.TextField(blank=True, null=True)),
                 ('created_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
-                ('project', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='note_entries', to='projects.project')),
             ],
             options={
-                'ordering': ['-created_at'],
+                'verbose_name_plural': 'Companies',
+                'ordering': ['name'],
             },
         ),
     ]

@@ -3,7 +3,8 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from projects.models import Project
 from tasks.models import Task
-from contacts.models import Company, Contact
+from companies.models import Company
+from contacts.models import Contact
 from notes.models import Note
 
 

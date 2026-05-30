@@ -19,7 +19,7 @@
             Projects
         </a>
 
-        {% url 'contacts:company_list' as companies_url %}
+        {% url 'companies:company_list' as companies_url %}
         <a href="{{ companies_url }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors {% if '/contacts/companies/' in request.path %}bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300{% else %}text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700{% endif %}">
             <i data-lucide="building-2" class="w-5 h-5"></i>
             Companies

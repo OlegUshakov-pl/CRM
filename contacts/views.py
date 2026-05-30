@@ -1,77 +1,10 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
-from .models import Company, Contact
-from .forms import CompanyForm, ContactForm
+from .models import Contact
+from .forms import ContactForm
 from core.models import log_activity
-
-
-@login_required
-def company_list(request):
-    companies = Company.objects.filter(is_active=True).order_by('name')
-    query = request.GET.get('q', '')
-    if query:
-        companies = companies.filter(name__icontains=query)
-    paginator = Paginator(companies, 12)
-    page = request.GET.get('page', 1)
-    companies_page = paginator.get_page(page)
-    return render(request, 'contacts/company_list.html', {'companies': companies_page, 'query': query})
-
-
-@login_required
-def company_detail(request, slug):
-    company = get_object_or_404(Company.objects.prefetch_related('contacts'), slug=slug)
-    return render(request, 'contacts/company_detail.html', {'company': company})
-
-
-@login_required
-def company_create(request):
-    form = CompanyForm()
-    if request.method == 'POST':
-        form = CompanyForm(request.POST, request.FILES)
-        if form.is_valid():
-            company = form.save(commit=False)
-            company.created_by = request.user
-            company.save()
-            log_activity(request.user, 'created', f'Company "{company.name}"', company)
-            messages.success(request, 'Company created successfully.')
-            if request.headers.get('HX-Request'):
-                response = HttpResponse('<script>closeSlideOver()</script>')
-                response['HX-Refresh'] = 'true'
-                return response
-            return redirect('contacts:company_list')
-    return render(request, 'contacts/company_form.html', {'form': form, 'title': 'Add Company'})
-
-
-@login_required
-def company_edit(request, slug):
-    company = get_object_or_404(Company, slug=slug)
-    form = CompanyForm(instance=company)
-    if request.method == 'POST':
-        form = CompanyForm(request.POST, request.FILES, instance=company)
-        if form.is_valid():
-            form.save()
-            log_activity(request.user, 'updated', f'Company "{company.name}"', company)
-            messages.success(request, 'Company updated successfully.')
-            if request.headers.get('HX-Request'):
-                response = HttpResponse('<script>closeSlideOver()</script>')
-                response['HX-Refresh'] = 'true'
-                return response
-            return redirect('contacts:company_list')
-    return render(request, 'contacts/company_form.html', {'form': form, 'title': 'Edit Company', 'company': company})
-
-
-@login_required
-def company_delete(request, slug):
-    company = get_object_or_404(Company, slug=slug)
-    if request.method == 'POST':
-        company.is_active = False
-        company.save()
-        log_activity(request.user, 'deleted', f'Company "{company.name}"')
-        messages.success(request, 'Company deleted successfully.')
-    return redirect('contacts:company_list')
 
 
 @login_required
@@ -130,19 +63,6 @@ def contact_delete(request, slug):
         log_activity(request.user, 'deleted', f'Contact "{contact.get_full_name()}"')
         messages.success(request, 'Contact deleted successfully.')
     return redirect('contacts:contact_list')
-
-
-@login_required
-def company_create_slide(request):
-    form = CompanyForm()
-    return render(request, 'contacts/company_form.html', {'form': form, 'title': 'Add Company'})
-
-
-@login_required
-def company_edit_slide(request, slug):
-    company = get_object_or_404(Company, slug=slug)
-    form = CompanyForm(instance=company)
-    return render(request, 'contacts/company_form.html', {'form': form, 'title': 'Edit Company', 'company': company})
 
 
 @login_required

@@ -51,7 +51,7 @@
                         <div class="flex items-center justify-between text-xs border-t border-gray-100 dark:border-gray-700 pt-2">
                             <span>
                                 {% if project.company %}
-                                    <a href="{% url 'contacts:company_detail' project.company.slug %}" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ project.company.name }}</a>
+                                    <a href="{% url 'companies:company_detail' project.company.slug %}" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ project.company.name }}</a>
                                 {% else %}
                                     <span class="text-gray-400">No company</span>
                                 {% endif %}
