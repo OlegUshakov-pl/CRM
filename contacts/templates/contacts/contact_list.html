@@ -16,10 +16,10 @@
 
     <div class="relative">
         <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"></i>
-        <input type="text" placeholder="Search contacts..." value="{{ query }}" hx-get="{% url 'contacts:contact_list' %}" hx-trigger="keyup changed delay:300ms" hx-target="#contact-list" name="q" class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none dark:text-gray-200">
+        <input type="text" placeholder="Search contacts..." value="{{ query }}" hx-get="{% url 'contacts:contact_list' %}" hx-trigger="keyup changed delay:300ms" hx-target="#contact-list" name="q" class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-[14px] outline-none focus:border-violet-300 transition-colors">
     </div>
 
-    <div id="contact-list" class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+    <div id="contact-list" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
         {% if contacts %}
             <div class="divide-y divide-gray-200 dark:divide-gray-700">
                 {% for contact in contacts %}
@@ -31,18 +31,22 @@
                                 <span class="text-sm font-semibold text-indigo-700 dark:text-indigo-300">{{ contact.first_name|first }}{{ contact.last_name|first }}</span>
                             </div>
                         {% endif %}
-                        <div class="flex-1 min-w-0">
+                        <div class="min-w-0 w-[200px]">
                             <p class="font-medium text-gray-900 dark:text-white">{{ contact.get_full_name }}</p>
                             <p class="text-sm text-gray-500 dark:text-gray-400 truncate">{{ contact.position|default:contact.email|default:'No position' }}</p>
                         </div>
-                        <div class="hidden sm:block text-sm text-gray-500 dark:text-gray-400">
-                            {{ contact.company.name|default:'—' }}
-                        </div>
-                        <div class="flex gap-2" onclick="event.stopPropagation()">
-                            <button onclick="event.stopPropagation(); openSlideOver('{% url 'contacts:contact_edit_slide' contact.slug %}')" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">Edit</button>
+                        <div class="flex-1 flex items-center justify-center gap-3 text-sm">
+                            {% if contact.company %}
+                                <a href="{% url 'contacts:company_detail' contact.company.slug %}" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ contact.company.name }}</a>
+                            {% else %}
+                                <span class="text-gray-400">—</span>
+                            {% endif %}
+                            <span class="text-gray-300">|</span>
+                            <button onclick="event.stopPropagation(); openSlideOver('{% url 'contacts:contact_edit_slide' contact.slug %}')" class="text-indigo-600 dark:text-indigo-400 hover:underline">Edit</button>
+                            <span class="text-gray-300">|</span>
                             <form method="post" action="{% url 'contacts:contact_delete' contact.slug %}" class="inline" onsubmit="return confirm('Delete this contact?')">
                                 {% csrf_token %}
-                                <button type="submit" class="text-sm text-red-600 dark:text-red-400 hover:underline">Delete</button>
+                                <button type="submit" class="text-red-600 dark:text-red-400 hover:underline">Delete</button>
                             </form>
                         </div>
                     </a>
