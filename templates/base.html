@@ -102,13 +102,20 @@
         <!-- Main -->
         <main class="flex-1 bg-white border border-light">
             <!-- Header -->
-            <div class="border-b border-light px-6 py-4 flex items-center justify-between">
-                <div class="flex items-center gap-3 text-[12px]">
-                    <div class="w-5 h-5 rounded bg-violet-400 flex-shrink-0"></div>
-                    <span class="font-semibold text-[13px]">admin</span>
+            <div class="border-b border-light px-6 py-4 flex items-center gap-4">
+                <div class="flex items-center gap-1 text-[12px] flex-shrink-0">
+                    <button class="p-2 hover:bg-[#e5e7eb] transition-colors"><i data-lucide="mic" class="w-5 h-5"></i></button>
+                    <button class="p-2 hover:bg-[#e5e7eb] transition-colors"><i data-lucide="message-square" class="w-5 h-5"></i></button>
+                    <button class="p-2 hover:bg-[#e5e7eb] transition-colors"><i data-lucide="mail" class="w-5 h-5"></i></button>
+                    <button class="p-2 hover:bg-[#e5e7eb] transition-colors"><i data-lucide="calendar" class="w-5 h-5"></i></button>
+                    <button class="p-2 hover:bg-[#e5e7eb] transition-colors"><i data-lucide="star" class="w-5 h-5" style="color: #FFA84C"></i></button>
                 </div>
 
-                <div class="relative" x-data="{ open: false }">
+                <div class="flex-1">
+                    <input type="text" placeholder="Search..." class="w-full px-3 py-1.5 border border-[#e8e8e8] text-[13px] outline-none focus:border-violet-300 transition-colors">
+                </div>
+
+                <div class="relative flex-shrink-0" x-data="{ open: false }">
                     <button @click="open = !open" class="flex items-center gap-2 text-[12px] hover:bg-gray-50 p-1.5 rounded transition-colors">
                         <span class="font-semibold">{{ user.get_full_name|default:user.username }}</span>
                         <div class="w-8 h-8 bg-gray-300 flex items-center justify-center rounded">
