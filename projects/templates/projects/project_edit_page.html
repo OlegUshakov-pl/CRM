@@ -6,7 +6,7 @@
     <div class="flex items-center justify-between mb-6">
         <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Edit Project</h1>
         <div class="flex items-center gap-2">
-            <button type="button" onclick="showDeleteModal()" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors">Delete</button>
+            <button type="button" onclick="showDeleteModal()" class="px-4 py-2 bg-red-400 hover:bg-red-500 text-white text-[14px] transition-colors">Delete</button>
             <a href="{% url 'projects:detail' project.slug %}" class="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors">
                 <i data-lucide="arrow-left" class="w-4 h-4"></i>
                 Back to Project
@@ -26,7 +26,7 @@
             <button type="button" onclick="hideDeleteModal()" class="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">Cancel</button>
             <form method="post" action="{% url 'projects:delete' project.slug %}">
                 {% csrf_token %}
-                <button type="submit" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors">Delete</button>
+                <button type="submit" class="px-4 py-2 bg-red-400 hover:bg-red-500 text-white text-[14px] transition-colors">Delete</button>
             </form>
         </div>
     </div>
