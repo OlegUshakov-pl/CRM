@@ -142,9 +142,21 @@
                 </div>
             </div>
 
-            <!-- Search -->
-            <div class="px-6 py-5 border-b border-light">
-                <textarea placeholder="What would you like to know?" class="border border-light rounded-sm w-full px-4 pt-3 text-soft text-[12px] resize-y min-h-[120px] outline-none focus:border-violet-300 transition-colors" style="font-family: 'Montserrat', sans-serif;"></textarea>
+            <!-- Breadcrumb -->
+            <div class="px-6 py-3 border-b border-light flex items-center justify-between">
+                <div class="flex items-center gap-2 text-[12px] text-[#999]">
+                    <a href="{% url 'core:dashboard' %}" class="hover:opacity-70 transition-opacity"><i data-lucide="house" class="w-5 h-5"></i></a>
+                    <span>/</span>
+                    <span class="text-[#222] font-medium text-[14px]">{% block breadcrumb %}Dashboard{% endblock %}</span>
+                </div>
+                <div class="relative" x-data="{ open: false }">
+                    <button @click="open = !open" class="p-1.5 hover:bg-[#e5e7eb] transition-colors">
+                        <i data-lucide="settings" class="w-5 h-5" style="color: #666;"></i>
+                    </button>
+                    <div x-show="open" @click.outside="open = false" class="absolute right-0 mt-1 w-40 bg-white border border-[#e8e8e8] shadow-lg py-1 z-50 text-[13px]">
+                        <button class="w-full text-left px-4 py-2 text-[#222] hover:bg-gray-50 transition-colors">Main folder</button>
+                    </div>
+                </div>
             </div>
 
             <!-- Messages -->
