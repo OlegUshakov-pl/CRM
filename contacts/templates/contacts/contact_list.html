@@ -23,42 +23,39 @@
         {% if contacts %}
             <div class="divide-y divide-gray-200 dark:divide-gray-700">
                 {% for contact in contacts %}
-                    <a href="{% url 'contacts:contact_detail' contact.slug %}" class="flex items-center gap-3 p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer">
+                    <a href="{% url 'contacts:contact_detail' contact.slug %}" class="flex items-center gap-2 p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer" style="flex-wrap:nowrap;min-width:0">
                         {% if contact.avatar %}
-                            <img src="{{ contact.avatar.url }}" alt="{{ contact.get_full_name }}" class="w-10 h-10 rounded-full object-cover flex-shrink-0">
+                            <img src="{{ contact.avatar.url }}" alt="{{ contact.get_full_name }}" class="w-8 h-8 rounded-full object-cover flex-shrink-0">
                         {% else %}
-                            <div class="w-10 h-10 bg-indigo-100 dark:bg-indigo-900/50 rounded-full flex items-center justify-center flex-shrink-0">
-                                <span class="text-sm font-semibold text-indigo-700 dark:text-indigo-300">{{ contact.first_name|first }}{{ contact.last_name|first }}</span>
+                            <div class="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/50 rounded-full flex items-center justify-center flex-shrink-0">
+                                <span class="text-xs font-semibold text-indigo-700 dark:text-indigo-300">{{ contact.first_name|first }}{{ contact.last_name|first }}</span>
                             </div>
                         {% endif %}
-                        <div class="min-w-0 flex-1">
-                            <p class="font-medium text-gray-900 dark:text-white">{{ contact.get_full_name }}</p>
-                            <p class="text-sm text-gray-500 dark:text-gray-400 truncate">{{ contact.position|default:contact.email|default:'No position' }}</p>
-                        </div>
-                        <div class="text-sm text-center flex-shrink-0 w-[150px]">
-                            {% if contact.company %}
-                                <a href="{% url 'companies:company_detail' contact.company.slug %}" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ contact.company.name }}</a>
-                            {% else %}
-                                <span class="text-gray-400">—</span>
-                            {% endif %}
-                        </div>
-                        <div class="text-sm text-center flex-shrink-0 w-[150px]">
+                        <span class="font-medium text-gray-900 dark:text-white flex-shrink-0" style="width:130px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ contact.get_full_name }}</span>
+                        <div style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" class="text-sm">
                             {% with projects=contact.projects.all %}
                                 {% if projects %}
                                     {% for project in projects %}
-                                        <a href="{% url 'projects:detail' project.slug %}" class="text-indigo-600 dark:text-indigo-400 hover:underline block">{{ project.name }}</a>
+                                        <a href="{% url 'projects:detail' project.slug %}" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ project.name }}</a>{% if not forloop.last %}, {% endif %}
                                     {% endfor %}
                                 {% else %}
                                     <span class="text-gray-400">—</span>
                                 {% endif %}
                             {% endwith %}
                         </div>
-                        <div class="flex items-center gap-2 flex-shrink-0" onclick="event.stopPropagation()">
-                            <button onclick="event.stopPropagation(); openSlideOver('{% url 'contacts:contact_edit_slide' contact.slug %}')" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">Edit</button>
+                        <div style="width:120px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center" class="text-sm">
+                            {% if contact.company %}
+                                <a href="{% url 'companies:company_detail' contact.company.slug %}" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ contact.company.name }}</a>
+                            {% else %}
+                                <span class="text-gray-400">—</span>
+                            {% endif %}
+                        </div>
+                        <div class="flex items-center gap-2 flex-shrink-0 text-sm" style="white-space:nowrap" onclick="event.stopPropagation()">
+                            <button onclick="event.stopPropagation(); openSlideOver('{% url 'contacts:contact_edit_slide' contact.slug %}')" class="text-indigo-600 dark:text-indigo-400 hover:underline">Edit</button>
                             <span class="text-gray-300">|</span>
                             <form method="post" action="{% url 'contacts:contact_delete' contact.slug %}" class="inline" onsubmit="return confirm('Delete this contact?')">
                                 {% csrf_token %}
-                                <button type="submit" class="text-sm text-red-600 dark:text-red-400 hover:underline">Delete</button>
+                                <button type="submit" class="text-red-600 dark:text-red-400 hover:underline">Delete</button>
                             </form>
                         </div>
                     </a>
