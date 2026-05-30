@@ -25,7 +25,7 @@
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Gallery</h2>
                 </div>
-                <div class="relative overflow-hidden bg-gray-100 dark:bg-gray-700 rounded-lg" style="aspect-ratio: 16/9">
+                <div class="relative overflow-hidden bg-gray-100 dark:bg-gray-700" style="aspect-ratio: 16/9">
                     {% for img in project.images.all %}
                     <div class="gallery-slide absolute inset-0" data-index="{{ forloop.counter0 }}" {% if not forloop.first %}style="display:none"{% endif %}>
                         <a href="{{ img.image.url }}" target="_blank">

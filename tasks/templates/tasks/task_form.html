@@ -10,9 +10,9 @@
         </div>
     {% endfor %}
     <div class="flex gap-3 pt-2">
-        <button type="submit" class="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors">
+        <button type="submit" class="px-4 py-2.5 bg-green-100 dark:bg-green-900/30 text-[14px] font-medium transition-colors">
             {% if task %}Save Changes{% else %}Create{% endif %}
         </button>
-        <button type="button" @click="closeSlideOver()" class="px-4 py-2.5 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">Cancel</button>
+        <button type="button" @click="closeSlideOver()" class="px-4 py-2.5 text-[#666] bg-gray-100 hover:bg-gray-200 transition-colors text-[14px]">Cancel</button>
     </div>
 </form>
