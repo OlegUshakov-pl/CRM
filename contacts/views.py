@@ -9,7 +9,7 @@ from core.models import log_activity
 
 @login_required
 def contact_list(request):
-    contacts = Contact.objects.filter(is_active=True).select_related('company').order_by('first_name')
+    contacts = Contact.objects.filter(is_active=True).select_related('company').prefetch_related('projects').order_by('first_name')
     query = request.GET.get('q', '')
     if query:
         contacts = contacts.filter(first_name__icontains=query) | contacts.filter(last_name__icontains=query)
