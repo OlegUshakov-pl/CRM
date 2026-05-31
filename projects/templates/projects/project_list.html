@@ -25,6 +25,7 @@
                     </div>
                 {% endif %}
                 <div class="p-4 flex-1 flex flex-col">
+                    <a href="{% url 'projects:detail' project.slug %}" class="text-sm font-semibold text-indigo-800 hover:text-indigo-600 transition-colors flex items-center" style="height:26px">{{ project.number|default:'Not set' }}</a>
                     <div class="flex items-start justify-between mb-2">
                         <a href="{% url 'projects:detail' project.slug %}" class="font-semibold text-gray-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">{{ project.name }}</a>
                         <span class="text-xs px-2 py-1 flex-shrink-0 ml-2
