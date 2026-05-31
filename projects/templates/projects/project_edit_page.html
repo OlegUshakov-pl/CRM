@@ -16,39 +16,6 @@
     <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-6">
         {% include 'projects/project_form.html' with is_page=True %}
     </div>
-
-    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-6 mt-6">
-        <h2 class="text-lg font-semibold text-[#222] mb-4">Notes</h2>
-        {% if project.note_entries.all %}
-            <div class="space-y-3 mb-6">
-                {% for note in project.note_entries.all %}
-                    <div class="p-4 bg-gray-50 dark:bg-gray-700/30 border border-gray-100 dark:border-gray-700">
-                        <div class="flex items-center justify-between mb-1">
-                            <p class="font-medium text-gray-900 dark:text-white">{{ note.title }}</p>
-                            <span class="text-[12px] text-gray-400">{{ note.created_at|date:'M d, Y' }}</span>
-                        </div>
-                        <p class="text-[14px] text-gray-600 dark:text-gray-400">{{ note.content|truncatewords:50 }}</p>
-                    </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <p class="text-gray-500 dark:text-gray-400 text-center py-4">No notes yet.</p>
-        {% endif %}
-
-        <form method="post" action="{% url 'projects:edit' project.slug %}" class="space-y-4 border-t border-gray-200 dark:border-gray-700 pt-4">
-            {% csrf_token %}
-            <input type="hidden" name="note_submit" value="1">
-            <div>
-                <label class="block text-[14px] font-medium text-[#666] mb-1">Title</label>
-                <input type="text" name="title" class="w-full px-4 py-2.5 border border-[#e8e8e8] text-[14px] outline-none focus:border-violet-300 transition-colors" placeholder="Note title" required>
-            </div>
-            <div>
-                <label class="block text-[14px] font-medium text-[#666] mb-1">Content</label>
-                <textarea name="content" rows="3" class="w-full px-4 py-2.5 border border-[#e8e8e8] text-[14px] outline-none focus:border-violet-300 transition-colors" placeholder="Write your note..." required></textarea>
-            </div>
-            <button type="submit" class="px-4 py-2.5 bg-green-100 dark:bg-green-900/30 text-[14px] font-medium transition-colors">Add Note</button>
-        </form>
-    </div>
 </div>
 
 <div id="delete-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 opacity-0 pointer-events-none transition-opacity duration-200">

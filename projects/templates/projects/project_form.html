@@ -59,6 +59,27 @@
         />
         <p class="mt-1 text-[12px] text-[#999]">You can select multiple images</p>
     </div>
+    {% if project %}
+    <div>
+        <label class="block text-[14px] font-medium text-[#666] mb-1">Notes</label>
+        {% if project.note_entries.all %}
+            <div class="space-y-2 mb-3">
+                {% for note in project.note_entries.all %}
+                    <div class="p-3 bg-gray-50 dark:bg-gray-700/30 border border-gray-100 dark:border-gray-700">
+                        <div class="flex items-center justify-between mb-1">
+                            <p class="font-medium text-gray-900 dark:text-white">{{ note.title }}</p>
+                            <span class="text-[12px] text-gray-400">{{ note.created_at|date:'M d, Y' }}</span>
+                        </div>
+                        <p class="text-[14px] text-gray-600 dark:text-gray-400">{{ note.content|truncatewords:50 }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        <input type="text" name="title" class="w-full px-4 py-2.5 border border-[#e8e8e8] text-[14px] outline-none focus:border-violet-300 transition-colors mb-2" placeholder="Note title" required>
+        <textarea name="content" rows="2" class="w-full px-4 py-2.5 border border-[#e8e8e8] text-[14px] outline-none focus:border-violet-300 transition-colors mb-2" placeholder="Write your note..." required></textarea>
+        <button type="submit" name="note_submit" value="1" class="px-4 py-2.5 bg-green-100 dark:bg-green-900/30 text-[14px] font-medium transition-colors">Add Note</button>
+    </div>
+    {% endif %}
     <div class="flex justify-between items-center pt-2">
         <button
             type="submit"
