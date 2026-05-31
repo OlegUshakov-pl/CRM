@@ -26,7 +26,7 @@
             <button type="button" onclick="hideDeleteModal()" class="px-4 py-2.5 text-[#666] bg-gray-100 hover:bg-gray-200 transition-colors text-[14px]">Cancel</button>
             <form method="post" action="{% url 'projects:delete' project.slug %}">
                 {% csrf_token %}
-                <button type="submit" class="px-4 py-2 bg-red-400 hover:bg-red-500 text-white text-[14px] transition-colors">Delete</button>
+                <button type="submit" class="px-4 py-2.5 bg-red-400 hover:bg-red-500 text-white text-[14px] transition-colors">Delete</button>
             </form>
         </div>
     </div>
@@ -40,7 +40,7 @@
             <button type="button" onclick="hideNoteDeleteModal()" class="px-4 py-2.5 text-[#666] bg-gray-100 hover:bg-gray-200 transition-colors text-[14px]">Cancel</button>
             <form method="post" action="" id="note-delete-form">
                 {% csrf_token %}
-                <button type="submit" class="px-4 py-2 bg-red-400 hover:bg-red-500 text-white text-[14px] transition-colors">Delete</button>
+                <button type="submit" class="px-4 py-2.5 bg-red-400 hover:bg-red-500 text-white text-[14px] transition-colors">Delete</button>
             </form>
         </div>
     </div>
