@@ -23,6 +23,7 @@ class Project(TimeStampedModel):
     start_date = models.DateField(blank=True, null=True)
     end_date = models.DateField(blank=True, null=True)
     budget = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
+    number = models.CharField(max_length=11, blank=True, null=True, verbose_name='Project Number')
     image = models.ImageField(upload_to='projects/', blank=True, null=True)
 
     class Meta:

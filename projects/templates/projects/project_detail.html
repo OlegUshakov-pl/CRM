@@ -114,6 +114,10 @@
                     </p>
                 </div>
                 <div class="flex-1">
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Number</p>
+                    <p class="font-medium text-gray-900 dark:text-white">{{ project.number|default:'Not set' }}</p>
+                </div>
+                <div class="flex-1">
                     <p class="text-sm text-gray-500 dark:text-gray-400">Created by</p>
                     <p class="font-medium text-gray-900 dark:text-white">{{ project.created_by|default:'System' }}</p>
                 </div>
