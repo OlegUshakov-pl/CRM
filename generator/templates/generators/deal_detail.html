@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% block title %}{{ deal.name }} - CRM{% endblock %}
+{% block breadcrumb %}{{ deal.name }}{% endblock %}
+{% block content %}
+<div class="space-y-6">
+    <div class="flex items-center justify-between">
+        <div class="flex items-center gap-4">
+            <a href="{% url 'generators:list' %}" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                <i data-lucide="arrow-left" class="w-5 h-5"></i>
+            </a>
+            <div>
+                <div class="flex items-center gap-3">
+                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ deal.name }}</h1>
+                    <span class="text-[11px] px-2 py-0.5 rounded-full
+                        {% if deal.status == 'won' %}bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300
+                        {% elif deal.status == 'lost' %}bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300
+                        {% elif deal.status == 'negotiation' %}bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300
+                        {% elif deal.status == 'proposal' %}bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300
+                        {% else %}bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300{% endif %}">
+                        {{ deal.get_status_display }}
+                    </span>
+                    <span class="text-[11px] px-2 py-0.5 rounded-full
+                        {% if deal.priority == 'high' %}bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300
+                        {% elif deal.priority == 'medium' %}bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300
+                        {% else %}bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300{% endif %}">
+                        {{ deal.get_priority_display }}
+                    </span>
+                </div>
+                {% if deal.company %}
+                    <p class="text-gray-500 dark:text-gray-400 mt-1">{{ deal.company.name }}</p>
+                {% endif %}
+            </div>
+        </div>
+        <div class="flex gap-2">
+            <button onclick="openSlideOver('{% url 'generators:edit_slide' deal.slug %}')" class="px-4 py-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Edit</button>
+            <form method="post" action="{% url 'generators:delete' deal.slug %}" onsubmit="return confirm('Delete this deal?')">
+                {% csrf_token %}
+                <button type="submit" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors">Delete</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Deal Information</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Name</p>
+                <p class="font-medium text-gray-900 dark:text-white">{{ deal.name }}</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Status</p>
+                <p class="font-medium text-gray-900 dark:text-white">{{ deal.get_status_display }}</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Priority</p>
+                <p class="font-medium text-gray-900 dark:text-white">{{ deal.get_priority_display }}</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Value</p>
+                <p class="font-medium text-gray-900 dark:text-white">{{ deal.value|default:'—' }}</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Company</p>
+                <p class="font-medium text-gray-900 dark:text-white">{{ deal.company.name|default:'—' }}</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Assigned To</p>
+                <p class="font-medium text-gray-900 dark:text-white">{{ deal.assigned_to.get_full_name|default:deal.assigned_to.username|default:'—' }}</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Due Date</p>
+                <p class="font-medium text-gray-900 dark:text-white">{{ deal.due_date|date:'M d, Y'|default:'—' }}</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Created By</p>
+                <p class="font-medium text-gray-900 dark:text-white">{{ deal.created_by|default:'System' }}</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Created At</p>
+                <p class="font-medium text-gray-900 dark:text-white">{{ deal.created_at|date:'M d, Y H:i' }}</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Updated At</p>
+                <p class="font-medium text-gray-900 dark:text-white">{{ deal.updated_at|date:'M d, Y H:i' }}</p>
+            </div>
+        </div>
+    </div>
+
+    {% if deal.description %}
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Description</h2>
+        <p class="text-gray-600 dark:text-gray-400 whitespace-pre-wrap">{{ deal.description }}</p>
+    </div>
+    {% endif %}
+
+    {% if deal.contacts.all %}
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Contacts</h2>
+        <div class="space-y-2">
+            {% for contact in deal.contacts.all %}
+                <a href="{% url 'contacts:contact_detail' contact.slug %}" class="flex items-center gap-3 p-3 hover:bg-[#f8f8f8] dark:hover:bg-gray-700 transition-colors rounded">
+                    <div class="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/30 rounded-full flex items-center justify-center">
+                        <span class="text-xs font-bold text-indigo-600 dark:text-indigo-400">{{ contact.first_name|first }}{{ contact.last_name|first }}</span>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-900 dark:text-white">{{ contact.get_full_name }}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ contact.position|default:'' }}</p>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if deal.notes %}
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Notes</h2>
+        <p class="text-gray-600 dark:text-gray-400 whitespace-pre-wrap">{{ deal.notes }}</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

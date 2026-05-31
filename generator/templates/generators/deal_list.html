@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% block title %}Deals - CRM{% endblock %}
+{% block breadcrumb %}Deals{% endblock %}
+{% block content %}
+<div class="space-y-6">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Deals</h1>
+            <p class="text-gray-500 dark:text-gray-400 mt-1">Manage your deals</p>
+        </div>
+        <button onclick="openSlideOver('{% url 'generators:create_slide' %}')" class="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors shadow-sm">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            Add Deal
+        </button>
+    </div>
+
+    <div class="flex flex-col sm:flex-row gap-3">
+        <div class="relative flex-1">
+            <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"></i>
+            <input type="text" placeholder="Search deals..." value="{{ query }}" hx-get="{% url 'generators:list' %}" hx-trigger="keyup changed delay:300ms" hx-target="#deal-list" hx-include="#status-filter, #priority-filter" name="q" class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none dark:text-gray-200">
+        </div>
+        <select id="status-filter" name="status" hx-get="{% url 'generators:list' %}" hx-target="#deal-list" hx-include="[name='q'], #priority-filter" class="px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none dark:text-gray-200">
+            <option value="">All statuses</option>
+            <option value="lead" {% if status_filter == 'lead' %}selected{% endif %}>Lead</option>
+            <option value="proposal" {% if status_filter == 'proposal' %}selected{% endif %}>Proposal</option>
+            <option value="negotiation" {% if status_filter == 'negotiation' %}selected{% endif %}>Negotiation</option>
+            <option value="won" {% if status_filter == 'won' %}selected{% endif %}>Won</option>
+            <option value="lost" {% if status_filter == 'lost' %}selected{% endif %}>Lost</option>
+        </select>
+        <select id="priority-filter" name="priority" hx-get="{% url 'generators:list' %}" hx-target="#deal-list" hx-include="[name='q'], #status-filter" class="px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none dark:text-gray-200">
+            <option value="">All priorities</option>
+            <option value="low" {% if priority_filter == 'low' %}selected{% endif %}>Low</option>
+            <option value="medium" {% if priority_filter == 'medium' %}selected{% endif %}>Medium</option>
+            <option value="high" {% if priority_filter == 'high' %}selected{% endif %}>High</option>
+        </select>
+    </div>
+
+    <div id="deal-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {% for deal in deals %}
+            <a href="{% url 'generators:detail' deal.slug %}" class="block bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md transition-shadow cursor-pointer">
+                <div class="flex items-start justify-between mb-3">
+                    <h3 class="font-semibold text-gray-900 dark:text-white">{{ deal.name }}</h3>
+                    <span class="text-[11px] px-2 py-0.5 rounded-full flex-shrink-0 ml-2
+                        {% if deal.status == 'won' %}bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300
+                        {% elif deal.status == 'lost' %}bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300
+                        {% elif deal.status == 'negotiation' %}bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300
+                        {% elif deal.status == 'proposal' %}bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300
+                        {% else %}bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300{% endif %}">
+                        {{ deal.get_status_display }}
+                    </span>
+                </div>
+
+                {% if deal.description %}
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-3 line-clamp-2">{{ deal.description }}</p>
+                {% endif %}
+
+                <div class="space-y-1 mb-3">
+                    {% if deal.company %}
+                        <p class="text-sm text-gray-500 dark:text-gray-400"><i data-lucide="building-2" class="w-3 h-3 inline mr-1"></i>{{ deal.company.name }}</p>
+                    {% endif %}
+                    {% if deal.value %}
+                        <p class="text-sm font-medium text-gray-900 dark:text-white"><i data-lucide="dollar-sign" class="w-3 h-3 inline mr-1"></i>{{ deal.value }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="flex items-center justify-between text-xs text-gray-400 pt-3 border-t border-gray-100 dark:border-gray-700">
+                    <div class="flex items-center gap-2">
+                        <span class="px-2 py-0.5 rounded-full
+                            {% if deal.priority == 'high' %}bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300
+                            {% elif deal.priority == 'medium' %}bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300
+                            {% else %}bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300{% endif %}">
+                            {{ deal.get_priority_display }}
+                        </span>
+                        {% if deal.due_date %}
+                            <span class="text-gray-500 dark:text-gray-400">Due: {{ deal.due_date|date:'M d' }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="flex gap-2" onclick="event.stopPropagation()">
+                        <button onclick="event.stopPropagation(); openSlideOver('{% url 'generators:edit_slide' deal.slug %}')" class="text-gray-600 dark:text-gray-400 hover:underline">Edit</button>
+                        <form method="post" action="{% url 'generators:delete' deal.slug %}" class="inline" onsubmit="return confirm('Delete this deal?')">
+                            {% csrf_token %}
+                            <button type="submit" class="text-red-600 dark:text-red-400 hover:underline">Delete</button>
+                        </form>
+                    </div>
+                </div>
+            </a>
+        {% empty %}
+            <div class="col-span-full text-center py-16">
+                <i data-lucide="handshake" class="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4"></i>
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">No deals yet</h3>
+                <p class="text-gray-500 dark:text-gray-400 mb-4">Create your first deal to get started</p>
+                <button onclick="openSlideOver('{% url 'generators:create_slide' %}')" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors">
+                    <i data-lucide="plus" class="w-4 h-4"></i>
+                    Add Deal
+                </button>
+            </div>
+        {% endfor %}
+    </div>
+
+    {% include 'includes/pagination.html' with page_obj=deals %}
+</div>
+{% endblock %}
