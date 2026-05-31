@@ -8,7 +8,7 @@
             <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Notes</h1>
             <p class="text-gray-500 dark:text-gray-400 mt-1">All your notes in one place</p>
         </div>
-        <button onclick="openSlideOver('{% url 'notes:create_slide' %}')" class="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors shadow-sm">
+        <button onclick="openSlideOver('{% url 'notes:create_slide' %}')" class="inline-flex items-center gap-2 px-4 py-2.5 bg-red-400 hover:bg-red-500 text-white text-[14px] font-medium transition-colors">
             <i data-lucide="plus" class="w-4 h-4"></i>
             Add Note
         </button>
@@ -16,12 +16,12 @@
 
     <div class="relative">
         <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"></i>
-        <input type="text" placeholder="Search notes..." value="{{ query }}" hx-get="{% url 'notes:list' %}" hx-trigger="keyup changed delay:300ms" hx-target="#note-list" name="q" class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none dark:text-gray-200">
+        <input type="text" placeholder="Search notes..." value="{{ query }}" hx-get="{% url 'notes:list' %}" hx-trigger="keyup changed delay:300ms" hx-target="#note-list" name="q" class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none dark:text-gray-200">
     </div>
 
     <div id="note-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {% for note in notes %}
-            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md transition-shadow">
+            <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md transition-shadow">
                 <div class="flex items-start justify-between mb-2">
                     <h3 class="font-semibold text-gray-900 dark:text-white">{{ note.title }}</h3>
                     <div class="flex gap-1">
@@ -39,14 +39,14 @@
                 <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-4 mb-3">{{ note.content }}</p>
                 <div class="flex items-center gap-2 text-xs text-gray-400 pt-3 border-t border-gray-100 dark:border-gray-700">
                     {% if note.project %}
-                        <a href="{% url 'projects:detail' note.project.slug %}" class="px-2 py-0.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-full hover:bg-indigo-200 dark:hover:bg-indigo-900/50 transition-colors">{{ note.project.name }}</a>
+                        <a href="{% url 'projects:detail' note.project.slug %}" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ note.project.name }}</a>
                     {% endif %}
                     {% if note.contact %}
                         <a href="{% url 'contacts:contact_detail' note.contact.slug %}" class="px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors">{{ note.contact.get_full_name }}</a>
                     {% elif note.company %}
-                        <a href="{% url 'companies:company_detail' note.company.slug %}" class="px-2 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 rounded-full hover:bg-amber-200 dark:hover:bg-amber-900/50 transition-colors">{{ note.company.name }}</a>
+                        <a href="{% url 'companies:company_detail' note.company.slug %}" class="text-green-500 hover:text-green-400 hover:underline">{{ note.company.name }}</a>
                     {% endif %}
-                    <span class="ml-auto">{{ note.created_at|date:'M d, Y' }}</span>
+                    <span class="ml-auto">{{ note.date|date:'M d, Y'|default:note.created_at|date:'M d, Y' }}</span>
                 </div>
             </div>
         {% empty %}
@@ -54,7 +54,7 @@
                 <i data-lucide="sticky-note" class="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4"></i>
                 <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">No notes yet</h3>
                 <p class="text-gray-500 dark:text-gray-400 mb-4">Create your first note</p>
-                <button onclick="openSlideOver('{% url 'notes:create_slide' %}')" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors">
+                <button onclick="openSlideOver('{% url 'notes:create_slide' %}')" class="inline-flex items-center gap-2 px-4 py-2 bg-red-400 hover:bg-red-500 text-white text-[14px] font-medium transition-colors">
                     <i data-lucide="plus" class="w-4 h-4"></i>
                     Add Note
                 </button>
