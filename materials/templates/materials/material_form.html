@@ -1,6 +1,4 @@
-<form method="post"
-      action="{% if material %}{% url 'materials:edit' material.slug %}{% else %}{% url 'materials:create' project.slug %}{% endif %}"
-      hx-post="{% if material %}{% url 'materials:edit' material.slug %}{% else %}{% url 'materials:create' project.slug %}{% endif %}"
+<form hx-post="{% if material %}{% url 'materials:edit' material.slug %}{% else %}{% url 'materials:create' project.slug %}{% endif %}"
       hx-target="#slide-over-content"
       hx-swap="innerHTML"
       class="space-y-4">
@@ -16,6 +14,6 @@
     {% endfor %}
     <div class="flex gap-3 pt-2">
         <button type="submit" class="px-4 py-2.5 bg-green-100 dark:bg-green-900/30 text-[14px] font-medium transition-colors">Save</button>
-        <button type="button" @click="closeSlideOver()" class="px-4 py-2.5 text-[#666] bg-gray-100 hover:bg-gray-200 transition-colors text-[14px]">Cancel</button>
+        <button type="button" onclick="closeSlideOver()" class="px-4 py-2.5 text-[#666] bg-gray-100 hover:bg-gray-200 transition-colors text-[14px]">Cancel</button>
     </div>
 </form>
