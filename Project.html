@@ -1,0 +1,560 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Project</title>
+
+        <!-- Tailwind -->
+        <script src="https://cdn.tailwindcss.com"></script>
+
+        <!-- Montserrat -->
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap"
+            rel="stylesheet"
+        />
+
+        <!-- Lucide -->
+        <script src="https://unpkg.com/lucide@latest"></script>
+
+        <style>
+            body {
+                font-family: "Montserrat", sans-serif;
+                background: #f5f5f5;
+                color: #222;
+            }
+
+            .border-light {
+                border-color: #e8e8e8;
+            }
+
+            .text-soft {
+                color: #8d8d8d;
+            }
+
+            .purple {
+                color: #8b7cf8;
+            }
+
+            .table-row {
+                background: #f8f8f8;
+            }
+
+            nav a {
+                padding-top: 5px;
+                padding-bottom: 5px;
+            }
+
+            nav a:hover {
+                background: #efefef;
+                border-radius: 4px;
+            }
+
+            #sidebar.collapsed {
+                width: 60px;
+                padding-left: 12px;
+                padding-right: 12px;
+            }
+
+            #sidebar.collapsed .sidebar-text {
+                display: none;
+            }
+
+            #sidebar.collapsed .flex.items-center.gap-2.mb-7 span {
+                display: none;
+            }
+
+            #sidebar.collapsed nav a {
+                justify-content: center;
+                padding-left: 8px;
+                padding-right: 8px;
+            }
+
+            #sidebar.collapsed nav a .sidebar-text {
+                display: none;
+            }
+
+            #sidebar.collapsed .flex.items-center.gap-2.mb-7 {
+                justify-content: center;
+            }
+
+            #sidebar.collapsed button {
+                justify-content: center;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="max-w-[1280px] mx-auto py-6 px-4 flex gap-5">
+            <!-- Sidebar -->
+            <aside
+                id="sidebar"
+                class="w-[210px] bg-white border border-light min-h-[900px] px-5 py-5 flex flex-col transition-all duration-300"
+            >
+                <div class="flex items-center gap-2 mb-7">
+                    <div class="w-4 h-4 rounded bg-violet-400 flex-shrink-0"></div>
+                    <span class="sidebar-text text-[12px] font-semibold tracking-wide">CRM</span>
+                </div>
+
+                <nav class="space-y-3 text-[13px] flex-1">
+                    <a class="flex items-center gap-2 font-medium" href="#">
+                        <i data-lucide="layout-dashboard" class="w-4 h-4 flex-shrink-0"></i>
+                        <span class="sidebar-text">Dashboard</span>
+                    </a>
+
+                    <a class="flex items-center gap-2" href="#">
+                        <i data-lucide="factory" class="w-4 h-4 flex-shrink-0"></i>
+                        <span class="sidebar-text">Industry</span>
+                    </a>
+
+                    <a class="flex items-center gap-2" href="#">
+                        <i data-lucide="briefcase" class="w-4 h-4 flex-shrink-0"></i>
+                        <span class="sidebar-text">Projects</span>
+                    </a>
+
+                    <a class="flex items-center gap-2" href="#">
+                        <i data-lucide="package" class="w-4 h-4 flex-shrink-0"></i>
+                        <span class="sidebar-text">Materials</span>
+                    </a>
+
+                    <a class="flex items-center gap-2" href="#">
+                        <i data-lucide="library" class="w-4 h-4 flex-shrink-0"></i>
+                        <span class="sidebar-text">Library</span>
+                    </a>
+
+                    <div class="pt-5 space-y-3">
+                        <a class="flex items-center gap-2" href="#">
+                            <i data-lucide="building-2" class="w-4 h-4 flex-shrink-0"></i>
+                            <span class="sidebar-text">Companies</span>
+                        </a>
+
+                        <a class="flex items-center gap-2" href="#">
+                            <i data-lucide="contact" class="w-4 h-4 flex-shrink-0"></i>
+                            <span class="sidebar-text">Contacts</span>
+                        </a>
+
+                        <a class="flex items-center gap-2" href="#">
+                            <i data-lucide="notebook-pen" class="w-4 h-4 flex-shrink-0"></i>
+                            <span class="sidebar-text">Notes</span>
+                        </a>
+                    </div>
+
+                    <button
+                        id="sidebar-toggle-btn"
+                        onclick="toggleSidebar()"
+                        class="p-2 hover:bg-gray-100 rounded flex items-center gap-2 mt-4 pl-0"
+                    >
+                        <i
+                            data-lucide="panel-left-close"
+                            id="toggle-icon"
+                            class="w-4 h-4 flex-shrink-0"
+                        ></i>
+                    </button>
+                </nav>
+            </aside>
+
+            <!-- Main -->
+            <main class="flex-1 bg-white border border-light">
+                <!-- Header -->
+                <div class="border-b border-light px-6 py-4 flex items-center justify-between">
+                    <div class="flex items-center gap-3 text-[12px] text-soft">
+                        <i data-lucide="house" class="w-3 h-3"></i>
+                        <span>/</span>
+                        <span>MAIN</span>
+                        <span>/</span>
+                        <span>Industry</span>
+                        <span>/</span>
+                        <span class="purple font-medium">Project</span>
+                        <span>/</span>
+                        <span>XXX-XXX-XXX</span>
+                    </div>
+
+                    <div class="flex items-center gap-3 text-[12px]" style="color: #222222">
+                        <button class="p-2 hover:bg-gray-100">
+                            <svg
+                                class="w-5 h-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                                ></path>
+                            </svg>
+                        </button>
+                        <div class="flex items-center gap-2">
+                            <span class="font-semibold">John Doe</span>
+                            <div class="w-8 h-8 bg-gray-300 flex items-center justify-center">
+                                <svg
+                                    class="w-5 h-5"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                                    ></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Search -->
+                <div class="px-6 py-5 border-b border-light">
+                    <div
+                        class="border border-light rounded-sm h-[120px] flex items-start justify-between px-4 pt-3 text-soft text-[12px]"
+                    >
+                        <span>What would you like to know?</span>
+
+                        <div class="flex items-center gap-4">
+                            <i data-lucide="plus" class="w-4 h-4"></i>
+                            <i data-lucide="mic" class="w-4 h-4"></i>
+                            <i data-lucide="arrow-up-circle" class="w-4 h-4"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Content -->
+                <div class="px-10 py-7">
+                    <div class="flex items-center justify-between mb-4">
+                        <h1 class="text-[20px] font-semibold">Project</h1>
+                        <i data-lucide="star" class="w-4 h-4 text-orange-400"></i>
+                    </div>
+
+                    <div class="flex justify-between text-[11px] mb-2">
+                        <div>
+                            <div class="font-semibold">XXX-XXX-XXX</div>
+                            <div class="text-soft mt-1">Name of project</div>
+                        </div>
+
+                        <div class="text-soft">25/07/2026 to 26/08/2027</div>
+                    </div>
+
+                    <!-- Slider -->
+                    <div class="mb-6 relative">
+                        <div class="overflow-hidden rounded-sm">
+                            <div id="slider-track" class="flex transition-transform duration-300">
+                                <img
+                                    src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1200&auto=format&fit=crop"
+                                    class="w-full h-[340px] object-cover flex-shrink-0"
+                                />
+                                <img
+                                    src="https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?q=80&w=1200&auto=format&fit=crop"
+                                    class="w-full h-[340px] object-cover flex-shrink-0"
+                                />
+                                <img
+                                    src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=1200&auto=format&fit=crop"
+                                    class="w-full h-[340px] object-cover flex-shrink-0"
+                                />
+                                <img
+                                    src="https://images.unsplash.com/photo-1501854140801-50d01698950b?q=80&w=1200&auto=format&fit=crop"
+                                    class="w-full h-[340px] object-cover flex-shrink-0"
+                                />
+                            </div>
+                        </div>
+
+                        <button
+                            onclick="prevSlide()"
+                            class="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full w-8 h-8 flex items-center justify-center shadow"
+                        >
+                            <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                        </button>
+                        <button
+                            onclick="nextSlide()"
+                            class="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full w-8 h-8 flex items-center justify-center shadow"
+                        >
+                            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                        </button>
+
+                        <div id="slider-dots" class="flex justify-center gap-2 mt-3">
+                            <button
+                                onclick="goToSlide(0)"
+                                class="w-2 h-2 rounded-full bg-violet-400"
+                            ></button>
+                            <button
+                                onclick="goToSlide(1)"
+                                class="w-2 h-2 rounded-full bg-gray-300"
+                            ></button>
+                            <button
+                                onclick="goToSlide(2)"
+                                class="w-2 h-2 rounded-full bg-gray-300"
+                            ></button>
+                            <button
+                                onclick="goToSlide(3)"
+                                class="w-2 h-2 rounded-full bg-gray-300"
+                            ></button>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <section class="mb-8">
+                        <h2 class="purple text-[14px] font-semibold mb-2">Description</h2>
+
+                        <p class="text-[12px] leading-5 text-[#555]">
+                            Ipsum velit, fusce posuere fames Varius quis lobortis, lorem ad accumsan
+                            interdum Duis nam, sapien ornare eget Etiam sollicitudin fusce
+                            venenatis. Varius quis lobortis, lorem ad accumsan interdum Duis nam,
+                            sapien ornare eget Etiam sollicitudin fusce venenatis.
+                        </p>
+                    </section>
+
+                    <!-- Properties -->
+                    <section class="border-t border-light pt-5 mb-8">
+                        <h2 class="purple text-[14px] font-semibold mb-4">Properties</h2>
+
+                        <div class="grid grid-cols-2 gap-y-2 text-[12px] max-w-[350px]">
+                            <span class="text-soft">Size</span>
+                            <span>2000x2000x500</span>
+
+                            <span class="text-soft">Color</span>
+                            <span>RAL 7011</span>
+
+                            <span class="text-soft">Weight</span>
+                            <span>75 kg</span>
+
+                            <span class="text-soft">Price</span>
+                            <span>7000$</span>
+                        </div>
+                    </section>
+
+                    <!-- Documents -->
+                    <section class="mb-8">
+                        <div class="flex items-center justify-between mb-3">
+                            <h2 class="purple text-[14px] font-semibold">Documents</h2>
+                            <i data-lucide="paperclip" class="w-4 h-4 text-soft"></i>
+                        </div>
+
+                        <div class="overflow-hidden border border-light">
+                            <table class="w-full text-[12px]">
+                                <thead class="bg-[#fafafa] text-soft">
+                                    <tr>
+                                        <th class="text-left px-3 py-2 font-medium">Name</th>
+                                        <th class="text-left px-3 py-2 font-medium">Created</th>
+                                        <th class="text-left px-3 py-2 font-medium">Updated</th>
+                                        <th class="text-left px-3 py-2 font-medium">Format</th>
+                                        <th class="text-left px-3 py-2 font-medium">Size</th>
+                                        <th class="text-right px-3 py-2"></th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    <tr class="table-row border-t border-light">
+                                        <td class="px-3 py-2 font-medium">Instruction</td>
+                                        <td class="px-3 py-2">25/10/2026</td>
+                                        <td class="px-3 py-2">26/10/2026</td>
+                                        <td class="px-3 py-2 text-red-400">doc</td>
+                                        <td class="px-3 py-2">500</td>
+                                        <td class="px-3 py-2 text-right">
+                                            <i
+                                                data-lucide="download"
+                                                class="w-4 h-4 inline text-red-400"
+                                            ></i>
+                                        </td>
+                                    </tr>
+
+                                    <tr class="table-row border-t border-light">
+                                        <td class="px-3 py-2 font-medium">Sample</td>
+                                        <td class="px-3 py-2">25/10/2026</td>
+                                        <td class="px-3 py-2">26/10/2026</td>
+                                        <td class="px-3 py-2 text-red-400">pdf</td>
+                                        <td class="px-3 py-2">244</td>
+                                        <td class="px-3 py-2 text-right">
+                                            <i
+                                                data-lucide="download"
+                                                class="w-4 h-4 inline text-red-400"
+                                            ></i>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <!-- Materials -->
+                    <section class="mb-8">
+                        <div class="flex items-center justify-between mb-3">
+                            <h2 class="purple text-[14px] font-semibold">Materials</h2>
+                            <i data-lucide="paperclip" class="w-4 h-4 text-soft"></i>
+                        </div>
+
+                        <div class="overflow-hidden border border-light">
+                            <table class="w-full text-[12px]">
+                                <thead class="bg-[#fafafa] text-soft">
+                                    <tr>
+                                        <th class="text-left px-3 py-2 font-medium">Name</th>
+                                        <th class="text-left px-3 py-2 font-medium">Standard</th>
+                                        <th class="text-left px-3 py-2 font-medium">Steel</th>
+                                        <th class="text-left px-3 py-2 font-medium">Amount</th>
+                                        <th class="text-left px-3 py-2 font-medium">Weight</th>
+                                        <th class="text-right px-3 py-2"></th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    <tr class="table-row border-t border-light">
+                                        <td class="px-3 py-2">L90x90x4</td>
+                                        <td class="px-3 py-2">EN 10025</td>
+                                        <td class="px-3 py-2">S355JR</td>
+                                        <td class="px-3 py-2">12</td>
+                                        <td class="px-3 py-2">69</td>
+                                        <td class="px-3 py-2 text-right text-red-400">
+                                            <i data-lucide="file-text" class="w-4 h-4 inline"></i>
+                                        </td>
+                                    </tr>
+
+                                    <tr class="table-row border-t border-light">
+                                        <td class="px-3 py-2">HEA 120</td>
+                                        <td class="px-3 py-2">DIN EN 10210</td>
+                                        <td class="px-3 py-2">S235JR</td>
+                                        <td class="px-3 py-2">8</td>
+                                        <td class="px-3 py-2">230</td>
+                                        <td class="px-3 py-2 text-right text-red-400">
+                                            <i data-lucide="file-text" class="w-4 h-4 inline"></i>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <!-- Parts -->
+                    <section class="mb-8">
+                        <div class="flex items-center justify-between mb-3">
+                            <h2 class="purple text-[14px] font-semibold">Parts</h2>
+                            <i data-lucide="paperclip" class="w-4 h-4 text-soft"></i>
+                        </div>
+
+                        <div class="overflow-hidden border border-light">
+                            <table class="w-full text-[12px]">
+                                <thead class="bg-[#fafafa] text-soft">
+                                    <tr>
+                                        <th class="text-left px-3 py-2 font-medium">Name</th>
+                                        <th class="text-left px-3 py-2 font-medium">Created</th>
+                                        <th class="text-left px-3 py-2 font-medium">Updated</th>
+                                        <th class="text-left px-3 py-2 font-medium">Size</th>
+                                        <th class="text-right px-3 py-2"></th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    <tr class="table-row border-t border-light">
+                                        <td class="px-3 py-2">Parts</td>
+                                        <td class="px-3 py-2">25/10/2026</td>
+                                        <td class="px-3 py-2">26/10/2026</td>
+                                        <td class="px-3 py-2">500</td>
+                                        <td class="px-3 py-2 text-right text-red-400">
+                                            <i data-lucide="download" class="w-4 h-4 inline"></i>
+                                        </td>
+                                    </tr>
+
+                                    <tr class="table-row border-t border-light">
+                                        <td class="px-3 py-2">Drawings</td>
+                                        <td class="px-3 py-2">25/10/2026</td>
+                                        <td class="px-3 py-2">26/10/2026</td>
+                                        <td class="px-3 py-2">244</td>
+                                        <td class="px-3 py-2 text-right text-red-400">
+                                            <i data-lucide="download" class="w-4 h-4 inline"></i>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <!-- Team -->
+                    <section class="mb-8">
+                        <h2 class="purple text-[14px] font-semibold mb-3">Team</h2>
+
+                        <div
+                            class="border border-light min-h-[120px] p-4 text-[12px] grid grid-cols-2 gap-5"
+                        >
+                            <div>
+                                <div class="font-semibold mb-2">Developer</div>
+                                <div class="text-blue-500">John Doe</div>
+                                <div class="font-semibold mt-1">Director</div>
+                            </div>
+
+                            <div>
+                                <div class="font-semibold mb-2">Company</div>
+                                <div>ABC</div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Information -->
+                    <section>
+                        <h2 class="purple text-[14px] font-semibold mb-3">Information</h2>
+
+                        <div class="border border-light min-h-[120px]"></div>
+
+                        <div class="flex items-center justify-between mt-6">
+                            <button
+                                class="bg-green-300 text-white text-[12px] px-5 py-2 rounded-sm"
+                            >
+                                Change
+                            </button>
+
+                            <button class="bg-red-200 text-white text-[12px] px-5 py-2 rounded-sm">
+                                Save
+                            </button>
+                        </div>
+                    </section>
+                </div>
+            </main>
+        </div>
+
+        <script>
+            lucide.createIcons();
+
+            function toggleSidebar() {
+                const sidebar = document.getElementById("sidebar");
+                const icon = document.getElementById("toggle-icon");
+                const btn = document.getElementById("sidebar-toggle-btn");
+                sidebar.classList.toggle("collapsed");
+
+                if (sidebar.classList.contains("collapsed")) {
+                    icon.setAttribute("data-lucide", "panel-left-open");
+                    btn.classList.remove("pl-0");
+                } else {
+                    icon.setAttribute("data-lucide", "panel-left-close");
+                    btn.classList.add("pl-0");
+                }
+                lucide.createIcons();
+            }
+
+            let currentSlide = 0;
+            const totalSlides = 4;
+
+            function updateSlider() {
+                document.getElementById("slider-track").style.transform =
+                    `translateX(-${currentSlide * 100}%)`;
+                document.querySelectorAll("#slider-dots button").forEach((dot, i) => {
+                    dot.className = `w-2 h-2 rounded-full ${i === currentSlide ? "bg-violet-400" : "bg-gray-300"}`;
+                });
+            }
+
+            function nextSlide() {
+                currentSlide = (currentSlide + 1) % totalSlides;
+                updateSlider();
+            }
+
+            function prevSlide() {
+                currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+                updateSlider();
+            }
+
+            function goToSlide(index) {
+                currentSlide = index;
+                updateSlider();
+            }
+        </script>
+    </body>
+</html>
