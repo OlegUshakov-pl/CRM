@@ -180,12 +180,10 @@
                                 {{ material.get_unit_display }}
                             </td>
                             <td class="py-2 text-gray-600 dark:text-gray-400">
-                                {% if material.unit_price %}${{ material.unit_price }}{% else %}—{%
-                                endif %}
+                                {% if material.unit_price %}${{ material.unit_price }}{% else %}—{% endif %}
                             </td>
                             <td class="py-2 text-gray-900 dark:text-white font-medium">
-                                {% if material.total_price %}${{ material.total_price }}{% else
-                                %}—{% endif %}
+                                {% if material.total_price %}${{ material.total_price }}{% else %}—{% endif %}
                             </td>
                             <td class="py-2">
                                 <a
