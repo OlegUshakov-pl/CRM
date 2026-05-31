@@ -174,6 +174,10 @@
             <div class="px-10 py-7">
                 {% block content %}{% endblock %}
             </div>
+
+            <div class="px-10 pb-4 text-[12px] text-gray-400">
+                Version: {{ APP_VERSION }}
+            </div>
         </main>
     </div>
 
@@ -224,10 +228,5 @@
         });
     </script>
     {% block extra_scripts %}{% endblock %}
-    <footer class="border-t border-[#e8e8e8] bg-white">
-        <div class="px-6 py-3 text-[14px] text-gray-500">
-            Version: {{ APP_VERSION }}
-        </div>
-    </footer>
 </body>
 </html>
