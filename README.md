@@ -108,3 +108,8 @@ cp -r generator <new_app_name>
 ```
 
 See `generator/GENERATOR_README.md` for detailed instructions.
+
+## P.S.
+
+The first version. CRM will be updated and I have a lot of ideas about it. I'm working on changes.
+You can take CRM and change it for yourself if you want.
