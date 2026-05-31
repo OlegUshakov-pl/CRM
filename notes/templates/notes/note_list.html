@@ -45,7 +45,7 @@
                         <a href="{% url 'contacts:contact_detail' note.contact.slug %}" class="text-indigo-600 hover:underline">{{ note.contact.get_full_name }}</a>
                     {% endif %}
                     {% if note.company %}
-                        <a href="{% url 'companies:company_detail' note.company.slug %}" class="text-indigo-600 hover:underline">{{ note.company.name }}</a>
+                        <a href="{% url 'companies:company_detail' note.company.slug %}" class="text-green-600 hover:underline">{{ note.company.name }}</a>
                     {% endif %}
                     <span class="ml-auto">{% if note.date %}{{ note.date|date:'M d, Y' }}{% else %}{{ note.created_at|date:'M d, Y' }}{% endif %}</span>
                 </div>
