@@ -1,4 +1,9 @@
-<form method="post" action="{% if material %}{% url 'materials:edit' material.slug %}{% else %}{% url 'materials:create' project.slug %}{% endif %}" class="space-y-4">
+<form method="post"
+      action="{% if material %}{% url 'materials:edit' material.slug %}{% else %}{% url 'materials:create' project.slug %}{% endif %}"
+      hx-post="{% if material %}{% url 'materials:edit' material.slug %}{% else %}{% url 'materials:create' project.slug %}{% endif %}"
+      hx-target="#slide-over-content"
+      hx-swap="innerHTML"
+      class="space-y-4">
     {% csrf_token %}
     {% for field in form %}
         <div>

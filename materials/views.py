@@ -1,4 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import Material
@@ -25,8 +26,12 @@ def material_create(request, project_slug):
             material.created_by = request.user
             material.save()
             log_activity(request.user, 'created', f'Material "{material.name}" in "{project.name}"', material)
+            if request.headers.get('HX-Request'):
+                response = HttpResponse('<script>closeSlideOver()</script>')
+                response['HX-Refresh'] = 'true'
+                return response
             messages.success(request, 'Material added successfully.')
-            return redirect('projects:detail', slug=project_slug)
+            return redirect('materials:page', project_slug=project_slug)
     return render(request, 'materials/material_form.html', {'form': form, 'project': project, 'title': 'Add Material'})
 
 
@@ -39,8 +44,12 @@ def material_edit(request, slug):
         if form.is_valid():
             form.save()
             log_activity(request.user, 'updated', f'Material "{material.name}"')
+            if request.headers.get('HX-Request'):
+                response = HttpResponse('<script>closeSlideOver()</script>')
+                response['HX-Refresh'] = 'true'
+                return response
             messages.success(request, 'Material updated successfully.')
-            return redirect('projects:detail', slug=material.project.slug)
+            return redirect('materials:page', project_slug=material.project.slug)
     return render(request, 'materials/material_form.html', {'form': form, 'project': material.project, 'title': 'Edit Material', 'material': material})
 
 
