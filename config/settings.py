@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     'materials',
     'tasks',
     'notes',
+    'generator',
 ]
 
 MIDDLEWARE = [

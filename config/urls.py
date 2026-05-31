@@ -13,6 +13,7 @@ urlpatterns = [
     path('tasks/', include('tasks.urls')),
     path('notes/', include('notes.urls')),
     path('materials/', include('materials.urls')),
+    path('deals/', include('generator.urls')),
 ]
 
 if settings.DEBUG:
