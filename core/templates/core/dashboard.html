@@ -109,8 +109,8 @@
             <div class="p-5">
                 {% if today_tasks %}
                     <div class="space-y-1">
-                        {% for task in today_tasks %}
-                            <div class="flex items-center gap-3 p-3 hover:bg-[#f8f8f8] transition-colors rounded">
+                        {% for task in today_tasks|slice:":4" %}
+                            <div class="flex items-center gap-3 p-3 hover:bg-[#f8f8f8] transition-colors">
                                 <div class="w-4 h-4 rounded-full border-2
                                     {% if task.priority == 'urgent' %}border-red-400
                                     {% elif task.priority == 'high' %}border-orange-400
@@ -121,7 +121,7 @@
                                     <p class="text-[13px] font-medium truncate">{{ task.title }}</p>
                                     <p class="text-[12px] text-soft">{{ task.project.name|default:'No project' }}</p>
                                 </div>
-                                <span class="text-[11px] px-2 py-0.5 rounded
+                                <span class="text-[11px] px-2 py-0.5
                                     {% if task.priority == 'urgent' %}bg-red-50 text-red-700
                                     {% elif task.priority == 'high' %}bg-orange-50 text-orange-700
                                     {% elif task.priority == 'medium' %}bg-blue-50 text-blue-700
@@ -130,6 +130,11 @@
                                 </span>
                             </div>
                         {% endfor %}
+                        {% if today_tasks|length > 4 %}
+                            <div class="pt-2">
+                                <a href="{% url 'tasks:list' %}" class="text-red-500 text-[12px] hover:underline">Page tasks</a>
+                            </div>
+                        {% endif %}
                     </div>
                 {% else %}
                     <div class="text-center py-10">

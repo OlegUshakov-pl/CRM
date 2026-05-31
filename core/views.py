@@ -17,7 +17,7 @@ def dashboard(request):
         'contact_count': Contact.objects.filter(is_active=True).count(),
         'task_count': Task.objects.filter(is_active=True).count(),
         'recent_projects': Project.objects.filter(is_active=True).select_related('company').order_by('-created_at')[:6],
-        'today_tasks': Task.objects.filter(is_active=True, status__in=['todo', 'in_progress']).select_related('project').order_by('-created_at')[:8],
+        'today_tasks': Task.objects.filter(is_active=True, status__in=['todo', 'in_progress']).select_related('project').order_by('-created_at'),
         'recent_notes': Note.objects.filter(is_active=True).select_related('project', 'company', 'contact').order_by('-created_at')[:5],
     }
     return render(request, 'core/dashboard.html', context)
