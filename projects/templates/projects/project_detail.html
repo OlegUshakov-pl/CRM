@@ -5,12 +5,17 @@
 <div class="space-y-6">
     <div class="flex items-center justify-between">
         <div class="flex items-center gap-4">
-            <a href="{% url 'projects:list' %}" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+            <a
+                href="{% url 'projects:list' %}"
+                class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+            >
                 <i data-lucide="arrow-left" class="w-5 h-5"></i>
             </a>
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ project.name }}</h1>
-                <p class="text-gray-500 dark:text-gray-400">{{ project.company.name|default:'No company' }}</p>
+                <p class="text-gray-500 dark:text-gray-400">
+                    {{ project.company.name|default:'No company' }}
+                </p>
             </div>
         </div>
         <div class="flex gap-2">
@@ -32,7 +37,10 @@
     <div class="space-y-6">
         {% if project.images.all %}
         <div id="gallery" class="bg-white border border-[#e8e8e8] p-6">
-            <div class="relative overflow-hidden bg-gray-100 dark:bg-gray-700" style="aspect-ratio: 16/9">
+            <div
+                class="relative overflow-hidden bg-gray-100 dark:bg-gray-700"
+                style="aspect-ratio: 16/9"
+            >
                 {% for img in project.images.all %}
                 <div
                     class="gallery-slide absolute inset-0"
@@ -47,7 +55,11 @@
                     %}
                 >
                     <a href="{{ img.image.url }}" target="_blank">
-                        <img src="{{ img.image.url }}" alt="{{ project.name }}" class="w-full h-full object-cover" />
+                        <img
+                            src="{{ img.image.url }}"
+                            alt="{{ project.name }}"
+                            class="w-full h-full object-cover"
+                        />
                     </a>
                 </div>
                 {% endfor %}
@@ -83,34 +95,38 @@
 
         <div class="bg-white border border-[#e8e8e8] p-6">
             <h2 class="text-lg font-semibold text-[#222] mb-4">Details</h2>
-            <div class="flex justify-between gap-2">
-                <div class="flex-1">
+            <div class="flex justify-between gap-[50px] text-center">
+                <div class="flex-2">
                     <p class="text-sm text-gray-500 dark:text-gray-400">Number</p>
-                    <p class="font-medium text-gray-900 dark:text-white">{{ project.number|default:'Not set' }}</p>
+                    <p class="font-medium text-gray-900 dark:text-white">
+                        {{ project.number|default:'Not set' }}
+                    </p>
                 </div>
-                <div class="flex-1">
+                <div class="flex-2">
                     <p class="text-sm text-gray-500 dark:text-gray-400">Start date</p>
                     <p class="font-medium text-gray-900 dark:text-white">
                         {{ project.start_date|date:'M d, Y'|default:'Not set' }}
                     </p>
                 </div>
-                <div class="flex-1">
+                <div class="flex-2">
                     <p class="text-sm text-gray-500 dark:text-gray-400">End date</p>
                     <p class="font-medium text-gray-900 dark:text-white">
                         {{ project.end_date|date:'M d, Y'|default:'Not set' }}
                     </p>
                 </div>
-                <div class="flex-1">
+                <div class="flex-2">
                     <p class="text-sm text-gray-500 dark:text-gray-400">Budget</p>
                     <p class="font-medium text-gray-900 dark:text-white">
                         {% if project.budget %}${{ project.budget }}{% else %}Not set{% endif %}
                     </p>
                 </div>
-                <div class="flex-1">
+                <div class="flex-2">
                     <p class="text-sm text-gray-500 dark:text-gray-400">Created by</p>
-                    <p class="font-medium text-gray-900 dark:text-white">{{ project.created_by|default:'System' }}</p>
+                    <p class="font-medium text-gray-900 dark:text-white">
+                        {{ project.created_by|default:'System' }}
+                    </p>
                 </div>
-                <div class="flex-1">
+                <div class="flex-2">
                     <p class="text-sm text-gray-500 dark:text-gray-400">Status</p>
                     <span
                         class="text-sm px-2 py-1 rounded-full {% if project.status == 'active' %}bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 {% elif project.status == 'planning' %}bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 {% elif project.status == 'on_hold' %}bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 {% elif project.status == 'completed' %}bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 {% else %}bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300{% endif %}"
@@ -123,7 +139,9 @@
 
         <div class="bg-white border border-[#e8e8e8] p-6">
             <h2 class="text-lg font-semibold text-[#222] mb-4">Description</h2>
-            <p class="text-gray-600 dark:text-gray-400">{{ project.description|default:'No description provided.' }}</p>
+            <p class="text-gray-600 dark:text-gray-400">
+                {{ project.description|default:'No description provided.' }}
+            </p>
         </div>
 
         <div class="bg-white border border-[#e8e8e8] p-6">
@@ -140,7 +158,9 @@
             <div class="overflow-x-auto">
                 <table class="w-full text-sm">
                     <thead>
-                        <tr class="text-left text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
+                        <tr
+                            class="text-left text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700"
+                        >
                             <th class="pb-2 font-medium">Name</th>
                             <th class="pb-2 font-medium">Qty</th>
                             <th class="pb-2 font-medium">Unit</th>
@@ -153,17 +173,23 @@
                         {% for material in project.materials.all|slice:":4" %}
                         <tr class="border-b border-gray-100 dark:border-gray-700/50">
                             <td class="py-2 text-gray-900 dark:text-white">{{ material.name }}</td>
-                            <td class="py-2 text-gray-600 dark:text-gray-400">{{ material.quantity }}</td>
-                            <td class="py-2 text-gray-600 dark:text-gray-400">{{ material.get_unit_display }}</td>
                             <td class="py-2 text-gray-600 dark:text-gray-400">
-                                {% if material.unit_price %}${{ material.unit_price }}{% else %}—{% endif %}
+                                {{ material.quantity }}
+                            </td>
+                            <td class="py-2 text-gray-600 dark:text-gray-400">
+                                {{ material.get_unit_display }}
+                            </td>
+                            <td class="py-2 text-gray-600 dark:text-gray-400">
+                                {% if material.unit_price %}${{ material.unit_price }}{% else %}—{%
+                                endif %}
                             </td>
                             <td class="py-2 text-gray-900 dark:text-white font-medium">
-                                {% if material.total_price %}${{ material.total_price }}{% else %}—{% endif %}
+                                {% if material.total_price %}${{ material.total_price }}{% else
+                                %}—{% endif %}
                             </td>
                             <td class="py-2">
                                 <a
-                                        href="{% url 'materials:edit' material.slug %}"
+                                    href="{% url 'materials:edit' material.slug %}"
                                     class="text-indigo-600 dark:text-indigo-400 hover:underline mr-2"
                                     >Edit</a
                                 >
@@ -174,7 +200,10 @@
                                     onsubmit="return confirm('Delete this material?');"
                                 >
                                     {% csrf_token %}
-                                    <button type="submit" class="text-red-600 dark:text-red-400 hover:underline">
+                                    <button
+                                        type="submit"
+                                        class="text-red-600 dark:text-red-400 hover:underline"
+                                    >
                                         Delete
                                     </button>
                                 </form>
@@ -186,12 +215,14 @@
             </div>
             {% if project.materials.all|length > 4 %}
             <div class="mt-4 text-center">
-                <a href="{% url 'materials:page' project.slug %}" class="inline-flex items-center gap-2 px-4 py-2.5 bg-red-400 hover:bg-red-500 text-white text-[14px] font-medium transition-colors">
+                <a
+                    href="{% url 'materials:page' project.slug %}"
+                    class="inline-flex items-center gap-2 px-4 py-2.5 bg-red-400 hover:bg-red-500 text-white text-[14px] font-medium transition-colors"
+                >
                     Page of materials
                 </a>
             </div>
-            {% endif %}
-            {% else %}
+            {% endif %} {% else %}
             <p class="text-gray-500 dark:text-gray-400 text-center py-6">No materials added yet.</p>
             {% endif %}
         </div>
@@ -213,8 +244,12 @@
                         >
                     </div>
                     <div>
-                        <p class="text-sm font-medium text-gray-900 dark:text-white">{{ contact.get_full_name }}</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ contact.position|default:contact.email }}</p>
+                        <p class="text-sm font-medium text-gray-900 dark:text-white">
+                            {{ contact.get_full_name }}
+                        </p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">
+                            {{ contact.position|default:contact.email }}
+                        </p>
                     </div>
                 </a>
                 {% endfor %}
@@ -236,7 +271,8 @@
                     <div>
                         <p class="font-medium text-gray-900 dark:text-white">{{ task.title }}</p>
                         <p class="text-xs text-gray-500 dark:text-gray-400">
-                            {{ task.get_status_display }} · {{ task.assigned_to|default:'Unassigned' }}
+                            {{ task.get_status_display }} · {{ task.assigned_to|default:'Unassigned'
+                            }}
                         </p>
                     </div>
                     <span
@@ -248,7 +284,9 @@
                 {% endfor %}
             </div>
             {% else %}
-            <p class="text-gray-500 dark:text-gray-400 text-center py-6">No tasks for this project.</p>
+            <p class="text-gray-500 dark:text-gray-400 text-center py-6">
+                No tasks for this project.
+            </p>
             {% endif %}
         </div>
         {% if project.note_entries.all %}
@@ -258,7 +296,9 @@
                 {% for note in project.note_entries.all %}
                 <div class="p-3 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
                     <p class="font-medium text-gray-900 dark:text-white">{{ note.title }}</p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ note.content|truncatewords:30 }}</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                        {{ note.content|truncatewords:30 }}
+                    </p>
                 </div>
                 {% endfor %}
             </div>
@@ -274,7 +314,8 @@
     <div class="bg-white shadow-2xl border border-[#e8e8e8] p-6 max-w-md w-full mx-4">
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Delete Project</h3>
         <p class="text-gray-600 dark:text-gray-400 mb-6">
-            Are you sure you want to delete project <strong>{{ project.name }}</strong>? This action cannot be undone.
+            Are you sure you want to delete project <strong>{{ project.name }}</strong>? This action
+            cannot be undone.
         </p>
         <div class="flex justify-end gap-3">
             <button
@@ -286,15 +327,17 @@
             </button>
             <form method="post" action="{% url 'projects:delete' project.slug %}">
                 {% csrf_token %}
-                <button type="submit" class="px-4 py-2 bg-red-400 hover:bg-red-500 text-white text-[14px] transition-colors">
+                <button
+                    type="submit"
+                    class="px-4 py-2 bg-red-400 hover:bg-red-500 text-white text-[14px] transition-colors"
+                >
                     Delete
                 </button>
             </form>
         </div>
     </div>
 </div>
-{% endblock %}
-{% block extra_scripts %}
+{% endblock %} {% block extra_scripts %}
 <script>
     (function () {
         function galleryShow(index) {
