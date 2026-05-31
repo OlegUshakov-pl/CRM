@@ -71,6 +71,9 @@
                             <span class="text-[12px] text-gray-400">{{ note.created_at|date:'M d, Y' }}</span>
                         </div>
                         <p class="text-[14px] text-gray-600 dark:text-gray-400">{{ note.content|truncatewords:50 }}</p>
+                        <div class="mt-1">
+                            <button type="button" onclick="showNoteDeleteModal('{% url 'notes:delete' note.slug %}')" class="text-[12px] text-red-400 hover:text-red-600 transition-colors">Delete</button>
+                        </div>
                     </div>
                 {% endfor %}
             </div>

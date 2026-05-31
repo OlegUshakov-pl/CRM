@@ -5,6 +5,11 @@ from contacts.models import Contact
 from projects.models import Project
 
 
+class ActiveManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(is_active=True)
+
+
 class Note(TimeStampedModel):
     title = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255, unique=True, blank=True, null=True)
@@ -12,6 +17,8 @@ class Note(TimeStampedModel):
     project = models.ForeignKey(Project, on_delete=models.SET_NULL, null=True, blank=True, related_name='note_entries')
     company = models.ForeignKey(Company, on_delete=models.SET_NULL, null=True, blank=True, related_name='note_entries')
     contact = models.ForeignKey(Contact, on_delete=models.SET_NULL, null=True, blank=True, related_name='note_entries')
+
+    objects = ActiveManager()
 
     class Meta:
         ordering = ['-created_at']
