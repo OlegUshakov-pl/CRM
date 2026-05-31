@@ -4,6 +4,8 @@ from django.contrib import messages
 from django.core.paginator import Paginator
 from .models import Project, Material, ProjectImage
 from .forms import ProjectForm, MaterialForm
+from notes.models import Note
+from notes.forms import NoteForm
 from core.models import log_activity
 
 
@@ -57,19 +59,39 @@ def project_create(request):
 def project_edit(request, slug):
     project = get_object_or_404(Project, slug=slug)
     form = ProjectForm(instance=project)
+    note_form = NoteForm()
+
     if request.method == 'POST':
-        form = ProjectForm(request.POST, request.FILES, instance=project)
-        if form.is_valid():
-            form.save()
-            for f in request.FILES.getlist('images'):
-                ProjectImage.objects.create(project=project, image=f)
-            delete_ids = request.POST.getlist('delete_images')
-            if delete_ids:
-                ProjectImage.objects.filter(id__in=delete_ids, project=project).delete()
-            log_activity(request.user, 'updated', f'Project "{project.name}"', project)
-            messages.success(request, 'Project updated successfully.')
-            return redirect('projects:detail', slug=project.slug)
-    return render(request, 'projects/project_edit_page.html', {'form': form, 'title': 'Edit Project', 'project': project, 'is_page': True})
+        if 'note_submit' in request.POST:
+            note_form = NoteForm(request.POST)
+            if note_form.is_valid():
+                note = note_form.save(commit=False)
+                note.project = project
+                note.created_by = request.user
+                note.save()
+                log_activity(request.user, 'created', f'Note "{note.title}" in "{project.name}"', note)
+                messages.success(request, 'Note added successfully.')
+                return redirect('projects:edit', slug=project.slug)
+        else:
+            form = ProjectForm(request.POST, request.FILES, instance=project)
+            if form.is_valid():
+                form.save()
+                for f in request.FILES.getlist('images'):
+                    ProjectImage.objects.create(project=project, image=f)
+                delete_ids = request.POST.getlist('delete_images')
+                if delete_ids:
+                    ProjectImage.objects.filter(id__in=delete_ids, project=project).delete()
+                log_activity(request.user, 'updated', f'Project "{project.name}"', project)
+                messages.success(request, 'Project updated successfully.')
+                return redirect('projects:detail', slug=project.slug)
+
+    return render(request, 'projects/project_edit_page.html', {
+        'form': form,
+        'title': 'Edit Project',
+        'project': project,
+        'is_page': True,
+        'note_form': note_form,
+    })
 
 
 @login_required
