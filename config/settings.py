@@ -20,6 +20,7 @@ INSTALLED_APPS = [
     'companies',
     'contacts',
     'projects',
+    'materials',
     'tasks',
     'notes',
 ]

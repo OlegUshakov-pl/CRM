@@ -2,8 +2,8 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
-from .models import Project, Material, ProjectImage
-from .forms import ProjectForm, MaterialForm
+from .models import Project, ProjectImage
+from .forms import ProjectForm
 from notes.models import Note
 from notes.forms import NoteForm
 from core.models import log_activity
@@ -116,52 +116,3 @@ def project_edit_slide(request, slug):
     project = get_object_or_404(Project, slug=slug)
     form = ProjectForm(instance=project)
     return render(request, 'projects/project_form.html', {'form': form, 'title': 'Edit Project', 'project': project})
-
-
-@login_required
-def material_create(request, project_slug):
-    project = get_object_or_404(Project, slug=project_slug)
-    form = MaterialForm()
-    if request.method == 'POST':
-        form = MaterialForm(request.POST)
-        if form.is_valid():
-            material = form.save(commit=False)
-            material.project = project
-            material.created_by = request.user
-            material.save()
-            log_activity(request.user, 'created', f'Material "{material.name}" in "{project.name}"', material)
-            messages.success(request, 'Material added successfully.')
-            return redirect('projects:detail', slug=project_slug)
-    return render(request, 'projects/material_form.html', {'form': form, 'project': project, 'title': 'Add Material'})
-
-
-@login_required
-def material_edit(request, slug):
-    material = get_object_or_404(Material, slug=slug)
-    form = MaterialForm(instance=material)
-    if request.method == 'POST':
-        form = MaterialForm(request.POST, instance=material)
-        if form.is_valid():
-            form.save()
-            log_activity(request.user, 'updated', f'Material "{material.name}"')
-            messages.success(request, 'Material updated successfully.')
-            return redirect('projects:detail', slug=material.project.slug)
-    return render(request, 'projects/material_form.html', {'form': form, 'project': material.project, 'title': 'Edit Material', 'material': material})
-
-
-@login_required
-def material_delete(request, slug):
-    material = get_object_or_404(Material, slug=slug)
-    project_slug = material.project.slug
-    if request.method == 'POST':
-        log_activity(request.user, 'deleted', f'Material "{material.name}"')
-        material.delete()
-        messages.success(request, 'Material deleted successfully.')
-    return redirect('projects:detail', slug=project_slug)
-
-
-@login_required
-def material_create_slide(request, project_slug):
-    project = get_object_or_404(Project, slug=project_slug)
-    form = MaterialForm()
-    return render(request, 'projects/material_form.html', {'form': form, 'project': project, 'title': 'Add Material'})

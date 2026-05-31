@@ -12,6 +12,7 @@ urlpatterns = [
     path('projects/', include('projects.urls')),
     path('tasks/', include('tasks.urls')),
     path('notes/', include('notes.urls')),
+    path('materials/', include('materials.urls')),
 ]
 
 if settings.DEBUG:

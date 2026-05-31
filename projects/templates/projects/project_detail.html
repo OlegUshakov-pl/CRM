@@ -129,7 +129,7 @@
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Materials</h2>
                 <button
-                    onclick="openSlideOver('{% url 'projects:material_create_slide' project.slug %}')"
+                    onclick="openSlideOver('{% url 'materials:create_slide' project.slug %}')"
                     class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline"
                 >
                     + Add Material
@@ -162,13 +162,13 @@
                             </td>
                             <td class="py-2">
                                 <a
-                                    href="{% url 'projects:material_edit' material.slug %}"
+                                        href="{% url 'materials:edit' material.slug %}"
                                     class="text-indigo-600 dark:text-indigo-400 hover:underline mr-2"
                                     >Edit</a
                                 >
                                 <form
                                     method="post"
-                                    action="{% url 'projects:material_delete' material.slug %}"
+                                    action="{% url 'materials:delete' material.slug %}"
                                     class="inline"
                                     onsubmit="return confirm('Delete this material?');"
                                 >

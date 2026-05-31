@@ -1,4 +1,4 @@
-<form method="post" action="{% if material %}{% url 'projects:material_edit' material.slug %}{% else %}{% url 'projects:material_create' project.slug %}{% endif %}" class="space-y-4">
+<form method="post" action="{% if material %}{% url 'materials:edit' material.slug %}{% else %}{% url 'materials:create' project.slug %}{% endif %}" class="space-y-4">
     {% csrf_token %}
     {% for field in form %}
         <div>
