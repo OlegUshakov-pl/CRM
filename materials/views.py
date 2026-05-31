@@ -60,3 +60,10 @@ def material_create_slide(request, project_slug):
     project = get_object_or_404(Project, slug=project_slug)
     form = MaterialForm()
     return render(request, 'materials/material_form.html', {'form': form, 'project': project, 'title': 'Add Material'})
+
+
+@login_required
+def material_edit_slide(request, slug):
+    material = get_object_or_404(Material, slug=slug)
+    form = MaterialForm(instance=material)
+    return render(request, 'materials/material_form.html', {'form': form, 'project': material.project, 'title': 'Edit Material', 'material': material})

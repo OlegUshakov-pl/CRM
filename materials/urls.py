@@ -8,4 +8,5 @@ urlpatterns = [
     path('<slug:slug>/edit/', views.material_edit, name='edit'),
     path('<slug:slug>/delete/', views.material_delete, name='delete'),
     path('<slug:project_slug>/create/slide/', views.material_create_slide, name='create_slide'),
+    path('<slug:slug>/edit/slide/', views.material_edit_slide, name='edit_slide'),
 ]

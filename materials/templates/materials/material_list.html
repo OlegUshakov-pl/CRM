@@ -22,12 +22,20 @@
         <h2 class="text-lg font-semibold text-[#222] mb-4">Project Info</h2>
         <div class="flex flex-wrap justify-between gap-y-2">
             <div class="flex-1">
+                <p class="text-sm text-gray-500">Number</p>
+                <p class="font-medium text-gray-900">{{ project.number|default:'Not set' }}</p>
+            </div>
+            <div class="flex-1">
                 <p class="text-sm text-gray-500">Name</p>
                 <p class="font-medium text-gray-900">{{ project.name }}</p>
             </div>
             <div class="flex-1">
-                <p class="text-sm text-gray-500">Number</p>
-                <p class="font-medium text-gray-900">#{{ project.id }}</p>
+                <p class="text-sm text-gray-500">Start date</p>
+                <p class="font-medium text-gray-900">{{ project.start_date|date:'M d, Y'|default:'Not set' }}</p>
+            </div>
+            <div class="flex-1">
+                <p class="text-sm text-gray-500">End date</p>
+                <p class="font-medium text-gray-900">{{ project.end_date|date:'M d, Y'|default:'Not set' }}</p>
             </div>
             <div class="flex-1">
                 <p class="text-sm text-gray-500">Status</p>
@@ -39,14 +47,6 @@
                     {% else %}bg-red-100 text-red-700{% endif %}">
                     {{ project.get_status_display }}
                 </span>
-            </div>
-            <div class="flex-1">
-                <p class="text-sm text-gray-500">Start date</p>
-                <p class="font-medium text-gray-900">{{ project.start_date|date:'M d, Y'|default:'Not set' }}</p>
-            </div>
-            <div class="flex-1">
-                <p class="text-sm text-gray-500">End date</p>
-                <p class="font-medium text-gray-900">{{ project.end_date|date:'M d, Y'|default:'Not set' }}</p>
             </div>
         </div>
     </div>
@@ -82,7 +82,7 @@
                             {% if material.total_price %}${{ material.total_price }}{% else %}—{% endif %}
                         </td>
                         <td class="py-2">
-                            <a href="{% url 'materials:edit' material.slug %}" class="text-indigo-600 hover:underline mr-2">Edit</a>
+                            <button onclick="openSlideOver('{% url 'materials:edit_slide' material.slug %}')" class="text-indigo-600 hover:underline mr-2">Edit</button>
                             <form method="post" action="{% url 'materials:delete' material.slug %}" class="inline" onsubmit="return confirm('Delete this material?');">
                                 {% csrf_token %}
                                 <button type="submit" class="text-red-600 hover:underline">Delete</button>
