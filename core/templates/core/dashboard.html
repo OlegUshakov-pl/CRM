@@ -110,25 +110,16 @@
                 {% if today_tasks %}
                     <div class="space-y-1">
                         {% for task in today_tasks|slice:":4" %}
-                            <div class="flex items-center gap-3 p-3 hover:bg-[#f8f8f8] transition-colors">
-                                <div class="w-4 h-4 rounded-full border-2
+                            <a href="{% url 'tasks:list' %}" class="flex items-center gap-3 p-3 hover:bg-[#f8f8f8] transition-colors">
+                                <div class="w-4 h-4 rounded-full border-2 flex-shrink-0
                                     {% if task.priority == 'urgent' %}border-red-400
                                     {% elif task.priority == 'high' %}border-orange-400
                                     {% elif task.priority == 'medium' %}border-blue-400
                                     {% else %}border-gray-400{% endif %}">
                                 </div>
-                                <div class="flex-1 min-w-0">
-                                    <p class="text-[13px] font-medium truncate">{{ task.title }}</p>
-                                    <p class="text-[12px] text-soft">{{ task.project.name|default:'No project' }}</p>
-                                </div>
-                                <span class="text-[11px] px-2 py-0.5
-                                    {% if task.priority == 'urgent' %}bg-red-50 text-red-700
-                                    {% elif task.priority == 'high' %}bg-orange-50 text-orange-700
-                                    {% elif task.priority == 'medium' %}bg-blue-50 text-blue-700
-                                    {% else %}bg-gray-100 text-gray-600{% endif %}">
-                                    {{ task.get_priority_display }}
-                                </span>
-                            </div>
+                                <span class="flex-1 text-[13px] font-medium text-[#222] truncate">{{ task.title }}</span>
+                                <span class="text-[12px] text-soft flex-shrink-0">{{ task.created_at|date:'M d, Y' }}</span>
+                            </a>
                         {% endfor %}
                         {% if today_tasks|length > 4 %}
                             <div class="pt-2">
