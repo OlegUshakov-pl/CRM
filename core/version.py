@@ -1,19 +1,15 @@
 from pathlib import Path
+import subprocess
 
-VERSION_FILE = Path(__file__).resolve().parent.parent / 'VERSION'
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 def read_version():
     try:
-        return VERSION_FILE.read_text().strip()
-    except FileNotFoundError:
-        return '0.0.0'
-
-
-def bump_version():
-    parts = read_version().split('.')
-    major, minor, patch = int(parts[0]), int(parts[1]), int(parts[2])
-    patch += 1
-    new_version = f'{major}.{minor}.{patch}'
-    VERSION_FILE.write_text(new_version + '\n')
-    return new_version
+        count = subprocess.run(
+            ['git', 'rev-list', '--count', 'HEAD'],
+            capture_output=True, text=True, cwd=BASE_DIR
+        ).stdout.strip()
+        return f'1.1.{count}'
+    except Exception:
+        return '1.1.0'

@@ -37,3 +37,5 @@ Thumbs.db
 # Environment
 *.env.local
 *.env
+
+VERSION
