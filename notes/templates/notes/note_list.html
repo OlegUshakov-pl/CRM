@@ -23,7 +23,7 @@
         {% for note in notes %}
             <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md transition-shadow">
                 <div class="flex items-start justify-between mb-2">
-                    <h3 class="font-semibold text-gray-900 dark:text-white">{{ note.title }}</h3>
+                    <h3 class="font-semibold text-gray-900 dark:text-white"><a href="{% url 'notes:detail' note.slug %}" class="hover:text-indigo-600 transition-colors">{{ note.title }}</a></h3>
                     <div class="flex gap-1">
                         <button onclick="openSlideOver('{% url 'notes:edit_slide' note.slug %}')" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                             <i data-lucide="edit-3" class="w-4 h-4"></i>

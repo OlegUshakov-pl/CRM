@@ -20,6 +20,12 @@ def note_list(request):
 
 
 @login_required
+def note_detail(request, slug):
+    note = get_object_or_404(Note.objects.select_related('project', 'company', 'contact'), slug=slug)
+    return render(request, 'notes/note_detail.html', {'note': note})
+
+
+@login_required
 def note_create(request):
     form = NoteForm()
     if request.method == 'POST':

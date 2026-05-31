@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block title %}{{ note.title }} - CRM{% endblock %}
+{% block breadcrumb %}{{ note.title }}{% endblock %}
+{% block content %}
+<div class="space-y-6">
+    <div class="flex items-center justify-between">
+        <div class="flex items-center gap-4">
+            <a href="{% url 'notes:list' %}" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                <i data-lucide="arrow-left" class="w-5 h-5"></i>
+            </a>
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ note.title }}</h1>
+                <p class="text-gray-500 dark:text-gray-400">
+                    {% if note.date %}{{ note.date|date:'M d, Y' }}{% else %}{{ note.created_at|date:'M d, Y' }}{% endif %}
+                </p>
+            </div>
+        </div>
+        <div class="flex gap-2">
+            <button onclick="openSlideOver('{% url 'notes:edit_slide' note.slug %}')" class="px-4 py-2 text-[#666] bg-white border border-[#e8e8e8] hover:bg-gray-50 transition-colors text-[14px]">Edit</button>
+            <form method="post" action="{% url 'notes:delete' note.slug %}" onsubmit="return confirm('Delete this note?')">
+                {% csrf_token %}
+                <button type="submit" class="px-4 py-2 bg-red-400 hover:bg-red-500 text-white transition-colors text-[14px]">Delete</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="bg-white border border-[#e8e8e8] p-6">
+        <h2 class="text-lg font-semibold text-[#222] mb-4">Note</h2>
+        <p class="text-gray-600 dark:text-gray-400 whitespace-pre-wrap">{{ note.content }}</p>
+    </div>
+
+    <div class="bg-white border border-[#e8e8e8] p-6">
+        <h2 class="text-lg font-semibold text-[#222] mb-4">Linked To</h2>
+        <div class="flex flex-wrap gap-4">
+            {% if note.project %}
+            <div>
+                <p class="text-sm text-gray-500">Project</p>
+                <a href="{% url 'projects:detail' note.project.slug %}" class="font-medium text-red-600 hover:underline">{{ note.project.name }}</a>
+            </div>
+            {% endif %}
+            {% if note.company %}
+            <div>
+                <p class="text-sm text-gray-500">Company</p>
+                <a href="{% url 'companies:company_detail' note.company.slug %}" class="font-medium text-green-600 hover:underline">{{ note.company.name }}</a>
+            </div>
+            {% endif %}
+            {% if note.contact %}
+            <div>
+                <p class="text-sm text-gray-500">Contact</p>
+                <a href="{% url 'contacts:contact_detail' note.contact.slug %}" class="font-medium text-indigo-600 hover:underline">{{ note.contact.get_full_name }}</a>
+            </div>
+            {% endif %}
+            {% if not note.project and not note.company and not note.contact %}
+            <p class="text-gray-400">No linked entities</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
