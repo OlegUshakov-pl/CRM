@@ -1,9 +1,9 @@
-<div id="slide-over-backdrop" class="fixed inset-0 z-40 bg-black/40 transition-opacity duration-300 opacity-0 pointer-events-none" @click="closeSlideOver()"></div>
+<div id="slide-over-backdrop" class="fixed inset-0 z-40 bg-black/40 transition-opacity duration-300 opacity-0 pointer-events-none" onclick="closeSlideOver()"></div>
 
 <div id="slide-over" class="fixed inset-y-0 right-0 z-50 w-full max-w-lg bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl shadow-2xl border-l border-gray-200 dark:border-gray-700 transform translate-x-full transition-transform duration-300 ease-in-out overflow-y-auto">
     <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl z-10">
         <h2 id="slide-over-title" class="text-lg font-semibold text-gray-900 dark:text-white">Add New</h2>
-        <button @click="closeSlideOver()" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+        <button onclick="closeSlideOver()" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
             <i data-lucide="x" class="w-5 h-5"></i>
         </button>
     </div>
