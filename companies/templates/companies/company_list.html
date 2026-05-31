@@ -16,22 +16,22 @@
 
     <div class="relative">
         <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"></i>
-        <input type="text" placeholder="Search companies..." value="{{ query }}" hx-get="{% url 'companies:company_list' %}" hx-trigger="keyup changed delay:300ms" hx-target="#company-list" name="q" class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none dark:text-gray-200">
+        <input type="text" placeholder="Search companies..." value="{{ query }}" hx-get="{% url 'companies:company_list' %}" hx-trigger="keyup changed delay:300ms" hx-target="#company-list" name="q" class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none dark:text-gray-200">
     </div>
 
     <div id="company-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {% for company in companies %}
-            <a href="{% url 'companies:company_detail' company.slug %}" class="block bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md transition-shadow cursor-pointer">
+            <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md transition-shadow">
                 <div class="flex items-center gap-4 mb-3">
                     {% if company.logo %}
-                        <img src="{{ company.logo.url }}" alt="{{ company.name }}" class="w-12 h-12 rounded-lg object-cover">
+                        <img src="{{ company.logo.url }}" alt="{{ company.name }}" class="w-12 h-12 object-cover">
                     {% else %}
-                        <div class="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg flex items-center justify-center">
+                        <div class="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
                             <span class="text-lg font-bold text-indigo-600 dark:text-indigo-400">{{ company.name|first }}</span>
                         </div>
                     {% endif %}
                     <div>
-                        <h3 class="font-semibold text-gray-900 dark:text-white">{{ company.name }}</h3>
+                        <h3 class="font-semibold text-gray-900 dark:text-white"><a href="{% url 'companies:company_detail' company.slug %}" class="hover:text-indigo-600 transition-colors">{{ company.name }}</a></h3>
                         <p class="text-sm text-gray-500 dark:text-gray-400">{{ company.contacts.count }} contact{{ company.contacts.count|pluralize }}</p>
                     </div>
                 </div>
@@ -43,15 +43,15 @@
                 {% endif %}
                 <div class="flex items-center justify-between text-xs text-gray-400 pt-3 border-t border-gray-100 dark:border-gray-700">
                     <span>{{ company.created_at|date:'M d, Y' }}</span>
-                    <div class="flex gap-2" onclick="event.stopPropagation()">
-                        <button onclick="event.stopPropagation(); openSlideOver('{% url 'companies:company_edit_slide' company.slug %}')" class="text-gray-600 dark:text-gray-400 hover:underline">Edit</button>
+                    <div class="flex gap-2">
+                        <button onclick="openSlideOver('{% url 'companies:company_edit_slide' company.slug %}')" class="text-gray-600 dark:text-gray-400 hover:underline">Edit</button>
                         <form method="post" action="{% url 'companies:company_delete' company.slug %}" class="inline" onsubmit="return confirm('Delete this company?')">
                             {% csrf_token %}
                             <button type="submit" class="text-red-600 dark:text-red-400 hover:underline">Delete</button>
                         </form>
                     </div>
                 </div>
-            </a>
+            </div>
         {% endfor %}
     </div>
 
