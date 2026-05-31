@@ -212,10 +212,10 @@
                 </table>
             </div>
             {% if project.materials.all|length > 4 %}
-            <div class="mt-4 text-center">
+            <div class="mt-4 text-right">
                 <a
                     href="{% url 'materials:page' project.slug %}"
-                    class="inline-flex items-center gap-2 px-4 py-2.5 bg-red-400 hover:bg-red-500 text-white text-[14px] font-medium transition-colors"
+                    class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white transition-colors text-[12px]"
                 >
                     Page of materials
                 </a>
