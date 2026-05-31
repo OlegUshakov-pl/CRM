@@ -8,6 +8,12 @@ from core.models import log_activity
 
 
 @login_required
+def material_page(request, project_slug):
+    project = get_object_or_404(Project.objects.prefetch_related('materials'), slug=project_slug)
+    return render(request, 'materials/material_list.html', {'project': project})
+
+
+@login_required
 def material_create(request, project_slug):
     project = get_object_or_404(Project, slug=project_slug)
     form = MaterialForm()

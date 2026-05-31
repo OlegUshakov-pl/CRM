@@ -149,7 +149,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for material in project.materials.all %}
+                        {% for material in project.materials.all|slice:":4" %}
                         <tr class="border-b border-gray-100 dark:border-gray-700/50">
                             <td class="py-2 text-gray-900 dark:text-white">{{ material.name }}</td>
                             <td class="py-2 text-gray-600 dark:text-gray-400">{{ material.quantity }}</td>
@@ -183,6 +183,13 @@
                     </tbody>
                 </table>
             </div>
+            {% if project.materials.all|length > 4 %}
+            <div class="mt-4 text-center">
+                <a href="{% url 'materials:page' project.slug %}" class="inline-flex items-center gap-2 px-4 py-2.5 bg-red-400 hover:bg-red-500 text-white text-[14px] font-medium transition-colors">
+                    Page of materials
+                </a>
+            </div>
+            {% endif %}
             {% else %}
             <p class="text-gray-500 dark:text-gray-400 text-center py-6">No materials added yet.</p>
             {% endif %}
