@@ -83,7 +83,7 @@
 
         <div class="bg-white border border-[#e8e8e8] p-6">
             <h2 class="text-lg font-semibold text-[#222] mb-4">Details</h2>
-            <div class="flex flex-wrap justify-between gap-y-2">
+            <div class="flex justify-between gap-2">
                 <div class="flex-1">
                     <p class="text-sm text-gray-500 dark:text-gray-400">Number</p>
                     <p class="font-medium text-gray-900 dark:text-white">{{ project.number|default:'Not set' }}</p>
@@ -233,7 +233,7 @@
                     <div
                         class="w-4 h-4 rounded-full border-2 {% if task.priority == 'urgent' %}border-red-400 {% elif task.priority == 'high' %}border-orange-400 {% elif task.priority == 'medium' %}border-blue-400 {% else %}border-gray-400{% endif %}"
                     ></div>
-                    <div class="flex-1">
+                    <div>
                         <p class="font-medium text-gray-900 dark:text-white">{{ task.title }}</p>
                         <p class="text-xs text-gray-500 dark:text-gray-400">
                             {{ task.get_status_display }} · {{ task.assigned_to|default:'Unassigned' }}
