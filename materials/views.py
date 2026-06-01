@@ -11,14 +11,14 @@ from core.models import log_activity
 
 @login_required
 def material_main(request):
-    materials = Material.objects.filter(is_active=True).select_related('project').order_by('-created_at')
+    projects = Project.objects.filter(is_active=True, materials__isnull=False).distinct().order_by('-created_at')
     query = request.GET.get('q', '')
     if query:
-        materials = materials.filter(name__icontains=query)
-    paginator = Paginator(materials, 20)
+        projects = projects.filter(name__icontains=query)
+    paginator = Paginator(projects, 12)
     page = request.GET.get('page', 1)
-    materials_page = paginator.get_page(page)
-    return render(request, 'materials/materials_main.html', {'materials': materials_page, 'query': query})
+    projects_page = paginator.get_page(page)
+    return render(request, 'materials/materials_main.html', {'projects': projects_page, 'query': query})
 
 
 @login_required
