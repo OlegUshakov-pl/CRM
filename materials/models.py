@@ -31,3 +31,26 @@ class Material(TimeStampedModel):
     def total_price(self):
         if self.unit_price and self.quantity:
             return self.quantity * self.unit_price
+
+
+class CommonMaterial(models.Model):
+    UNIT_CHOICES = Material.UNIT_CHOICES
+
+    name = models.CharField(max_length=255)
+    project_name = models.CharField(max_length=255, blank=True, null=True, verbose_name='Project')
+    quantity = models.DecimalField(max_digits=10, decimal_places=2, default=1)
+    unit = models.CharField(max_length=10, choices=UNIT_CHOICES, default='pcs')
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    notes = models.TextField(blank=True, null=True)
+
+    class Meta:
+        ordering = ['name']
+        verbose_name = 'Common Material'
+        verbose_name_plural = 'Common Materials'
+
+    def __str__(self):
+        return self.name
+
+    def total_price(self):
+        if self.unit_price and self.quantity:
+            return self.quantity * self.unit_price
