@@ -22,6 +22,11 @@ def material_main(request):
 
 
 @login_required
+def material_general(request):
+    return render(request, 'materials/materials_general.html')
+
+
+@login_required
 def material_page(request, project_slug):
     project = get_object_or_404(Project.objects.prefetch_related('materials'), slug=project_slug)
     return render(request, 'materials/material_list.html', {'project': project})
