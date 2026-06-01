@@ -26,7 +26,7 @@
             >
             <button
                 type="button"
-                onclick="showDeleteModal()"
+                @click="$store.deleteModal.open('{% url 'projects:delete' project.slug %}', '{{ project.name|escapejs }}')"
                 class="px-4 py-2 bg-red-400 hover:bg-red-500 text-white transition-colors text-[14px]"
             >
                 Delete
@@ -191,20 +191,12 @@
                                     class="text-indigo-600 dark:text-indigo-400 hover:underline mr-2"
                                     >Edit</a
                                 >
-                                <form
-                                    method="post"
-                                    action="{% url 'materials:delete' material.slug %}"
-                                    class="inline"
-                                    onsubmit="return confirm('Delete this material?');"
+                                <button
+                                    @click="$store.deleteModal.open('{% url 'materials:delete' material.slug %}', '{{ material.name|escapejs }}')"
+                                    class="text-red-600 dark:text-red-400 hover:underline"
                                 >
-                                    {% csrf_token %}
-                                    <button
-                                        type="submit"
-                                        class="text-red-600 dark:text-red-400 hover:underline"
-                                    >
-                                        Delete
-                                    </button>
-                                </form>
+                                    Delete
+                                </button>
                             </td>
                         </tr>
                         {% endfor %}
@@ -305,36 +297,6 @@
     </div>
 </div>
 
-<div
-    id="delete-modal"
-    class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 opacity-0 pointer-events-none transition-opacity duration-200"
->
-    <div class="bg-white shadow-2xl border border-[#e8e8e8] p-6 max-w-md w-full mx-4">
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Delete Project</h3>
-        <p class="text-gray-600 dark:text-gray-400 mb-6">
-            Are you sure you want to delete project <strong>{{ project.name }}</strong>? This action
-            cannot be undone.
-        </p>
-        <div class="flex justify-end gap-3">
-            <button
-                type="button"
-                onclick="hideDeleteModal()"
-                class="px-4 py-2.5 text-[#666] bg-gray-100 hover:bg-gray-200 transition-colors text-[14px]"
-            >
-                Cancel
-            </button>
-            <form method="post" action="{% url 'projects:delete' project.slug %}">
-                {% csrf_token %}
-                <button
-                    type="submit"
-                    class="px-4 py-2 bg-red-400 hover:bg-red-500 text-white text-[14px] transition-colors"
-                >
-                    Delete
-                </button>
-            </form>
-        </div>
-    </div>
-</div>
 {% endblock %} {% block extra_scripts %}
 <script>
     (function () {
@@ -384,22 +346,5 @@
         }
     })();
 
-    function showDeleteModal() {
-        var m = document.getElementById("delete-modal");
-        m.classList.remove("opacity-0", "pointer-events-none");
-        m.classList.add("opacity-100");
-    }
-    function hideDeleteModal() {
-        var m = document.getElementById("delete-modal");
-        m.classList.remove("opacity-100");
-        m.classList.add("opacity-0", "pointer-events-none");
-    }
-    document.addEventListener("DOMContentLoaded", function () {
-        var m = document.getElementById("delete-modal");
-        if (m)
-            m.addEventListener("click", function (e) {
-                if (e.target === this) hideDeleteModal();
-            });
-    });
 </script>
 {% endblock %}

@@ -87,10 +87,7 @@
                         <td class="py-2 text-gray-600 max-w-[200px] truncate">{{ material.notes|default:'—' }}</td>
                         <td class="py-2">
                             <button onclick="openSlideOver('{% url 'materials:edit_slide' material.slug %}')" class="text-indigo-600 hover:underline mr-2">Edit</button>
-                            <form method="post" action="{% url 'materials:delete' material.slug %}" class="inline" onsubmit="return confirm('Delete this material?');">
-                                {% csrf_token %}
-                                <button type="submit" class="text-red-600 hover:underline">Delete</button>
-                            </form>
+                            <button @click="$store.deleteModal.open('{% url 'materials:delete' material.slug %}', '{{ material.name|escapejs }}')" class="text-red-600 hover:underline">Delete</button>
                         </td>
                     </tr>
                     {% endfor %}
