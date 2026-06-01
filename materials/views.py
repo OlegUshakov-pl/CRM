@@ -22,8 +22,8 @@ def material_main(request):
 
 
 @login_required
-def material_general(request):
-    return render(request, 'materials/materials_general.html')
+def material_common(request):
+    return render(request, 'materials/materials_common.html')
 
 
 @login_required
