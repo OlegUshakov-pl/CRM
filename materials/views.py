@@ -118,3 +118,31 @@ def category_save(request):
         response['HX-Refresh'] = 'true'
         return response
     return render(request, 'materials/category_form.html', {'form': form, 'title': 'Add Category'})
+
+
+@login_required
+def common_create_slide(request):
+    form = MaterialForm()
+    return render(request, 'materials/common_material_form.html', {'form': form, 'title': 'Add Material'})
+
+
+@login_required
+def common_save(request):
+    form = MaterialForm(request.POST)
+    if form.is_valid():
+        material = form.save(commit=False)
+        material.created_by = request.user
+        material.save()
+        response = HttpResponse()
+        response['HX-Refresh'] = 'true'
+        return response
+    return render(request, 'materials/common_material_form.html', {'form': form, 'title': 'Add Material'})
+
+
+@login_required
+def common_delete(request, slug):
+    material = get_object_or_404(Material, slug=slug)
+    if request.method == 'POST':
+        material.delete()
+        messages.success(request, 'Material deleted.')
+    return redirect('materials:common')
