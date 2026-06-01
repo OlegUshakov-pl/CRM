@@ -2,10 +2,23 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.core.paginator import Paginator
 from .models import Material
 from .forms import MaterialForm
 from projects.models import Project
 from core.models import log_activity
+
+
+@login_required
+def material_main(request):
+    materials = Material.objects.filter(is_active=True).select_related('project').order_by('-created_at')
+    query = request.GET.get('q', '')
+    if query:
+        materials = materials.filter(name__icontains=query)
+    paginator = Paginator(materials, 20)
+    page = request.GET.get('page', 1)
+    materials_page = paginator.get_page(page)
+    return render(request, 'materials/materials_main.html', {'materials': materials_page, 'query': query})
 
 
 @login_required
@@ -61,7 +74,7 @@ def material_delete(request, slug):
         log_activity(request.user, 'deleted', f'Material "{material.name}"')
         material.delete()
         messages.success(request, 'Material deleted successfully.')
-    return redirect('projects:detail', slug=project_slug)
+    return redirect('materials:main')
 
 
 @login_required
