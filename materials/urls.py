@@ -11,6 +11,7 @@ urlpatterns = [
     path('categories/', views.category_list, name='category_list'),
     path('category/create/slide/', views.category_create_slide, name='category_create_slide'),
     path('category/save/', views.category_save, name='category_save'),
+    path('category/<int:pk>/delete/', views.category_delete, name='category_delete'),
     path('<slug:project_slug>/page/', views.material_page, name='page'),
     path('<slug:project_slug>/create/', views.material_create, name='create'),
     path('<slug:slug>/edit/', views.material_edit, name='edit'),

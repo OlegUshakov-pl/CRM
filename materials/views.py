@@ -159,3 +159,12 @@ def category_list(request):
             messages.success(request, 'Category added successfully.')
             return redirect('materials:category_list')
     return render(request, 'materials/category_list.html', {'categories': categories, 'form': form})
+
+
+@login_required
+def category_delete(request, pk):
+    category = get_object_or_404(Category, pk=pk)
+    if request.method == 'POST':
+        category.delete()
+        messages.success(request, f'Category "{category.name}" deleted.')
+    return redirect('materials:category_list')
