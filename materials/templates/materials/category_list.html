@@ -27,7 +27,7 @@
                 <tbody>
                     {% for category in categories %}
                     <tr class="border-b border-gray-100">
-                        <td class="py-2 text-gray-900">{{ category.name }}</td>
+                        <td class="py-2"><a href="{% url 'materials:category_detail' category.pk %}" class="text-indigo-600 hover:underline">{{ category.name }}</a></td>
                         <td class="py-2 text-gray-600">{{ category.materials.count }}</td>
                         <td class="py-2">
                             <button @click="$store.deleteModal.open('{% url 'materials:category_delete' category.pk %}', '{{ category.name|escapejs }}')" class="text-red-600 hover:underline">Delete</button>

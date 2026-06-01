@@ -162,6 +162,13 @@ def category_list(request):
 
 
 @login_required
+def category_detail(request, pk):
+    category = get_object_or_404(Category, pk=pk)
+    materials = Material.objects.filter(category=category, is_active=True).select_related('project')
+    return render(request, 'materials/category_detail.html', {'category': category, 'materials': materials})
+
+
+@login_required
 def category_delete(request, pk):
     category = get_object_or_404(Category, pk=pk)
     if request.method == 'POST':
