@@ -2,10 +2,11 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
+from django.db.models import Prefetch
 from .models import Project, ProjectImage
 from .forms import ProjectForm
-from notes.models import Note
 from notes.forms import NoteForm
+from materials.models import Material
 from core.models import log_activity
 
 
@@ -30,7 +31,7 @@ def project_list(request):
 
 @login_required
 def project_detail(request, slug):
-    project = get_object_or_404(Project.objects.prefetch_related('materials', 'contacts', 'tasks', 'note_entries', 'images'), slug=slug)
+    project = get_object_or_404(Project.objects.prefetch_related(Prefetch('materials', queryset=Material.objects.select_related('category')), 'contacts', 'tasks', 'note_entries', 'images'), slug=slug)
     return render(request, 'projects/project_detail.html', {'project': project})
 
 

@@ -162,6 +162,7 @@
                             class="text-left text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700"
                         >
                             <th class="pb-2 font-medium">Name</th>
+                            <th class="pb-2 font-medium">Category</th>
                             <th class="pb-2 font-medium">Qty</th>
                             <th class="pb-2 font-medium">Unit</th>
                             <th class="pb-2 font-medium">Price</th>
@@ -173,6 +174,7 @@
                         {% for material in project.materials.all|slice:":4" %}
                         <tr class="border-b border-gray-100 dark:border-gray-700/50">
                             <td class="py-2 text-gray-900 dark:text-white">{{ material.name }}</td>
+                            <td class="py-2 text-gray-600 dark:text-gray-400">{{ material.category.name|default:'—' }}</td>
                             <td class="py-2 text-gray-600 dark:text-gray-400">
                                 {{ material.quantity }}
                             </td>
