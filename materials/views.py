@@ -21,22 +21,57 @@ def material_main(request):
     return render(request, 'materials/materials_main.html', {'projects': projects_page, 'query': query})
 
 
+SORT_OPTIONS = [
+    ('name', 'Name'),
+    ('quantity', 'Qty'),
+    ('unit_price', 'Price'),
+    ('created_at', 'Date Created'),
+]
+
+
+def apply_sorting(queryset, request):
+    sort = request.GET.get('sort', 'created_at')
+    order = request.GET.get('order', 'desc')
+    valid_fields = [f[0] for f in SORT_OPTIONS]
+    if sort not in valid_fields:
+        sort = 'created_at'
+    if order not in ('asc', 'desc'):
+        order = 'desc'
+    sort_label = dict(SORT_OPTIONS).get(sort, 'Sort')
+    if order == 'asc':
+        queryset = queryset.order_by(sort)
+    else:
+        queryset = queryset.order_by(f'-{sort}')
+    return queryset, sort, order, sort_label
+
+
 @login_required
 def material_common(request):
-    materials = Material.objects.filter(is_active=True).select_related('project', 'category').order_by('-created_at')
+    materials = Material.objects.filter(is_active=True).select_related('project', 'category')
     query = request.GET.get('q', '')
     if query:
         materials = materials.filter(name__icontains=query)
+    materials, sort, order, sort_label = apply_sorting(materials, request)
     paginator = Paginator(materials, 20)
     page = request.GET.get('page', 1)
     materials_page = paginator.get_page(page)
-    return render(request, 'materials/materials_common.html', {'materials': materials_page, 'query': query, 'total_count': paginator.count})
+    return render(request, 'materials/materials_common.html', {
+        'materials': materials_page, 'query': query, 'total_count': paginator.count,
+        'sort_options': SORT_OPTIONS, 'current_sort': sort, 'current_order': order,
+        'current_sort_label': sort_label, 'current_page': page,
+    })
 
 
 @login_required
 def material_page(request, project_slug):
-    project = get_object_or_404(Project.objects.prefetch_related('materials'), slug=project_slug)
-    return render(request, 'materials/material_list.html', {'project': project})
+    project = get_object_or_404(Project, slug=project_slug)
+    materials = Material.objects.filter(project=project, is_active=True).select_related('category')
+    materials, sort, order, sort_label = apply_sorting(materials, request)
+    return render(request, 'materials/material_list.html', {
+        'project': project, 'materials': materials,
+        'sort_options': SORT_OPTIONS, 'current_sort': sort, 'current_order': order,
+        'current_sort_label': sort_label,
+    })
 
 
 @login_required
