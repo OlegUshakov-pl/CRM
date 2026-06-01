@@ -12,10 +12,10 @@
         </button>
     </div>
 
-    <div class="relative mb-6">
+    <form method="get" class="relative mb-6">
         <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"></i>
-        <input type="text" placeholder="Search materials..." value="{{ query }}" hx-get="{% url 'materials:common' %}" hx-trigger="keyup changed delay:300ms" hx-target="#material-list" name="q" class="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-300 text-sm outline-none">
-    </div>
+        <input type="text" name="q" placeholder="Search materials..." value="{{ query }}" class="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-300 text-sm outline-none">
+    </form>
 
     <div id="material-list" class="bg-white border border-[#e8e8e8] p-6">
         <div class="flex items-center justify-between mb-4">
