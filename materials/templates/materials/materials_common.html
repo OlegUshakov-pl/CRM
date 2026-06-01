@@ -7,9 +7,6 @@
         <div>
             <h1 class="text-2xl font-bold text-gray-900">Common Materials</h1>
         </div>
-        <button onclick="openSlideOver('{% url 'materials:common_create_slide' %}')" class="inline-flex items-center gap-2 px-4 py-2.5 bg-red-400 hover:bg-red-500 text-white text-[14px] font-medium transition-colors">
-            + Add Material
-        </button>
     </div>
 
     <form method="get" class="relative mb-6">
@@ -28,7 +25,8 @@
                 <thead>
                     <tr class="text-left text-gray-500 border-b border-gray-200">
                         <th class="pb-2 font-medium">Name</th>
-                        <th class="pb-2 font-medium">Place</th>
+                        <th class="pb-2 font-medium">Category</th>
+                        <th class="pb-2 font-medium">Project</th>
                         <th class="pb-2 font-medium">Qty</th>
                         <th class="pb-2 font-medium">Unit</th>
                         <th class="pb-2 font-medium">Price</th>
@@ -40,7 +38,8 @@
                     {% for material in materials %}
                     <tr class="border-b border-gray-100">
                         <td class="py-2 text-gray-900">{{ material.name }}</td>
-                        <td class="py-2 text-gray-600">{{ material.project_name|default:'—' }}</td>
+                        <td class="py-2 text-gray-600">{{ material.category.name|default:'—' }}</td>
+                        <td class="py-2 text-gray-600">{{ material.project.name }}</td>
                         <td class="py-2 text-gray-600">{{ material.quantity }}</td>
                         <td class="py-2 text-gray-600">{{ material.get_unit_display }}</td>
                         <td class="py-2 text-gray-600">
@@ -50,11 +49,7 @@
                             {% if material.total_price %}${{ material.total_price|floatformat:2 }}{% else %}—{% endif %}
                         </td>
                         <td class="py-2">
-                            <button onclick="openSlideOver('{% url 'materials:common_edit_slide' material.id %}')" class="text-indigo-600 hover:underline mr-2">Edit</button>
-                            <form method="post" action="{% url 'materials:common_delete' material.id %}" class="inline" onsubmit="return confirm('Delete this material?');">
-                                {% csrf_token %}
-                                <button type="submit" class="text-red-600 hover:underline">Delete</button>
-                            </form>
+                            <a href="{% url 'materials:page' material.project.slug %}" class="text-indigo-600 hover:underline mr-2">View</a>
                         </td>
                     </tr>
                     {% endfor %}
@@ -62,7 +57,7 @@
             </table>
         </div>
         {% else %}
-        <p class="text-gray-500 text-center py-6">No common materials added yet.</p>
+        <p class="text-gray-500 text-center py-6">No materials added yet.</p>
         {% endif %}
     </div>
 

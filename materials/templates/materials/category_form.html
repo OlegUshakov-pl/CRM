@@ -6,7 +6,7 @@
     </button>
 </div>
 
-<form hx-post="{% if material %}{% url 'materials:common_save' material.id %}{% else %}{% url 'materials:common_create_save' %}{% endif %}" hx-target="#slide-over-content" method="post" class="p-6 space-y-4">
+<form hx-post="{% url 'materials:category_save' %}" hx-target="#slide-over-content" method="post" class="p-6 space-y-4">
     {% csrf_token %}
     {% for field in form %}
     <div>

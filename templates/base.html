@@ -79,10 +79,17 @@
                     </a>
                     <div class="hidden group-hover:block absolute left-full top-0 pl-2 z-50">
                         <div class="bg-white border border-[#e8e8e8] shadow-lg min-w-[170px] py-1">
-                            <a href="{% url 'materials:main' %}" class="block px-4 py-2 text-[13px] text-[#222] hover:bg-gray-50 transition-colors">Place materials</a>
+                            <a href="{% url 'materials:main' %}" class="block px-4 py-2 text-[13px] text-[#222] hover:bg-gray-50 transition-colors">Category materials</a>
                             <a href="{% url 'materials:common' %}" class="block px-4 py-2 text-[13px] text-[#222] hover:bg-gray-50 transition-colors">Common materials</a>
                         </div>
                     </div>
+                </div>
+
+                <div>
+                    <button onclick="openSlideOver('{% url 'materials:category_create_slide' %}')" class="flex items-center gap-2 w-full">
+                        <i data-lucide="tags" class="w-4 h-4 flex-shrink-0"></i>
+                        <span class="sidebar-text">Category</span>
+                    </button>
                 </div>
 
                 <a href="{% url 'tasks:list' %}">

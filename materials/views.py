@@ -3,8 +3,8 @@ from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
-from .models import Material, CommonMaterial
-from .forms import MaterialForm, CommonMaterialForm
+from .models import Category, Material
+from .forms import CategoryForm, MaterialForm
 from projects.models import Project
 from core.models import log_activity
 
@@ -23,7 +23,7 @@ def material_main(request):
 
 @login_required
 def material_common(request):
-    materials = CommonMaterial.objects.all().order_by('name')
+    materials = Material.objects.filter(is_active=True).select_related('project', 'category').order_by('-created_at')
     query = request.GET.get('q', '')
     if query:
         materials = materials.filter(name__icontains=query)
@@ -104,36 +104,17 @@ def material_edit_slide(request, slug):
 
 
 @login_required
-def common_create_slide(request):
-    form = CommonMaterialForm()
-    return render(request, 'materials/common_material_form.html', {'form': form, 'title': 'Add Common Material'})
+def category_create_slide(request):
+    form = CategoryForm()
+    return render(request, 'materials/category_form.html', {'form': form, 'title': 'Add Category'})
 
 
 @login_required
-def common_edit_slide(request, pk):
-    material = get_object_or_404(CommonMaterial, pk=pk)
-    form = CommonMaterialForm(instance=material)
-    return render(request, 'materials/common_material_form.html', {'form': form, 'title': 'Edit Common Material', 'material': material})
-
-
-@login_required
-def common_save(request, pk=None):
-    if pk:
-        material = get_object_or_404(CommonMaterial, pk=pk)
-        form = CommonMaterialForm(request.POST, instance=material)
-    else:
-        form = CommonMaterialForm(request.POST)
+def category_save(request):
+    form = CategoryForm(request.POST)
     if form.is_valid():
         form.save()
         response = HttpResponse()
         response['HX-Refresh'] = 'true'
         return response
-    return render(request, 'materials/common_material_form.html', {'form': form, 'title': 'Edit Common Material' if pk else 'Add Common Material'})
-
-
-@login_required
-def common_delete(request, pk):
-    material = get_object_or_404(CommonMaterial, pk=pk)
-    material.delete()
-    messages.success(request, 'Common material deleted.')
-    return redirect('materials:common')
+    return render(request, 'materials/category_form.html', {'form': form, 'title': 'Add Category'})
