@@ -28,7 +28,6 @@
                 <thead>
                     <tr class="text-left text-gray-500 border-b border-gray-200">
                         <th class="pb-2 font-medium">Name</th>
-                        <th class="pb-2 font-medium">Category</th>
                         <th class="pb-2 font-medium">Project</th>
                         <th class="pb-2 font-medium">Qty</th>
                         <th class="pb-2 font-medium">Unit</th>
@@ -41,7 +40,6 @@
                     {% for material in materials %}
                     <tr class="border-b border-gray-100">
                         <td class="py-2 text-gray-900">{{ material.name }}</td>
-                        <td class="py-2 text-gray-600">{{ material.category.name|default:'—' }}</td>
                         <td class="py-2 text-gray-600">{{ material.project.name }}</td>
                         <td class="py-2 text-gray-600">{{ material.quantity }}</td>
                         <td class="py-2 text-gray-600">{{ material.get_unit_display }}</td>
