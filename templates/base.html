@@ -46,10 +46,11 @@
         .slide-over-enter-active { transform: translateX(0); transition: transform 0.3s ease-out; }
         .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         .line-clamp-4 { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+        [x-cloak] { display: none !important; }
     </style>
     {% block extra_head %}{% endblock %}
 </head>
-<body>
+<body x-data>
     <div class="max-w-[1280px] mx-auto py-6 px-4 flex gap-5">
         <!-- Sidebar -->
         <aside id="sidebar" class="w-[210px] bg-white border border-light min-h-[900px] px-5 py-5 flex flex-col transition-all duration-300">
@@ -202,6 +203,30 @@
 
     {% include 'includes/slide_over.html' %}
 
+    <!-- Delete Confirmation Modal -->
+    <div x-cloak x-data x-show="$store.deleteModal.show" class="fixed inset-0 z-50 flex items-center justify-center">
+        <div x-show="$store.deleteModal.show" @click="$store.deleteModal.close()" class="fixed inset-0 bg-black/50"></div>
+        <div x-show="$store.deleteModal.show" class="bg-white rounded-lg shadow-xl z-10 max-w-md w-full mx-4 p-6 relative" @click.outside="$store.deleteModal.close()">
+            <div class="flex items-start gap-4">
+                <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <i data-lucide="alert-triangle" class="w-5 h-5 text-red-600"></i>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-lg font-semibold text-gray-900">Confirm Delete</h3>
+                    <p class="text-sm text-gray-500 mt-1">Are you sure you want to delete <strong class="text-gray-700" x-text="$store.deleteModal.itemName"></strong>?</p>
+                    <p class="text-xs text-gray-400 mt-1">This action cannot be undone.</p>
+                </div>
+            </div>
+            <div class="flex justify-end gap-3 mt-6">
+                <button @click="$store.deleteModal.close()" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors rounded">Cancel</button>
+                <form method="post" :action="$store.deleteModal.deleteUrl">
+                    {% csrf_token %}
+                    <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600 transition-colors rounded">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script>
         lucide.createIcons();
         document.addEventListener('htmx:afterSettle', function() { lucide.createIcons(); });
@@ -230,6 +255,16 @@
             panel.classList.add('translate-x-0');
             htmx.ajax('GET', url, {target: '#slide-over-content', swap: 'innerHTML'});
         }
+
+        document.addEventListener('alpine:init', () => {
+            Alpine.store('deleteModal', {
+                show: false,
+                deleteUrl: '',
+                itemName: '',
+                open(url, name) { this.deleteUrl = url; this.itemName = name; this.show = true; },
+                close() { this.show = false; }
+            });
+        });
 
         function closeSlideOver() {
             var backdrop = document.getElementById('slide-over-backdrop');

@@ -54,10 +54,7 @@
                 <div class="flex items-center gap-2 flex-shrink-0 text-sm whitespace-nowrap">
                     <button onclick="event.stopPropagation(); openSlideOver('{% url 'contacts:contact_edit_slide' contact.slug %}')" class="text-indigo-600 dark:text-indigo-400 hover:underline">Edit</button>
                     <span class="text-gray-300">|</span>
-                    <form method="post" action="{% url 'contacts:contact_delete' contact.slug %}" class="inline" onsubmit="return confirm('Delete this contact?');">
-                        {% csrf_token %}
-                        <button type="submit" class="text-red-600 dark:text-red-400 hover:underline">Delete</button>
-                    </form>
+                    <button @click="$store.deleteModal.open('{% url 'contacts:contact_delete' contact.slug %}', '{{ contact.get_full_name|escapejs }}')" class="text-red-600 dark:text-red-400 hover:underline">Delete</button>
                 </div>
             </div>
         </div>
