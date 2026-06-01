@@ -183,14 +183,13 @@
                                 {% if material.unit_price %}${{ material.unit_price }}{% else %}—{% endif %}
                             </td>
                             <td class="py-2 text-gray-900 dark:text-white font-medium">
-                                {% if material.total_price %}${{ material.total_price }}{% else %}—{% endif %}
+                                {% if material.total_price %}${{ material.total_price|floatformat:2 }}{% else %}—{% endif %}
                             </td>
                             <td class="py-2">
-                                <a
-                                    href="{% url 'materials:edit' material.slug %}"
+                                <button
+                                    onclick="openSlideOver('{% url 'materials:edit_slide' material.slug %}')"
                                     class="text-indigo-600 dark:text-indigo-400 hover:underline mr-2"
-                                    >Edit</a
-                                >
+                                >Edit</button>
                                 <button
                                     @click="$store.deleteModal.open('{% url 'materials:delete' material.slug %}', '{{ material.name|escapejs }}')"
                                     class="text-red-600 dark:text-red-400 hover:underline"

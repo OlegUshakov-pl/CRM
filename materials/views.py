@@ -86,7 +86,7 @@ def material_delete(request, slug):
         log_activity(request.user, 'deleted', f'Material "{material.name}"')
         material.delete()
         messages.success(request, 'Material deleted successfully.')
-    return redirect('materials:main')
+    return redirect('projects:detail', slug=project_slug)
 
 
 @login_required
