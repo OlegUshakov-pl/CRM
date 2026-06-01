@@ -188,6 +188,7 @@
                                 {% if material.total_price %}${{ material.total_price|floatformat:2 }}{% else %}—{% endif %}
                             </td>
                             <td class="py-2">
+                                {% if material.slug %}
                                 <button
                                     onclick="openSlideOver('{% url 'materials:edit_slide' material.slug %}')"
                                     class="text-indigo-600 dark:text-indigo-400 hover:underline mr-2"
@@ -198,6 +199,7 @@
                                 >
                                     Delete
                                 </button>
+                                {% endif %}
                             </td>
                         </tr>
                         {% endfor %}
