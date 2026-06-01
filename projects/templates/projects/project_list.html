@@ -16,7 +16,7 @@
 
     <div id="project-list" class="space-y-4">
         {% for project in projects %}
-            <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow flex">
+            <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex">
                 {% if project.image %}
                     <img src="{{ project.image.url }}" alt="{{ project.name }}" class="w-[250px] flex-shrink-0 object-cover">
                 {% else %}
