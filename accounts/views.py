@@ -14,7 +14,8 @@ def login_view(request):
             user = authenticate(username=form.cleaned_data['username'], password=form.cleaned_data['password'])
             if user:
                 login(request, user)
-                return redirect('core:dashboard')
+                next_url = request.POST.get('next') or request.GET.get('next') or 'core:dashboard'
+                return redirect(next_url)
             form.add_error(None, 'Invalid username or password')
     return render(request, 'accounts/login.html', {'form': form})
 

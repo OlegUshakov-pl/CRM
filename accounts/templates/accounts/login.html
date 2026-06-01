@@ -24,16 +24,19 @@
             </div>
             <form method="post" class="space-y-4">
                 {% csrf_token %}
+                {% if request.GET.next %}<input type="hidden" name="next" value="{{ request.GET.next }}">{% endif %}
                 {% if form.non_field_errors %}
-                    <div class="p-3 bg-red-50 text-red-700 border border-red-200 rounded text-sm">{{ form.non_field_errors.0 }}</div>
+                    <div class="p-3 bg-red-50 text-red-700 border border-red-200 text-sm">{{ form.non_field_errors.0 }}</div>
                 {% endif %}
                 <div>
                     <label class="block text-[13px] text-[#8d8d8d] mb-1">Username</label>
                     {{ form.username }}
+                    {% if form.username.errors %}<p class="text-red-500 text-xs mt-1">{{ form.username.errors.0 }}</p>{% endif %}
                 </div>
                 <div>
                     <label class="block text-[13px] text-[#8d8d8d] mb-1">Password</label>
                     {{ form.password }}
+                    {% if form.password.errors %}<p class="text-red-500 text-xs mt-1">{{ form.password.errors.0 }}</p>{% endif %}
                 </div>
                 <button type="submit" class="w-full py-2.5 bg-violet-400 hover:opacity-90 text-white font-medium text-[13px] transition-opacity">Sign in</button>
             </form>
