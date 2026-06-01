@@ -25,7 +25,7 @@ class Material(TimeStampedModel):
         ('set', 'Sets'),
     ]
 
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='materials')
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='materials', blank=True, null=True)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, blank=True, null=True, related_name='materials')
     name = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255, unique=True, blank=True, null=True)

@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
 from .models import Category, Material
-from .forms import CategoryForm, MaterialForm
+from .forms import CategoryForm, MaterialForm, CommonMaterialForm
 from projects.models import Project
 from core.models import log_activity
 
@@ -157,13 +157,13 @@ def category_save(request):
 
 @login_required
 def common_create_slide(request):
-    form = MaterialForm()
+    form = CommonMaterialForm()
     return render(request, 'materials/common_material_form.html', {'form': form, 'title': 'Add Material'})
 
 
 @login_required
 def common_save(request):
-    form = MaterialForm(request.POST)
+    form = CommonMaterialForm(request.POST)
     if form.is_valid():
         material = form.save(commit=False)
         material.created_by = request.user
