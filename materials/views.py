@@ -146,3 +146,16 @@ def common_delete(request, slug):
         material.delete()
         messages.success(request, 'Material deleted.')
     return redirect('materials:common')
+
+
+@login_required
+def category_list(request):
+    categories = Category.objects.all()
+    form = CategoryForm()
+    if request.method == 'POST':
+        form = CategoryForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Category added successfully.')
+            return redirect('materials:category_list')
+    return render(request, 'materials/category_list.html', {'categories': categories, 'form': form})

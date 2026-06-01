@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
-{% block title %}Common Materials - CRM{% endblock %}
-{% block breadcrumb %}Common Materials{% endblock %}
+{% block title %}Materials - CRM{% endblock %}
+{% block breadcrumb %}Materials{% endblock %}
 {% block content %}
 <div style="max-width: 1080px; width: 100%; margin-left: auto; margin-right: auto;">
     <div class="flex items-center justify-between mb-6">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900">Common Materials</h1>
+            <h1 class="text-2xl font-bold text-gray-900">Materials</h1>
         </div>
         <button onclick="openSlideOver('{% url 'materials:common_create_slide' %}')" class="inline-flex items-center gap-2 px-4 py-2.5 bg-red-400 hover:bg-red-500 text-white text-[14px] font-medium transition-colors">
             + Add Material
@@ -19,7 +19,7 @@
 
     <div id="material-list" class="bg-white border border-[#e8e8e8] p-6">
         <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-semibold text-gray-900">Common Materials</h2>
+            <h2 class="text-lg font-semibold text-gray-900">Materials</h2>
             <span class="text-sm text-gray-500">{{ total_count }} item(s)</span>
         </div>
         {% if materials %}

@@ -8,6 +8,7 @@ urlpatterns = [
     path('common/create/slide/', views.common_create_slide, name='common_create_slide'),
     path('common/save/', views.common_save, name='common_save'),
     path('common/<slug:slug>/delete/', views.common_delete, name='common_delete'),
+    path('categories/', views.category_list, name='category_list'),
     path('category/create/slide/', views.category_create_slide, name='category_create_slide'),
     path('category/save/', views.category_save, name='category_save'),
     path('<slug:project_slug>/page/', views.material_page, name='page'),
