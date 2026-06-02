@@ -17,16 +17,29 @@ def document_list(request):
     documents = Document.objects.select_related('project').all()
     query = request.GET.get('q', '')
     type_filter = request.GET.get('type', '')
+    sort = request.GET.get('sort', 'created_desc')
     if query:
         documents = documents.filter(number__icontains=query)
     if type_filter:
         documents = documents.filter(file_type=type_filter)
+    if sort == 'type':
+        documents = documents.order_by('file_type')
+    elif sort == 'size':
+        documents = documents.order_by('size')
+    elif sort == 'size_desc':
+        documents = documents.order_by('-size')
+    elif sort == 'created':
+        documents = documents.order_by('created_at')
+    elif sort == 'project':
+        documents = documents.order_by('project__name')
+    else:
+        documents = documents.order_by('-created_at')
     paginator = Paginator(documents, 20)
     page = request.GET.get('page', 1)
     documents_page = paginator.get_page(page)
     return render(request, 'documents/documents_list.html', {
         'documents': documents_page, 'query': query,
-        'current_type': type_filter, 'total_count': paginator.count,
+        'current_type': type_filter, 'current_sort': sort, 'total_count': paginator.count,
     })
 
 

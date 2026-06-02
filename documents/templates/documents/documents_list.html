@@ -5,9 +5,21 @@
 <div style="max-width: 1080px; width: 100%; margin-left: auto; margin-right: auto;">
     <div class="flex items-center justify-between mb-6">
         <h1 class="text-2xl font-bold text-gray-900">Documents</h1>
-        <button onclick="openSlideOver('{% url 'documents:common_create_slide' %}')" class="inline-flex items-center gap-2 px-4 py-2.5 bg-red-400 hover:bg-red-500 text-white text-[14px] font-medium rounded-[20px] shadow-[0_2px_2px_rgba(0,0,0,0.25)] transition-colors">
-            + Add Document
-        </button>
+        <div class="flex items-center gap-2">
+            <form method="get" id="sort-form">
+                <select name="sort" onchange="this.form.submit()"
+                        class="px-3 py-2 border border-[#e8e8e8] text-sm text-gray-600 outline-none cursor-pointer bg-white">
+                    <option value="created_desc" {% if current_sort == 'created_desc' %}selected{% endif %}>Newest</option>
+                    <option value="created" {% if current_sort == 'created' %}selected{% endif %}>Oldest</option>
+                    <option value="type" {% if current_sort == 'type' %}selected{% endif %}>File type</option>
+                    <option value="size_desc" {% if current_sort == 'size_desc' %}selected{% endif %}>Size</option>
+                    <option value="project" {% if current_sort == 'project' %}selected{% endif %}>Project</option>
+                </select>
+            </form>
+            <button onclick="openSlideOver('{% url 'documents:common_create_slide' %}')" class="inline-flex items-center gap-2 px-4 py-2.5 bg-red-400 hover:bg-red-500 text-white text-[14px] font-medium rounded-[20px] shadow-[0_2px_2px_rgba(0,0,0,0.25)] transition-colors">
+                + Add Document
+            </button>
+        </div>
     </div>
 
     <div class="bg-white border border-[#e8e8e8] p-6">
@@ -37,7 +49,7 @@
                         <td class="py-2 text-gray-900">{{ doc.number|default:'—' }}</td>
                         <td class="py-2 text-gray-600">{{ doc.project.name }}</td>
                         <td class="py-2 text-gray-600">{{ doc.get_file_type_display }}</td>
-                        <td class="py-2 text-gray-600">{{ doc.filename }}</td>
+                        <td class="py-2 text-gray-600 max-w-[100px] truncate" title="{{ doc.filename }}">{{ doc.filename|truncatechars:10 }}</td>
                         <td class="py-2 text-gray-600">{% if doc.size %}{{ doc.size|filesizeformat }}{% else %}—{% endif %}</td>
                         <td class="py-2 text-gray-600">{{ doc.created_at|date:'M d, Y' }}</td>
                         <td class="py-2">
