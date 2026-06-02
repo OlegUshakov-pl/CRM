@@ -1,7 +1,7 @@
 import os
 from django.conf import settings
 from django.shortcuts import render, get_object_or_404, redirect
-from django.http import HttpResponse
+from django.http import HttpResponse, FileResponse
 from django.urls import reverse
 from django.views.static import serve
 from django.contrib.auth.decorators import login_required
@@ -137,9 +137,9 @@ def document_update(request, pk):
 @login_required
 def document_show(request, pk):
     document = get_object_or_404(Document, pk=pk)
-    if not document.file:
+    if not document.file or not os.path.exists(document.filepath):
         return HttpResponse('File not found', status=404)
-    return serve(request, document.file.name, document_root=settings.DOCUMENTS_ROOT)
+    return FileResponse(open(document.filepath, 'rb'), filename=document.filename)
 
 
 @login_required

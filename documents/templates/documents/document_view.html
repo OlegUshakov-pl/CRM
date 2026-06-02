@@ -33,7 +33,7 @@
     </div>
     {% elif is_pdf %}
     <div class="bg-white border border-[#e8e8e8] p-0" style="height: 80vh;">
-        <embed src="{% url 'documents:show' doc.pk %}" type="application/pdf" width="100%" height="100%">
+        <iframe src="{{ doc.file.url }}" width="100%" height="100%" style="border:none;"></iframe>
     </div>
     {% elif is_text %}
     <div class="bg-white border border-[#e8e8e8]">
