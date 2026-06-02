@@ -8,7 +8,7 @@
             <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Deals</h1>
             <p class="text-gray-500 dark:text-gray-400 mt-1">Manage your deals</p>
         </div>
-        <button onclick="openSlideOver('{% url 'generators:create_slide' %}')" class="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors shadow-sm">
+        <button onclick="openSlideOver('{% url 'generators:create_slide' %}')" class="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-[20px] shadow-[0_2px_2px_rgba(0,0,0,0.25)] transition-colors">
             <i data-lucide="plus" class="w-4 h-4"></i>
             Add Deal
         </button>
@@ -89,7 +89,7 @@
                 <i data-lucide="handshake" class="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4"></i>
                 <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">No deals yet</h3>
                 <p class="text-gray-500 dark:text-gray-400 mb-4">Create your first deal to get started</p>
-                <button onclick="openSlideOver('{% url 'generators:create_slide' %}')" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors">
+                <button onclick="openSlideOver('{% url 'generators:create_slide' %}')" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-[20px] shadow-[0_2px_2px_rgba(0,0,0,0.25)] transition-colors">
                     <i data-lucide="plus" class="w-4 h-4"></i>
                     Add Deal
                 </button>

@@ -8,7 +8,7 @@
             <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Contacts</h1>
             <p class="text-gray-500 dark:text-gray-400 mt-1">Manage your contacts</p>
         </div>
-        <button onclick="openSlideOver('{% url 'contacts:contact_create_slide' %}')" class="inline-flex items-center gap-2 px-4 py-2 bg-red-400 hover:bg-red-500 text-white text-[14px] font-medium transition-colors">
+        <button onclick="openSlideOver('{% url 'contacts:contact_create_slide' %}')" class="inline-flex items-center gap-2 px-4 py-2 bg-red-400 hover:bg-red-500 text-white text-[14px] font-medium rounded-[20px] shadow-[0_2px_2px_rgba(0,0,0,0.25)] transition-colors">
             <i data-lucide="plus" class="w-4 h-4"></i>
             Add Contact
         </button>
@@ -63,7 +63,7 @@
             <i data-lucide="users" class="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4"></i>
             <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">No contacts yet</h3>
             <p class="text-gray-500 dark:text-gray-400 mb-4">Add your first contact to get started</p>
-            <button onclick="openSlideOver('{% url 'contacts:contact_create_slide' %}')" class="inline-flex items-center gap-2 px-4 py-2 bg-red-400 hover:bg-red-500 text-white text-[14px] font-medium transition-colors">
+            <button onclick="openSlideOver('{% url 'contacts:contact_create_slide' %}')" class="inline-flex items-center gap-2 px-4 py-2 bg-red-400 hover:bg-red-500 text-white text-[14px] font-medium rounded-[20px] shadow-[0_2px_2px_rgba(0,0,0,0.25)] transition-colors">
                 <i data-lucide="plus" class="w-4 h-4"></i>
                 Add Contact
             </button>
