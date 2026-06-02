@@ -5,6 +5,7 @@ from django.core.paginator import Paginator
 from django.db.models import Prefetch
 from .models import Project, ProjectImage
 from .forms import ProjectForm
+from contacts.models import Contact
 from notes.forms import NoteForm
 from materials.models import Material
 from core.models import log_activity
@@ -93,6 +94,17 @@ def project_edit(request, slug):
         'is_page': True,
         'note_form': note_form,
     })
+
+
+@login_required
+def remove_contact(request, slug, contact_id):
+    project = get_object_or_404(Project, slug=slug)
+    if request.method == 'POST':
+        contact = get_object_or_404(Contact, id=contact_id)
+        project.contacts.remove(contact)
+        log_activity(request.user, 'updated', f'Removed contact "{contact.get_full_name()}" from "{project.name}"', project)
+        messages.success(request, 'Contact removed.')
+    return redirect(request.META.get('HTTP_REFERER', 'projects:detail', slug=slug))
 
 
 @login_required

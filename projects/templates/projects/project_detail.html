@@ -278,30 +278,39 @@
         </div>
 
         <div class="bg-white border border-[#e8e8e8] p-6">
-            <h2 class="text-lg font-semibold text-[#222] mb-4">Contacts</h2>
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-semibold text-[#222]">Contacts</h2>
+                <button onclick="openSlideOver('{% url 'contacts:contact_create_slide' %}')" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">+ Add Contact</button>
+            </div>
             {% if project.contacts.all %}
             <div class="space-y-3">
                 {% for contact in project.contacts.all %}
-                <a
-                    href="{% url 'contacts:contact_detail' contact.slug %}"
-                    class="flex items-center gap-3 hover:bg-gray-50 transition-colors -mx-2 px-2 py-1 rounded"
-                >
-                    <div
-                        class="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/50 rounded-full flex items-center justify-center flex-shrink-0"
+                <div class="flex items-center gap-3 group">
+                    <a
+                        href="{% url 'contacts:contact_detail' contact.slug %}"
+                        class="flex items-center gap-3 flex-1 hover:bg-gray-50 transition-colors -mx-2 px-2 py-1 rounded"
                     >
-                        <span class="text-xs font-semibold text-indigo-700 dark:text-indigo-300"
-                            >{{ contact.first_name|first }}{{ contact.last_name|first }}</span
+                        <div
+                            class="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/50 rounded-full flex items-center justify-center flex-shrink-0"
                         >
-                    </div>
-                    <div>
-                        <p class="text-sm font-medium text-gray-900 dark:text-white">
-                            {{ contact.get_full_name }}
-                        </p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">
-                            {{ contact.position|default:contact.email }}
-                        </p>
-                    </div>
-                </a>
+                            <span class="text-xs font-semibold text-indigo-700 dark:text-indigo-300"
+                                >{{ contact.first_name|first }}{{ contact.last_name|first }}</span
+                            >
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-900 dark:text-white">
+                                {{ contact.get_full_name }}
+                            </p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">
+                                {{ contact.position|default:contact.email }}
+                            </p>
+                        </div>
+                    </a>
+                    <form method="post" action="{% url 'projects:remove_contact' project.slug contact.id %}" class="opacity-0 group-hover:opacity-100 transition-opacity">
+                        {% csrf_token %}
+                        <button type="submit" class="text-xs text-red-500 hover:text-red-700" onclick="return confirm('Remove this contact?')">Delete</button>
+                    </form>
+                </div>
                 {% endfor %}
             </div>
             {% else %}
