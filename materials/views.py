@@ -31,8 +31,10 @@ SORT_OPTIONS = [
 
 
 def apply_sorting(queryset, request):
-    sort = request.GET.get('sort', 'created_at')
-    order = request.GET.get('order', 'desc')
+    sort_params = request.GET.getlist('sort')
+    order_params = request.GET.getlist('order')
+    sort = sort_params[-1] if sort_params else 'created_at'
+    order = order_params[-1] if order_params else 'desc'
     valid_fields = [f[0] for f in SORT_OPTIONS]
     if sort not in valid_fields:
         sort = 'created_at'
