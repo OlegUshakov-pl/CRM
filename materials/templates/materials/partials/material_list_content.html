@@ -2,9 +2,9 @@
         <form id="filter-form" method="get" hx-get="{% url 'materials:common' %}" class="flex items-center gap-4 flex-1">
             <div class="relative flex-1">
                 <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"></i>
-                <input type="text" name="q" placeholder="Search materials..." value="{{ query }}" class="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-300 text-sm outline-none" hx-trigger="keyup changed delay:300ms" hx-target="#material-list" hx-include="#filter-form">
+                <input type="text" name="q" hx-get="{% url 'materials:common' %}" placeholder="Search materials..." value="{{ query }}" class="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-300 text-sm outline-none" hx-trigger="keyup changed delay:300ms" hx-target="#material-list" hx-include="#filter-form">
             </div>
-            <select name="category" class="px-3 py-2.5 bg-white border border-gray-300 text-sm text-gray-600 outline-none cursor-pointer" hx-trigger="change" hx-target="#material-list" hx-include="#filter-form">
+            <select name="category" hx-get="{% url 'materials:common' %}" class="px-3 py-2.5 bg-white border border-gray-300 text-sm text-gray-600 outline-none cursor-pointer" hx-trigger="change" hx-target="#material-list" hx-include="#filter-form">
                 <option value="">All</option>
                 {% for cat in categories %}
                 <option value="{{ cat.pk }}" {% if current_category == cat.pk|stringformat:'s' %}selected{% endif %}>{{ cat.name }}</option>

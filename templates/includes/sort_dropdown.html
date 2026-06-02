@@ -1,16 +1,16 @@
-<div class="relative" x-data="{ open: false }">
-    <button @click="open = !open" class="flex items-center gap-2 px-3 py-2 border border-[#e8e8e8] text-sm text-gray-600 hover:bg-gray-50 transition-colors bg-white">
+<div class="relative" id="sort-dropdown">
+    <button onclick="document.getElementById('sort-dropdown').classList.toggle('show')" class="flex items-center gap-2 px-3 py-2 border border-[#e8e8e8] text-sm text-gray-600 hover:bg-gray-50 transition-colors bg-white">
         <i data-lucide="arrow-up-down" class="w-4 h-4"></i>
         <span>{{ current_sort_label|default:'Sort' }}</span>
         <i data-lucide="chevron-down" class="w-3 h-3"></i>
     </button>
-    <div x-show="open" @click.outside="open = false" class="absolute right-0 mt-1 w-44 bg-white border border-[#e8e8e8] shadow-lg z-50 py-1" x-cloak>
+    <div class="sort-dropdown-menu absolute right-0 mt-1 w-44 bg-white border border-[#e8e8e8] shadow-lg z-50 py-1" style="display:none">
         {% for field, label in sort_options %}
         <button hx-get="{% url 'materials:common' %}"
                 hx-target="#material-list"
                 hx-include="#filter-form"
                 hx-vals='{"sort":"{{ field }}","order":"{% if current_sort == field and current_order == 'asc' %}desc{% else %}asc{% endif %}"}'
-                @click="open = false"
+                onclick="document.getElementById('sort-dropdown').classList.remove('show');"
                 class="flex items-center justify-between w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors text-left">
             <span>{{ label }}</span>
             {% if current_sort == field %}
@@ -20,3 +20,12 @@
         {% endfor %}
     </div>
 </div>
+<style>
+#sort-dropdown.show .sort-dropdown-menu { display: block !important; }
+</style>
+<script>
+document.addEventListener('click', function(e) {
+    var dd = document.getElementById('sort-dropdown');
+    if (dd && !dd.contains(e.target)) dd.classList.remove('show');
+});
+</script>
