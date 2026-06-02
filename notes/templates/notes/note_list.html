@@ -28,12 +28,9 @@
                         <button onclick="openSlideOver('{% url 'notes:edit_slide' note.slug %}')" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                             <i data-lucide="edit-3" class="w-4 h-4"></i>
                         </button>
-                        <form method="post" action="{% url 'notes:delete' note.slug %}" class="inline" onsubmit="return confirm('Delete this note?')">
-                            {% csrf_token %}
-                            <button type="submit" class="text-gray-400 hover:text-red-600 dark:hover:text-red-400">
-                                <i data-lucide="trash-2" class="w-4 h-4"></i>
-                            </button>
-                        </form>
+                        <button @click="$store.deleteModal.open('{% url 'notes:delete' note.slug %}', '{{ note.title|escapejs }}')" class="text-gray-400 hover:text-red-600 dark:hover:text-red-400">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
                     </div>
                 </div>
                 <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-4 mb-3">{{ note.content }}</p>
