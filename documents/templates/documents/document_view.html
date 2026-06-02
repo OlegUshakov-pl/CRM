@@ -23,34 +23,17 @@
 
     {% if is_image %}
     <div class="bg-white border border-[#e8e8e8] p-6">
-        <div id="viewer-gallery" class="relative overflow-hidden bg-gray-100" style="aspect-ratio: 16/9">
-            <div class="gallery-slides flex transition-transform duration-300" id="gallery-track">
-                <div class="gallery-slide min-w-full flex items-center justify-center">
-                    <img src="{% url 'documents:show' doc.pk %}" alt="{{ doc.filename }}" class="max-w-full max-h-full object-contain">
-                </div>
-                {% for photo in photos %}
-                <div class="gallery-slide min-w-full flex items-center justify-center">
-                    <img src="{% url 'documents:show' photo.pk %}" alt="{{ photo.filename }}" class="max-w-full max-h-full object-contain">
-                </div>
-                {% endfor %}
-            </div>
-            {% if photos %}
-            <button type="button" onclick="galleryPrev()" class="absolute left-2 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-black/40 text-white hover:bg-black/60 transition-colors">
-                <i data-lucide="chevron-left" class="w-5 h-5"></i>
-            </button>
-            <button type="button" onclick="galleryNext()" class="absolute right-2 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-black/40 text-white hover:bg-black/60 transition-colors">
-                <i data-lucide="chevron-right" class="w-5 h-5"></i>
-            </button>
-            {% endif %}
-        </div>
-        {% if photos %}
-        <div class="flex justify-center gap-1 mt-3" id="gallery-dots">
-            <button type="button" onclick="galleryGo(0)" class="gallery-dot h-2 w-6 rounded-full bg-indigo-600 transition-all duration-300" data-index="0"></button>
+        <h2 class="text-lg font-semibold text-[#222] mb-4">{{ doc.filename }}</h2>
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+            <a href="{% url 'documents:show' doc.pk %}" target="_blank" class="block aspect-square overflow-hidden bg-gray-100 dark:bg-gray-700 hover:opacity-90 transition-opacity">
+                <img src="{% url 'documents:show' doc.pk %}" alt="{{ doc.filename }}" class="w-full h-full object-cover">
+            </a>
             {% for photo in photos %}
-            <button type="button" onclick="galleryGo({{ forloop.counter }})" class="gallery-dot h-2 w-2 rounded-full bg-gray-300 transition-all duration-300" data-index="{{ forloop.counter }}"></button>
+            <a href="{% url 'documents:show' photo.pk %}" target="_blank" class="block aspect-square overflow-hidden bg-gray-100 dark:bg-gray-700 hover:opacity-90 transition-opacity">
+                <img src="{% url 'documents:show' photo.pk %}" alt="{{ photo.filename }}" class="w-full h-full object-cover">
+            </a>
             {% endfor %}
         </div>
-        {% endif %}
     </div>
     {% elif is_pdf %}
     <div class="bg-white border border-[#e8e8e8] p-0" style="height: 80vh;">
@@ -78,29 +61,4 @@
 </div>
 {% endblock %}
 
-{% block extra_scripts %}
-<script>
-(function() {
-    var track = document.getElementById('gallery-track');
-    if (!track) return;
-    var slides = track.querySelectorAll('.gallery-slide');
-    var dots = document.querySelectorAll('.gallery-dot');
-    var current = 0;
-    function go(index) {
-        if (index < 0) index = slides.length - 1;
-        if (index >= slides.length) index = 0;
-        current = index;
-        track.style.transform = 'translateX(-' + (current * 100) + '%)';
-        dots.forEach(function(d, i) {
-            d.classList.toggle('bg-indigo-600', i === current);
-            d.classList.toggle('w-6', i === current);
-            d.classList.toggle('bg-gray-300', i !== current);
-            d.classList.toggle('w-2', i !== current);
-        });
-    }
-    window.galleryGo = go;
-    window.galleryPrev = function() { go(current - 1); };
-    window.galleryNext = function() { go(current + 1); };
-})();
-</script>
-{% endblock %}
+{% block extra_scripts %}{% endblock %}
