@@ -149,16 +149,27 @@ def document_view(request, pk):
     ext = os.path.splitext(document.filename)[1].lower()
     is_image = ext in ('.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp', '.svg')
     is_pdf = ext == '.pdf'
+    is_text = ext in ('.txt', '.md', '.csv', '.json', '.xml', '.yml', '.yaml', '.html', '.css', '.js', '.py', '.log', '.cfg', '.ini', '.conf')
     photos = []
+    text_content = None
     if is_image:
         photos = Document.objects.filter(
             project=document.project, file_type='photos'
         ).exclude(pk=document.pk).order_by('-created_at')[:10]
+    elif is_text:
+        file_path = document.filepath
+        try:
+            with open(file_path, 'r', encoding='utf-8', errors='replace') as f:
+                text_content = f.read()
+        except Exception:
+            text_content = None
     return render(request, 'documents/document_view.html', {
         'doc': document,
         'is_image': is_image,
         'is_pdf': is_pdf,
+        'is_text': is_text,
         'photos': photos,
+        'text_content': text_content,
         'file_url': reverse('documents:download', kwargs={'pk': document.pk}),
     })
 
