@@ -41,7 +41,7 @@ def document_project(request, project_slug):
 
 @login_required
 def document_projects(request):
-    projects = Project.objects.filter(is_active=True).order_by('-created_at')
+    projects = Project.objects.filter(is_active=True, documents__isnull=False).order_by('-created_at').distinct()
     query = request.GET.get('q', '')
     if query:
         projects = projects.filter(name__icontains=query)
