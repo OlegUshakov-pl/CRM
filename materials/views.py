@@ -23,6 +23,7 @@ def material_main(request):
 
 SORT_OPTIONS = [
     ('name', 'Name'),
+    ('category__name', 'Category'),
     ('quantity', 'Qty'),
     ('unit_price', 'Price'),
     ('created_at', 'Date Created'),
