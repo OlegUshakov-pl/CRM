@@ -1,5 +1,7 @@
+import mimetypes
+import os
 from django.shortcuts import render, get_object_or_404, redirect
-from django.http import HttpResponse
+from django.http import HttpResponse, FileResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
@@ -128,6 +130,32 @@ def document_update(request, pk):
         'form': form, 'document': document, 'project': document.project,
         'title': 'Edit Document',
     })
+
+
+@login_required
+def document_show(request, pk):
+    document = get_object_or_404(Document, pk=pk)
+    if not document.file:
+        return HttpResponse('File not found', status=404)
+    file_path = document.filepath
+    if not os.path.exists(file_path):
+        return HttpResponse('File not found', status=404)
+    content_type, _ = mimetypes.guess_type(file_path)
+    return FileResponse(open(file_path, 'rb'), content_type=content_type or 'application/octet-stream')
+
+
+@login_required
+def document_download(request, pk):
+    document = get_object_or_404(Document, pk=pk)
+    if not document.file:
+        return HttpResponse('File not found', status=404)
+    file_path = document.filepath
+    if not os.path.exists(file_path):
+        return HttpResponse('File not found', status=404)
+    content_type, _ = mimetypes.guess_type(file_path)
+    response = FileResponse(open(file_path, 'rb'), content_type=content_type or 'application/octet-stream')
+    response['Content-Disposition'] = f'attachment; filename="{document.filename}"'
+    return response
 
 
 @login_required

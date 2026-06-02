@@ -7,7 +7,7 @@ from projects.models import Project
 
 class DocumentStorage(FileSystemStorage):
     def __init__(self):
-        super().__init__(location=settings.DOCUMENTS_ROOT)
+        super().__init__(location=settings.DOCUMENTS_ROOT, base_url=settings.DOCUMENTS_URL)
 
 
 def document_upload_to(instance, filename):

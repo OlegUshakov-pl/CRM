@@ -13,4 +13,6 @@ urlpatterns = [
     path('<int:pk>/edit/slide/', views.document_edit_slide, name='edit_slide'),
     path('<int:pk>/update/', views.document_update, name='update'),
     path('<int:pk>/delete/', views.document_delete, name='delete'),
+    path('<int:pk>/show/', views.document_show, name='show'),
+    path('<int:pk>/download/', views.document_download, name='download'),
 ]

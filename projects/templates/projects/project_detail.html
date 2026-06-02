@@ -159,6 +159,8 @@
                             <th class="pb-2 font-medium">File</th>
                             <th class="pb-2 font-medium">Size</th>
                             <th class="pb-2 font-medium">Created</th>
+                            <th class="pb-2 font-medium">Show</th>
+                            <th class="pb-2 font-medium">Download</th>
                             <th class="pb-2 font-medium">Actions</th>
                         </tr>
                     </thead>
@@ -170,6 +172,16 @@
                             <td class="py-2 text-gray-600 dark:text-gray-400">{{ doc.filename }}</td>
                             <td class="py-2 text-gray-600 dark:text-gray-400">{% if doc.size %}{{ doc.size|filesizeformat }}{% else %}—{% endif %}</td>
                             <td class="py-2 text-gray-600 dark:text-gray-400">{{ doc.created_at|date:'M d, Y' }}</td>
+                            <td class="py-2">
+                                {% if doc.file %}
+                                <a href="{% url 'documents:show' doc.pk %}" target="_blank" class="inline-flex items-center"><i data-lucide="eye" class="w-4 h-4 text-red-500"></i></a>
+                                {% endif %}
+                            </td>
+                            <td class="py-2">
+                                {% if doc.file %}
+                                <a href="{% url 'documents:download' doc.pk %}" class="inline-flex items-center"><i data-lucide="download" class="w-4 h-4 text-red-500"></i></a>
+                                {% endif %}
+                            </td>
                             <td class="py-2">
                                 <button onclick="openSlideOver('{% url 'documents:edit_slide' doc.pk %}')" class="text-indigo-600 dark:text-indigo-400 hover:underline mr-2">Edit</button>
                                 <button @click="$store.deleteModal.open('{% url 'documents:delete' doc.pk %}', '{{ doc.number|default:doc.filename|escapejs }}')" class="text-red-600 dark:text-red-400 hover:underline">Delete</button>
