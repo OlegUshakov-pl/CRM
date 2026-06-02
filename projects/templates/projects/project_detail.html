@@ -36,13 +36,58 @@
 
     <div class="space-y-6">
         {% if project.images.all %}
-        <div class="bg-white border border-[#e8e8e8] p-6">
-            <h2 class="text-lg font-semibold text-[#222] mb-4">Photos</h2>
-            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+        <div id="gallery" class="bg-white border border-[#e8e8e8] p-6">
+            <div
+                class="relative overflow-hidden bg-gray-100 dark:bg-gray-700"
+                style="aspect-ratio: 16/9"
+            >
                 {% for img in project.images.all %}
-                <a href="{{ img.image.url }}" target="_blank" class="block aspect-square overflow-hidden bg-gray-100 dark:bg-gray-700 hover:opacity-90 transition-opacity">
-                    <img src="{{ img.image.url }}" alt="{{ project.name }}" class="w-full h-full object-cover" />
-                </a>
+                <div
+                    class="gallery-slide absolute inset-0"
+                    data-index="{{ forloop.counter0 }}"
+                    {%
+                    if
+                    not
+                    forloop.first
+                    %}style="display:none"
+                    {%
+                    endif
+                    %}
+                >
+                    <a href="{{ img.image.url }}" target="_blank">
+                        <img
+                            src="{{ img.image.url }}"
+                            alt="{{ project.name }}"
+                            class="w-full h-full object-cover"
+                        />
+                    </a>
+                </div>
+                {% endfor %}
+                <button
+                    type="button"
+                    onclick="galleryPrev()"
+                    id="gallery-prev"
+                    class="absolute left-2 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-black/40 text-white hover:bg-black/60 transition-colors"
+                >
+                    <i data-lucide="chevron-left" class="w-5 h-5"></i>
+                </button>
+                <button
+                    type="button"
+                    onclick="galleryNext()"
+                    id="gallery-next"
+                    class="absolute right-2 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-black/40 text-white hover:bg-black/60 transition-colors"
+                >
+                    <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="flex justify-center gap-1 mt-3" id="gallery-dots">
+                {% for img in project.images.all %}
+                <button
+                    type="button"
+                    onclick="galleryGo({{ forloop.counter0 }})"
+                    class="gallery-dot h-2 w-2 rounded-full bg-gray-300 dark:bg-gray-600 transition-all duration-300"
+                    data-index="{{ forloop.counter0 }}"
+                ></button>
                 {% endfor %}
             </div>
         </div>
@@ -312,4 +357,54 @@
     </div>
 </div>
 
+{% endblock %} {% block extra_scripts %}
+<script>
+    (function () {
+        function galleryShow(index) {
+            var slides = document.querySelectorAll(".gallery-slide");
+            var total = slides.length;
+            if (total === 0) return;
+            slides.forEach(function (s, i) {
+                s.style.display = i === index ? "" : "none";
+            });
+            var dots = document.querySelectorAll(".gallery-dot");
+            dots.forEach(function (d, i) {
+                d.classList.toggle("bg-indigo-600", i === index);
+                d.classList.toggle("w-6", i === index);
+                d.classList.toggle("bg-gray-300", i !== index);
+                d.classList.toggle("dark:bg-gray-600", i !== index);
+                d.classList.toggle("w-2", i !== index);
+            });
+            var prev = document.getElementById("gallery-prev");
+            var next = document.getElementById("gallery-next");
+            if (prev) prev.style.opacity = index === 0 ? "0.3" : "1";
+            if (next) next.style.opacity = index === total - 1 ? "0.3" : "1";
+            window._galleryCurrent = index;
+        }
+        window.galleryShow = galleryShow;
+        window.galleryGo = function (index) {
+            galleryShow(index);
+        };
+        window.galleryPrev = function () {
+            var c = window._galleryCurrent || 0;
+            if (c > 0) galleryShow(c - 1);
+        };
+        window.galleryNext = function () {
+            var slides = document.querySelectorAll(".gallery-slide");
+            var c = window._galleryCurrent || 0;
+            if (c < slides.length - 1) galleryShow(c + 1);
+        };
+
+        function init() {
+            var slides = document.querySelectorAll(".gallery-slide");
+            if (slides.length > 0) galleryShow(0);
+        }
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", init);
+        } else {
+            init();
+        }
+    })();
+
+</script>
 {% endblock %}
