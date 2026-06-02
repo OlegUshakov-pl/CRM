@@ -15,20 +15,21 @@ A modern CRM built with **Django 6.0.5 + Tailwind CSS 4 + Alpine.js + HTMX**.
 
 ## Features
 
-- **Dashboard** — Stats overview, recent projects, today's tasks, recent notes
-- **Projects** — Full CRUD with status tracking, gallery, materials, notes, contacts
-- **Companies** — Company management with logo upload
-- **Contacts** — Contact management linked to companies
-- **Materials** — BOM management per project (quantity, unit, price)
-- **Tasks** — Task management with priorities, statuses, assignments
-- **Notes** — Universal notes linked to projects, companies, contacts
-- **Dark Mode** — Toggle light/dark theme
-- **Slide-over Forms** — All create/edit via animated right panel
-- **Live Search** — HTMX-powered search and filters
-- **Responsive** — Mobile-friendly layout with collapsible sidebar
-- **Activity Logging** — Automatic tracking of all create/update/delete actions
-- **Soft Delete** — All records preserved with `is_active` flag
-- **Auto Versioning** — Version displayed in footer, derived from git commit count
+- **Dashboard** — stats, recent projects, today's tasks, recent notes
+- **Projects** — full CRUD with status, gallery, materials, notes, contacts
+- **Companies** — management with logo upload
+- **Contacts** — linked to companies
+- **Materials** — BOM per project (quantity, unit, price)
+- **Tasks** — priorities, statuses, assignments
+- **Notes** — linked to projects, companies, contacts
+- **Documents** — upload, preview (images, PDF, text), download, filter by type/project
+- **Dark mode** — light/dark toggle
+- **Slide-over forms** — create/edit via animated right panel
+- **Live search** — HTMX-powered search and filters
+- **Responsive** — mobile-friendly with collapsible sidebar
+- **Activity logging** — automatic tracking of all CUD actions
+- **Soft delete** — all records preserved via `is_active`
+- **Auto versioning** — version from git commit count
 
 ## Quick Start
 
@@ -59,27 +60,25 @@ python manage.py runserver
 ## Project Structure
 
 ```
-config/              # Django project settings & root URLs
-accounts/            # Auth (login, logout, profile)
-core/                # Dashboard, base model (TimeStampedModel), activity logging, version
-companies/           # Company management
-contacts/            # Contact management
-projects/            # Project management with status, gallery, notes
-materials/           # Materials / BOM management (per project)
-tasks/               # Task management
-notes/               # Universal notes linked to any entity
-generator/           # Template app — boilerplate for adding new modules
+config/              Settings & root URLs
+accounts/            Auth (login, logout, profile)
+core/                Dashboard, base model, activity logging
+companies/           Company management
+contacts/            Contact management
+projects/            Project management
+materials/           Materials / BOM
+tasks/               Task management
+notes/               Universal notes
+documents/           File management with preview (images, PDF, text)
+generator/           Template app for new modules
 templates/
-  base.html          # Base layout with sidebar, topbar, dark mode toggle
-  includes/
-    sidebar.html     # Left navigation sidebar
-    topbar.html      # Top bar with search & profile
-    slide_over.html  # Slide-over panel for forms
-    pagination.html  # Pagination component
+  base.html          Base layout
+  includes/          Sidebar, topbar, slide-over, pagination
 static/
-  src/styles.css     # Tailwind input
-  dist/styles.css    # Tailwind output
-media/               # User-uploaded files (logos, avatars, project images)
+  src/styles.css     Tailwind input
+  dist/styles.css    Tailwind output
+media/               Uploaded files (logos, avatars, images)
+documents/           Uploaded documents (grouped by project/type)
 ```
 
 ## Models
@@ -92,26 +91,22 @@ media/               # User-uploaded files (logos, avatars, project images)
 | **Material** | project (FK), name, quantity, unit, unit_price, notes |
 | **Task** | title, description, status, priority, due_date, project (FK), assigned_to (FK), contacts (M2M) |
 | **Note** | title, content, date, project (FK), company (FK), contact (FK) |
+| **Document** | project (FK), number, file, file_type (contracts/reports/drawings/photos/invoices/other), size |
 | **Activity** | user, action, description, timestamp, object (GenericFK) |
 
-All models inherit from `TimeStampedModel` which provides `created_at`, `updated_at`, `created_by`, and `is_active`.
+All models inherit from `TimeStampedModel` (`created_at`, `updated_at`, `created_by`, `is_active`).
 
-## UX Pattern
+## UX
 
-All record creation and editing happens through a semi-transparent slide-over panel that slides in from the right side of the screen. This keeps the main content area stable and provides a focused form experience.
+All forms use a slide-over panel from the right, keeping the main content stable.
 
 ## Generator App
 
-The `generator/` directory contains a ready-to-copy template app (`Deal` model — sales pipeline) with full CRUD, forms, views, URLs, admin, and templates. To create a new module:
+The `generator/` app is a ready-to-copy template with full CRUD. To create a new module:
 
 ```bash
 cp -r generator <new_app_name>
-# Rename models, views, templates, and register in settings.py
+# Rename models, views, templates, register in settings.py
 ```
 
-See `generator/GENERATOR_README.md` for detailed instructions.
-
-## P.S.
-
-The first version. CRM will be updated and I have a lot of ideas about it. I'm working on changes.
-You can take CRM and change it for yourself if you want.
+See `generator/GENERATOR_README.md` for details.
