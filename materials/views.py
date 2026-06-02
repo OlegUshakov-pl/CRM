@@ -103,8 +103,7 @@ def material_create(request, project_slug):
                 return response
             messages.success(request, 'Material added successfully.')
             return redirect('materials:page', project_slug=project_slug)
-    projects = Project.objects.filter(is_active=True)
-    return render(request, 'materials/material_form.html', {'form': form, 'project': project, 'projects': projects, 'title': 'Add Material'})
+    return render(request, 'materials/material_form.html', {'form': form, 'project': project, 'title': 'Add Material'})
 
 
 @login_required
@@ -122,8 +121,7 @@ def material_edit(request, slug):
                 return response
             messages.success(request, 'Material updated successfully.')
             return redirect('materials:page', project_slug=material.project.slug)
-    projects = Project.objects.filter(is_active=True)
-    return render(request, 'materials/material_form.html', {'form': form, 'project': material.project, 'projects': projects, 'title': 'Edit Material', 'material': material})
+    return render(request, 'materials/material_form.html', {'form': form, 'project': material.project, 'title': 'Edit Material', 'material': material})
 
 
 @login_required
@@ -141,16 +139,14 @@ def material_delete(request, slug):
 def material_create_slide(request, project_slug):
     project = get_object_or_404(Project, slug=project_slug)
     form = MaterialForm()
-    projects = Project.objects.filter(is_active=True)
-    return render(request, 'materials/material_form.html', {'form': form, 'project': project, 'projects': projects, 'title': 'Add Material'})
+    return render(request, 'materials/material_form.html', {'form': form, 'project': project, 'title': 'Add Material'})
 
 
 @login_required
 def material_edit_slide(request, slug):
     material = get_object_or_404(Material, slug=slug)
     form = MaterialForm(instance=material)
-    projects = Project.objects.filter(is_active=True)
-    return render(request, 'materials/material_form.html', {'form': form, 'project': material.project, 'projects': projects, 'title': 'Edit Material', 'material': material})
+    return render(request, 'materials/material_form.html', {'form': form, 'project': material.project, 'title': 'Edit Material', 'material': material})
 
 
 @login_required
@@ -173,7 +169,8 @@ def category_save(request):
 @login_required
 def common_create_slide(request):
     form = CommonMaterialForm()
-    return render(request, 'materials/common_material_form.html', {'form': form, 'title': 'Add Material'})
+    projects = Project.objects.filter(is_active=True)
+    return render(request, 'materials/common_material_form.html', {'form': form, 'projects': projects, 'title': 'Add Material'})
 
 
 @login_required
@@ -182,11 +179,15 @@ def common_save(request):
     if form.is_valid():
         material = form.save(commit=False)
         material.created_by = request.user
+        project_id = request.POST.get('project')
+        if project_id:
+            material.project = get_object_or_404(Project, id=project_id)
         material.save()
         response = HttpResponse()
         response['HX-Refresh'] = 'true'
         return response
-    return render(request, 'materials/common_material_form.html', {'form': form, 'title': 'Add Material'})
+    projects = Project.objects.filter(is_active=True)
+    return render(request, 'materials/common_material_form.html', {'form': form, 'projects': projects, 'title': 'Add Material'})
 
 
 @login_required
