@@ -77,11 +77,14 @@ def document_save(request, project_slug):
         document.project = project
         document.save()
         if request.headers.get('HX-Request'):
-            response = HttpResponse('<script>closeSlideOver()</script>')
+            response = HttpResponse()
             response['HX-Refresh'] = 'true'
             return response
         messages.success(request, 'Document added successfully.')
-    return redirect('documents:project', project_slug=project_slug)
+        return redirect('documents:project', project_slug=project_slug)
+    return render(request, 'documents/document_form.html', {
+        'form': form, 'project': project, 'title': 'Add Document',
+    })
 
 
 @login_required
@@ -99,16 +102,13 @@ def document_common_save(request):
         document = form.save(commit=False)
         document.save()
         if request.headers.get('HX-Request'):
-            response = HttpResponse('<script>closeSlideOver()</script>')
+            response = HttpResponse()
             response['HX-Refresh'] = 'true'
             return response
         messages.success(request, 'Document added successfully.')
         return redirect('documents:list')
     return render(request, 'documents/document_common_form.html', {
         'form': form, 'title': 'Add Document',
-    })
-    return render(request, 'documents/document_form.html', {
-        'form': form, 'project': project, 'title': 'Add Document',
     })
 
 
@@ -119,7 +119,7 @@ def document_update(request, pk):
     if form.is_valid():
         form.save()
         if request.headers.get('HX-Request'):
-            response = HttpResponse('<script>closeSlideOver()</script>')
+            response = HttpResponse()
             response['HX-Refresh'] = 'true'
             return response
         messages.success(request, 'Document updated successfully.')
