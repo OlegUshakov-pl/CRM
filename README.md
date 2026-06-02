@@ -26,6 +26,8 @@ A modern CRM built with **Django 6.0.5 + Tailwind CSS 4 + Alpine.js + HTMX**.
 - **Dark mode** — light/dark toggle
 - **Slide-over forms** — create/edit via animated right panel
 - **Live search** — HTMX-powered search and filters
+- **Sorting** — column-based sort on tables (materials, documents, notes, categories)
+- **Multiple file upload** — batch document upload with multi-file selector
 - **Responsive** — mobile-friendly with collapsible sidebar
 - **Activity logging** — automatic tracking of all CUD actions
 - **Soft delete** — all records preserved via `is_active`
@@ -89,7 +91,7 @@ documents/           Uploaded documents (grouped by project/type)
 | **Contact** | company (FK), first_name, last_name, email, phone, position, avatar |
 | **Project** | name, number, description, status, company (FK), contacts (M2M), dates, budget, image |
 | **Material** | project (FK), name, quantity, unit, unit_price, notes |
-| **Task** | title, description, status, priority, due_date, project (FK), assigned_to (FK), contacts (M2M) |
+| **Task** | title, description, status, priority, due_date, project (FK) |
 | **Note** | title, content, date, project (FK), company (FK), contact (FK) |
 | **Document** | project (FK), number, file, file_type (contracts/reports/drawings/photos/invoices/other), size |
 | **Activity** | user, action, description, timestamp, object (GenericFK) |
