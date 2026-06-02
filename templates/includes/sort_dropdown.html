@@ -6,13 +6,17 @@
     </button>
     <div x-show="open" @click.outside="open = false" class="absolute right-0 mt-1 w-44 bg-white border border-[#e8e8e8] shadow-lg z-50 py-1" x-cloak>
         {% for field, label in sort_options %}
-        <a href="?sort={{ field }}{% if current_sort == field and current_order == 'asc' %}&order=desc{% else %}&order=asc{% endif %}{% if query %}&q={{ query }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_page %}&page={{ current_page }}{% endif %}"
-           class="flex items-center justify-between px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+        <button hx-get="{% url 'materials:common' %}"
+                hx-target="#material-list"
+                hx-include="#filter-form"
+                hx-vals='{"sort":"{{ field }}","order":"{% if current_sort == field and current_order == 'asc' %}desc{% else %}asc{% endif %}"}'
+                @click="open = false"
+                class="flex items-center justify-between w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors text-left">
             <span>{{ label }}</span>
             {% if current_sort == field %}
             <i data-lucide="{% if current_order == 'asc' %}arrow-up{% else %}arrow-down{% endif %}" class="w-3.5 h-3.5 text-indigo-600"></i>
             {% endif %}
-        </a>
+        </button>
         {% endfor %}
     </div>
 </div>
