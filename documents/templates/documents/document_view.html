@@ -24,7 +24,6 @@
     {% if is_image %}
     <div class="bg-white border border-[#e8e8e8] p-6">
         <div id="viewer-gallery" class="relative overflow-hidden bg-gray-100" style="aspect-ratio: 16/9">
-            {% if photos %}
             <div class="gallery-slides flex transition-transform duration-300" id="gallery-track">
                 <div class="gallery-slide min-w-full flex items-center justify-center">
                     <img src="{% url 'documents:show' doc.pk %}" alt="{{ doc.filename }}" class="max-w-full max-h-full object-contain">
@@ -35,14 +34,15 @@
                 </div>
                 {% endfor %}
             </div>
+            {% if photos %}
             <button type="button" onclick="galleryPrev()" class="absolute left-2 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-black/40 text-white hover:bg-black/60 transition-colors">
                 <i data-lucide="chevron-left" class="w-5 h-5"></i>
             </button>
             <button type="button" onclick="galleryNext()" class="absolute right-2 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-black/40 text-white hover:bg-black/60 transition-colors">
                 <i data-lucide="chevron-right" class="w-5 h-5"></i>
             </button>
+            {% endif %}
         </div>
-        {% endif %}
         {% if photos %}
         <div class="flex justify-center gap-1 mt-3" id="gallery-dots">
             <button type="button" onclick="galleryGo(0)" class="gallery-dot h-2 w-6 rounded-full bg-indigo-600 transition-all duration-300" data-index="0"></button>
