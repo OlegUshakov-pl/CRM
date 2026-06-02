@@ -5,6 +5,9 @@
 <div style="max-width: 1080px; width: 100%; margin-left: auto; margin-right: auto;">
     <div class="flex items-center justify-between mb-6">
         <h1 class="text-2xl font-bold text-gray-900">Documents</h1>
+        <button onclick="openSlideOver('{% url 'documents:common_create_slide' %}')" class="inline-flex items-center gap-2 px-4 py-2.5 bg-red-400 hover:bg-red-500 text-white text-[14px] font-medium transition-colors">
+            + Add Document
+        </button>
     </div>
 
     <div class="bg-white border border-[#e8e8e8] p-6">

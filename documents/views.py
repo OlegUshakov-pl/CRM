@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.core.paginator import Paginator
 from projects.models import Project
 from .models import Document
-from .forms import DocumentForm
+from .forms import DocumentForm, CommonDocumentForm
 
 
 @login_required
@@ -81,7 +81,32 @@ def document_save(request, project_slug):
             response['HX-Refresh'] = 'true'
             return response
         messages.success(request, 'Document added successfully.')
-        return redirect('documents:project', project_slug=project_slug)
+    return redirect('documents:project', project_slug=project_slug)
+
+
+@login_required
+def document_common_create_slide(request):
+    form = CommonDocumentForm()
+    return render(request, 'documents/document_common_form.html', {
+        'form': form, 'title': 'Add Document',
+    })
+
+
+@login_required
+def document_common_save(request):
+    form = CommonDocumentForm(request.POST, request.FILES)
+    if form.is_valid():
+        document = form.save(commit=False)
+        document.save()
+        if request.headers.get('HX-Request'):
+            response = HttpResponse('<script>closeSlideOver()</script>')
+            response['HX-Refresh'] = 'true'
+            return response
+        messages.success(request, 'Document added successfully.')
+        return redirect('documents:list')
+    return render(request, 'documents/document_common_form.html', {
+        'form': form, 'title': 'Add Document',
+    })
     return render(request, 'documents/document_form.html', {
         'form': form, 'project': project, 'title': 'Add Document',
     })
