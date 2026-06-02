@@ -12,15 +12,21 @@
         </button>
     </div>
 
-    <div class="flex items-center gap-4 mb-6">
-        <form method="get" class="relative flex-1">
+    <form id="filter-form" method="get" hx-get="{% url 'materials:common' %}" hx-target="#material-list" hx-trigger="submit" class="flex items-center gap-4 mb-6">
+        <div class="relative flex-1">
             <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"></i>
-            <input type="text" name="q" placeholder="Search materials..." value="{{ query }}" class="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-300 text-sm outline-none">
-            {% if current_sort %}<input type="hidden" name="sort" value="{{ current_sort }}">{% endif %}
-            {% if current_order %}<input type="hidden" name="order" value="{{ current_order }}">{% endif %}
-        </form>
+            <input type="text" name="q" placeholder="Search materials..." value="{{ query }}" class="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-300 text-sm outline-none" hx-trigger="keyup changed delay:300ms" hx-target="#material-list" hx-include="#filter-form">
+        </div>
+        <select name="category" class="px-3 py-2.5 bg-white border border-gray-300 text-sm text-gray-600 outline-none cursor-pointer" hx-trigger="change" hx-target="#material-list" hx-include="#filter-form">
+            <option value="">All</option>
+            {% for cat in categories %}
+            <option value="{{ cat.pk }}" {% if current_category == cat.pk|stringformat:'s' %}selected{% endif %}>{{ cat.name }}</option>
+            {% endfor %}
+        </select>
+        {% if current_sort %}<input type="hidden" name="sort" value="{{ current_sort }}">{% endif %}
+        {% if current_order %}<input type="hidden" name="order" value="{{ current_order }}">{% endif %}
         {% include 'includes/sort_dropdown.html' %}
-    </div>
+    </form>
 
     <div id="material-list" class="bg-white border border-[#e8e8e8] p-6">
         <div class="flex items-center justify-between mb-4">
@@ -34,6 +40,7 @@
                     <tr class="text-left text-gray-500 border-b border-gray-200">
                         <th class="pb-2 font-medium">Name</th>
                         <th class="pb-2 font-medium">Project</th>
+                        <th class="pb-2 font-medium">Category</th>
                         <th class="pb-2 font-medium">Qty</th>
                         <th class="pb-2 font-medium">Unit</th>
                         <th class="pb-2 font-medium">Price</th>
@@ -46,6 +53,7 @@
                     <tr class="border-b border-gray-100">
                         <td class="py-2 text-gray-900">{{ material.name }}</td>
                         <td class="py-2 text-gray-600">{{ material.project.name|default:'—' }}</td>
+                        <td class="py-2 text-gray-600">{{ material.category.name|default:'—' }}</td>
                         <td class="py-2 text-gray-600">{{ material.quantity }}</td>
                         <td class="py-2 text-gray-600">{{ material.get_unit_display }}</td>
                         <td class="py-2 text-gray-600">

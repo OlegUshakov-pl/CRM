@@ -49,9 +49,13 @@ def apply_sorting(queryset, request):
 def material_common(request):
     materials = Material.objects.filter(is_active=True).select_related('project', 'category')
     query = request.GET.get('q', '')
+    category_filter = request.GET.get('category', '')
     if query:
         materials = materials.filter(name__icontains=query)
+    if category_filter:
+        materials = materials.filter(category_id=category_filter)
     materials, sort, order, sort_label = apply_sorting(materials, request)
+    categories = Category.objects.all()
     paginator = Paginator(materials, 20)
     page = request.GET.get('page', 1)
     materials_page = paginator.get_page(page)
@@ -59,6 +63,7 @@ def material_common(request):
         'materials': materials_page, 'query': query, 'total_count': paginator.count,
         'sort_options': SORT_OPTIONS, 'current_sort': sort, 'current_order': order,
         'current_sort_label': sort_label, 'current_page': page,
+        'categories': categories, 'current_category': category_filter,
     })
 
 

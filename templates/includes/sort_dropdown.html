@@ -6,7 +6,7 @@
     </button>
     <div x-show="open" @click.outside="open = false" class="absolute right-0 mt-1 w-44 bg-white border border-[#e8e8e8] shadow-lg z-50 py-1" x-cloak>
         {% for field, label in sort_options %}
-        <a href="?sort={{ field }}{% if current_sort == field and current_order == 'asc' %}&order=desc{% else %}&order=asc{% endif %}{% if query %}&q={{ query }}{% endif %}{% if current_page %}&page={{ current_page }}{% endif %}"
+        <a href="?sort={{ field }}{% if current_sort == field and current_order == 'asc' %}&order=desc{% else %}&order=asc{% endif %}{% if query %}&q={{ query }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_page %}&page={{ current_page }}{% endif %}"
            class="flex items-center justify-between px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
             <span>{{ label }}</span>
             {% if current_sort == field %}
