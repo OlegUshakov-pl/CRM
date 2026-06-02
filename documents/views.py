@@ -2,6 +2,7 @@ import mimetypes
 import os
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse, FileResponse
+from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
@@ -142,6 +143,28 @@ def document_show(request, pk):
         return HttpResponse('File not found', status=404)
     content_type, _ = mimetypes.guess_type(file_path)
     return FileResponse(open(file_path, 'rb'), content_type=content_type or 'application/octet-stream')
+
+
+@login_required
+def document_view(request, pk):
+    document = get_object_or_404(Document, pk=pk)
+    if not document.file or not os.path.exists(document.filepath):
+        return HttpResponse('File not found', status=404)
+    ext = os.path.splitext(document.filename)[1].lower()
+    is_image = ext in ('.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp', '.svg')
+    is_pdf = ext == '.pdf'
+    photos = []
+    if is_image:
+        photos = Document.objects.filter(
+            project=document.project, file_type='photos'
+        ).exclude(pk=document.pk).order_by('-created_at')[:10]
+    return render(request, 'documents/document_view.html', {
+        'doc': document,
+        'is_image': is_image,
+        'is_pdf': is_pdf,
+        'photos': photos,
+        'file_url': reverse('documents:download', kwargs={'pk': document.pk}),
+    })
 
 
 @login_required

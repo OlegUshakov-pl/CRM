@@ -1,0 +1,97 @@
+{% load static %}
+{% extends 'base.html' %}
+{% block title %}{{ doc.filename }} - CRM{% endblock %}
+{% block breadcrumb %}{{ doc.filename }}{% endblock %}
+{% block content %}
+<div style="max-width: 1080px; width: 100%; margin-left: auto; margin-right: auto;">
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">{{ doc.filename }}</h1>
+            <p class="text-sm text-gray-500 mt-1">{{ doc.project.name }} · {{ doc.get_file_type_display }} · {% if doc.size %}{{ doc.size|filesizeformat }}{% endif %}</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <a href="{% url 'documents:download' doc.pk %}" class="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-[14px] font-medium transition-colors">
+                <i data-lucide="download" class="w-4 h-4"></i>
+                Download
+            </a>
+            <a href="{% if request.META.HTTP_REFERER %}{{ request.META.HTTP_REFERER }}{% else %}{% url 'documents:list' %}{% endif %}" class="inline-flex items-center gap-2 px-4 py-2.5 border border-gray-300 text-gray-700 hover:bg-gray-50 text-[14px] transition-colors">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                Back
+            </a>
+        </div>
+    </div>
+
+    {% if is_image %}
+    <div class="bg-white border border-[#e8e8e8] p-6">
+        <div id="viewer-gallery" class="relative overflow-hidden bg-gray-100" style="aspect-ratio: 16/9">
+            {% if photos %}
+            <div class="gallery-slides flex transition-transform duration-300" id="gallery-track">
+                <div class="gallery-slide min-w-full flex items-center justify-center">
+                    <img src="{% url 'documents:show' doc.pk %}" alt="{{ doc.filename }}" class="max-w-full max-h-full object-contain">
+                </div>
+                {% for photo in photos %}
+                <div class="gallery-slide min-w-full flex items-center justify-center">
+                    <img src="{% url 'documents:show' photo.pk %}" alt="{{ photo.filename }}" class="max-w-full max-h-full object-contain">
+                </div>
+                {% endfor %}
+            </div>
+            <button type="button" onclick="galleryPrev()" class="absolute left-2 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-black/40 text-white hover:bg-black/60 transition-colors">
+                <i data-lucide="chevron-left" class="w-5 h-5"></i>
+            </button>
+            <button type="button" onclick="galleryNext()" class="absolute right-2 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-black/40 text-white hover:bg-black/60 transition-colors">
+                <i data-lucide="chevron-right" class="w-5 h-5"></i>
+            </button>
+        </div>
+        {% if photos %}
+        <div class="flex justify-center gap-1 mt-3" id="gallery-dots">
+            <button type="button" onclick="galleryGo(0)" class="gallery-dot h-2 w-6 rounded-full bg-indigo-600 transition-all duration-300" data-index="0"></button>
+            {% for photo in photos %}
+            <button type="button" onclick="galleryGo({{ forloop.counter }})" class="gallery-dot h-2 w-2 rounded-full bg-gray-300 transition-all duration-300" data-index="{{ forloop.counter }}"></button>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+    {% elif is_pdf %}
+    <div class="bg-white border border-[#e8e8e8] p-0" style="height: 80vh;">
+        <iframe src="{% url 'documents:show' doc.pk %}" width="100%" height="100%" style="border:none;"></iframe>
+    </div>
+    {% else %}
+    <div class="bg-white border border-[#e8e8e8] p-12 text-center">
+        <i data-lucide="file-text" class="w-16 h-16 text-gray-300 mx-auto mb-4"></i>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ doc.filename }}</h3>
+        <p class="text-sm text-gray-500 mb-6">This file type cannot be previewed in the browser.</p>
+        <a href="{% url 'documents:download' doc.pk %}" class="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-[14px] font-medium transition-colors">
+            <i data-lucide="download" class="w-4 h-4"></i>
+            Download File
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(function() {
+    var track = document.getElementById('gallery-track');
+    if (!track) return;
+    var slides = track.querySelectorAll('.gallery-slide');
+    var dots = document.querySelectorAll('.gallery-dot');
+    var current = 0;
+    function go(index) {
+        if (index < 0) index = slides.length - 1;
+        if (index >= slides.length) index = 0;
+        current = index;
+        track.style.transform = 'translateX(-' + (current * 100) + '%)';
+        dots.forEach(function(d, i) {
+            d.classList.toggle('bg-indigo-600', i === current);
+            d.classList.toggle('w-6', i === current);
+            d.classList.toggle('bg-gray-300', i !== current);
+            d.classList.toggle('w-2', i !== current);
+        });
+    }
+    window.galleryGo = go;
+    window.galleryPrev = function() { go(current - 1); };
+    window.galleryNext = function() { go(current + 1); };
+})();
+</script>
+{% endblock %}
