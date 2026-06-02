@@ -9,7 +9,7 @@ from core.models import log_activity
 
 @login_required
 def task_list(request):
-    tasks = Task.objects.filter(is_active=True).select_related('project', 'assigned_to')
+    tasks = Task.objects.filter(is_active=True).select_related('project')
     query = request.GET.get('q', '')
     status_filter = request.GET.get('status', '')
     priority_filter = request.GET.get('priority', '')

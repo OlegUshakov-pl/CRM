@@ -1,7 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
 from core.models import TimeStampedModel, generate_unique_slug
-from contacts.models import Contact
 from projects.models import Project
 
 
@@ -27,8 +26,6 @@ class Task(TimeStampedModel):
     priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default='medium')
     due_date = models.DateField(blank=True, null=True)
     project = models.ForeignKey(Project, on_delete=models.SET_NULL, null=True, blank=True, related_name='tasks')
-    assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_tasks')
-    contacts = models.ManyToManyField(Contact, blank=True, related_name='tasks')
 
     class Meta:
         ordering = ['-created_at']

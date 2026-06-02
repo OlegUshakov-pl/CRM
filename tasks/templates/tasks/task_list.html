@@ -83,9 +83,6 @@
                             {% if task.due_date %}
                                 <span class="text-gray-500 dark:text-gray-400">Date: {{ task.due_date|date:'M d' }}</span>
                             {% endif %}
-                            {% if task.assigned_to %}
-                                <span class="text-gray-500 dark:text-gray-400">{{ task.assigned_to.get_full_name|default:task.assigned_to.username }}</span>
-                            {% endif %}
                         </div>
                     </div>
                 </div>
