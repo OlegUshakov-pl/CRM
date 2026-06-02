@@ -7,15 +7,21 @@
         <div>
             <h1 class="text-2xl font-bold text-gray-900">{{ project.name }}</h1>
         </div>
-        <a href="{% url 'documents:projects' %}" class="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 transition-colors">
-            <i data-lucide="arrow-left" class="w-4 h-4"></i>
-            Back to Projects
-        </a>
+        <div class="flex items-center gap-2">
+            <button onclick="openSlideOver('{% url 'documents:create_slide' project.slug %}')" class="inline-flex items-center gap-2 px-4 py-2.5 bg-red-400 hover:bg-red-500 text-white text-[14px] font-medium transition-colors">
+                + Add Document
+            </button>
+            <a href="{% url 'documents:projects' %}" class="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 transition-colors">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                Back to Projects
+            </a>
+        </div>
     </div>
 
     <div class="bg-white border border-[#e8e8e8] p-6">
         <div class="flex items-center justify-between mb-4">
             <h2 class="text-lg font-semibold text-gray-900">Documents</h2>
+            <span class="text-sm text-gray-500">{{ documents|length }} item(s)</span>
         </div>
         {% if documents %}
         <div class="overflow-x-auto">
@@ -27,6 +33,7 @@
                         <th class="pb-2 font-medium">File</th>
                         <th class="pb-2 font-medium">Size</th>
                         <th class="pb-2 font-medium">Created</th>
+                        <th class="pb-2 font-medium">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -37,6 +44,13 @@
                         <td class="py-2 text-gray-600">{{ doc.filename }}</td>
                         <td class="py-2 text-gray-600">{% if doc.size %}{{ doc.size|filesizeformat }}{% else %}—{% endif %}</td>
                         <td class="py-2 text-gray-600">{{ doc.created_at|date:'M d, Y' }}</td>
+                        <td class="py-2">
+                            <button onclick="openSlideOver('{% url 'documents:edit_slide' doc.pk %}')" class="text-indigo-600 hover:underline mr-2">Edit</button>
+                            <form method="post" action="{% url 'documents:delete' doc.pk %}" style="display:inline">
+                                {% csrf_token %}
+                                <button type="submit" class="text-red-600 hover:underline" onclick="return confirm('Delete this document?')">Delete</button>
+                            </form>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>

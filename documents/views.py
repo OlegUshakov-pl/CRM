@@ -1,9 +1,11 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
 from projects.models import Project
 from .models import Document
+from .forms import DocumentForm
 
 
 @login_required
@@ -45,3 +47,69 @@ def document_projects(request):
     return render(request, 'documents/documents_projects.html', {
         'projects': projects_page, 'query': query,
     })
+
+
+@login_required
+def document_create_slide(request, project_slug):
+    project = get_object_or_404(Project, slug=project_slug)
+    form = DocumentForm()
+    return render(request, 'documents/document_form.html', {
+        'form': form, 'project': project, 'title': 'Add Document',
+    })
+
+
+@login_required
+def document_edit_slide(request, pk):
+    document = get_object_or_404(Document, pk=pk)
+    form = DocumentForm(instance=document)
+    return render(request, 'documents/document_form.html', {
+        'form': form, 'document': document, 'project': document.project,
+        'title': 'Edit Document',
+    })
+
+
+@login_required
+def document_save(request, project_slug):
+    project = get_object_or_404(Project, slug=project_slug)
+    form = DocumentForm(request.POST, request.FILES)
+    if form.is_valid():
+        document = form.save(commit=False)
+        document.project = project
+        document.save()
+        if request.headers.get('HX-Request'):
+            response = HttpResponse('<script>closeSlideOver()</script>')
+            response['HX-Refresh'] = 'true'
+            return response
+        messages.success(request, 'Document added successfully.')
+        return redirect('documents:project', project_slug=project_slug)
+    return render(request, 'documents/document_form.html', {
+        'form': form, 'project': project, 'title': 'Add Document',
+    })
+
+
+@login_required
+def document_update(request, pk):
+    document = get_object_or_404(Document, pk=pk)
+    form = DocumentForm(request.POST, request.FILES, instance=document)
+    if form.is_valid():
+        form.save()
+        if request.headers.get('HX-Request'):
+            response = HttpResponse('<script>closeSlideOver()</script>')
+            response['HX-Refresh'] = 'true'
+            return response
+        messages.success(request, 'Document updated successfully.')
+        return redirect('documents:project', project_slug=document.project.slug)
+    return render(request, 'documents/document_form.html', {
+        'form': form, 'document': document, 'project': document.project,
+        'title': 'Edit Document',
+    })
+
+
+@login_required
+def document_delete(request, pk):
+    document = get_object_or_404(Document, pk=pk)
+    project_slug = document.project.slug
+    if request.method == 'POST':
+        document.delete()
+        messages.success(request, 'Document deleted.')
+    return redirect('documents:project', project_slug=project_slug)
