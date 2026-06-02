@@ -52,10 +52,7 @@
                         </td>
                         <td class="py-2">
                             <button onclick="openSlideOver('{% url 'documents:edit_slide' doc.pk %}')" class="text-indigo-600 hover:underline mr-2">Edit</button>
-                            <form method="post" action="{% url 'documents:delete' doc.pk %}" style="display:inline">
-                                {% csrf_token %}
-                                <button type="submit" class="text-red-600 hover:underline" onclick="return confirm('Delete this document?')">Delete</button>
-                            </form>
+                            <button @click="$store.deleteModal.open('{% url 'documents:delete' doc.pk %}', '{{ doc.number|default:doc.filename|escapejs }}')" class="text-red-600 hover:underline">Delete</button>
                         </td>
                     </tr>
                     {% endfor %}

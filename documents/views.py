@@ -188,8 +188,7 @@ def document_download(request, pk):
 @login_required
 def document_delete(request, pk):
     document = get_object_or_404(Document, pk=pk)
-    project_slug = document.project.slug
     if request.method == 'POST':
         document.delete()
         messages.success(request, 'Document deleted.')
-    return redirect('documents:project', project_slug=project_slug)
+    return redirect(request.META.get('HTTP_REFERER', reverse('documents:list')))
