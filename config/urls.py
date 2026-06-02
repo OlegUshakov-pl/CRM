@@ -14,6 +14,7 @@ urlpatterns = [
     path('notes/', include('notes.urls')),
     path('materials/', include('materials.urls')),
     path('deals/', include('generator.urls')),
+    path('documents/', include('documents.urls')),
 ]
 
 if settings.DEBUG:

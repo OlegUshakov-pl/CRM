@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     'tasks',
     'notes',
     'generator',
+    'documents',
 ]
 
 MIDDLEWARE = [
