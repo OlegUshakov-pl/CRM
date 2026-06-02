@@ -62,12 +62,15 @@ def material_common(request):
     paginator = Paginator(materials, 20)
     page = request.GET.get('page', 1)
     materials_page = paginator.get_page(page)
-    return render(request, 'materials/materials_common.html', {
+    context = {
         'materials': materials_page, 'query': query, 'total_count': paginator.count,
         'sort_options': SORT_OPTIONS, 'current_sort': sort, 'current_order': order,
         'current_sort_label': sort_label, 'current_page': page,
         'categories': categories, 'current_category': category_filter,
-    })
+    }
+    if request.headers.get('HX-Request'):
+        return render(request, 'materials/partials/material_list_content.html', context)
+    return render(request, 'materials/materials_common.html', context)
 
 
 @login_required
