@@ -216,7 +216,18 @@ def category_list(request):
 def category_detail(request, pk):
     category = get_object_or_404(Category, pk=pk)
     materials = Material.objects.filter(category=category, is_active=True).select_related('project')
-    return render(request, 'materials/category_detail.html', {'category': category, 'materials': materials})
+    sort = request.GET.get('sort', 'name')
+    if sort == 'category':
+        materials = materials.order_by('category__name')
+    elif sort == 'qty':
+        materials = materials.order_by('quantity')
+    elif sort == 'price':
+        materials = materials.order_by('unit_price')
+    elif sort == 'created':
+        materials = materials.order_by('-created_at')
+    else:
+        materials = materials.order_by('name')
+    return render(request, 'materials/category_detail.html', {'category': category, 'materials': materials, 'current_sort': sort})
 
 
 @login_required

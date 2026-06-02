@@ -8,12 +8,23 @@
             <a href="{% url 'materials:category_list' %}" class="text-gray-400 hover:text-gray-600">
                 <i data-lucide="arrow-left" class="w-5 h-5"></i>
             </a>
-            <div>
-                <h1 class="text-2xl font-bold text-gray-900">{{ category.name }}</h1>
-                <p class="text-sm text-gray-500">{{ materials|length }} material(s)</p>
-            </div>
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">{{ category.name }}</h1>
+            <p class="text-sm text-gray-500">{{ materials|length }} material(s)</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <select onchange="this.form.submit()" name="sort" form="sort-form"
+                    class="px-3 py-2 border border-[#e8e8e8] text-sm text-gray-600 outline-none cursor-pointer bg-white">
+                <option value="name" {% if current_sort == 'name' %}selected{% endif %}>Name</option>
+                <option value="category" {% if current_sort == 'category' %}selected{% endif %}>Category</option>
+                <option value="qty" {% if current_sort == 'qty' %}selected{% endif %}>Qty</option>
+                <option value="price" {% if current_sort == 'price' %}selected{% endif %}>Price</option>
+                <option value="created" {% if current_sort == 'created' %}selected{% endif %}>Date Created</option>
+            </select>
         </div>
     </div>
+    <form id="sort-form" method="get"></form>
+</div>
 
     <div class="bg-white border border-[#e8e8e8] p-6">
         {% if materials %}
