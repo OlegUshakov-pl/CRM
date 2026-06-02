@@ -25,27 +25,23 @@
             >Additional Images</label
         >
         {% if project %}
-        <div class="flex flex-wrap gap-2 mb-3" id="existing-images">
+        <div class="flex flex-wrap gap-3 mb-3" id="existing-images">
             {% for img in project.images.all %}
-            <div class="relative w-20 h-20 flex-shrink-0">
-                <img
-                    src="{{ img.image.url }}"
-                    alt=""
-                    class="w-full h-full object-cover border border-[#e8e8e8]"
-                />
-                <label
-                    class="absolute -top-2 -right-2 w-6 h-6 bg-white border border-gray-300 flex items-center justify-center cursor-pointer shadow hover:bg-red-50 transition-colors"
-                >
-                    <input
-                        type="checkbox"
-                        name="delete_images"
-                        value="{{ img.id }}"
-                        class="w-4 h-4 accent-red-500 rounded cursor-pointer"
-                        onchange="
-                            this.closest('label').classList.toggle('bg-red-100', this.checked);
-                        "
+            <div class="flex flex-col items-center gap-1">
+                <div class="relative w-20 h-20 flex-shrink-0">
+                    <img
+                        src="{{ img.image.url }}"
+                        alt=""
+                        class="w-full h-full object-cover border border-[#e8e8e8]"
                     />
-                </label>
+                </div>
+                <button
+                    type="button"
+                    @click="$store.deleteModal.open('{% url 'projects:delete_image' img.pk %}', 'image')"
+                    class="text-[11px] text-red-500 hover:text-red-700 transition-colors"
+                >
+                    Delete
+                </button>
             </div>
             {% endfor %}
         </div>

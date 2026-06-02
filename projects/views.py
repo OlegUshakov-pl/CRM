@@ -96,6 +96,15 @@ def project_edit(request, slug):
 
 
 @login_required
+def delete_image(request, pk):
+    img = get_object_or_404(ProjectImage, pk=pk)
+    if request.method == 'POST':
+        img.delete()
+        messages.success(request, 'Image deleted.')
+    return redirect('projects:edit', slug=img.project.slug)
+
+
+@login_required
 def project_delete(request, slug):
     project = get_object_or_404(Project, slug=slug)
     if request.method == 'POST':

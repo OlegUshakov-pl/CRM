@@ -11,4 +11,5 @@ urlpatterns = [
     path('<slug:slug>/edit/', views.project_edit, name='edit'),
     path('<slug:slug>/delete/', views.project_delete, name='delete'),
     path('<slug:slug>/edit/slide/', views.project_edit_slide, name='edit_slide'),
+    path('image/<int:pk>/delete/', views.delete_image, name='delete_image'),
 ]
