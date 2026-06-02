@@ -2,7 +2,7 @@
     {% csrf_token %}
     {% for field in form %}
         <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ field.label }}</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{% if field.label == 'Due date' %}Date{% else %}{{ field.label }}{% endif %}</label>
             {{ field }}
             {% if field.errors %}
                 <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ field.errors.0 }}</p>
