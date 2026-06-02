@@ -75,37 +75,27 @@ def document_edit_slide(request, pk):
 @login_required
 def document_save(request, project_slug):
     project = get_object_or_404(Project, slug=project_slug)
-    files = request.FILES.getlist('file')
-    if not files:
-        form = DocumentForm(request.POST, request.FILES)
-        if form.is_valid():
-            document = form.save(commit=False)
-            document.project = project
-            document.save()
-        else:
-            return render(request, 'documents/document_form.html', {
-                'form': form, 'project': project, 'title': 'Add Document',
-            })
-    else:
-        form = DocumentForm(request.POST)
-        if form.is_valid():
-            for f in files:
-                Document.objects.create(
-                    project=project,
-                    number=form.cleaned_data.get('number', ''),
-                    file=f,
-                    file_type=form.cleaned_data.get('file_type', 'other'),
-                )
-        else:
-            return render(request, 'documents/document_form.html', {
-                'form': form, 'project': project, 'title': 'Add Document',
-            })
-    if request.headers.get('HX-Request'):
-        response = HttpResponse()
-        response['HX-Refresh'] = 'true'
-        return response
-    messages.success(request, 'Document(s) added successfully.')
-    return redirect('documents:project', project_slug=project_slug)
+    form = DocumentForm(request.POST, request.FILES)
+    if form.is_valid():
+        files = form.cleaned_data.pop('file', [])
+        if not files:
+            files = request.FILES.getlist('file')
+        for f in files:
+            Document.objects.create(
+                project=project,
+                number=form.cleaned_data.get('number', ''),
+                file=f,
+                file_type=form.cleaned_data.get('file_type', 'other'),
+            )
+        if request.headers.get('HX-Request'):
+            response = HttpResponse()
+            response['HX-Refresh'] = 'true'
+            return response
+        messages.success(request, 'Document(s) added successfully.')
+        return redirect('documents:project', project_slug=project_slug)
+    return render(request, 'documents/document_form.html', {
+        'form': form, 'project': project, 'title': 'Add Document',
+    })
 
 
 @login_required
@@ -138,7 +128,10 @@ def document_update(request, pk):
     document = get_object_or_404(Document, pk=pk)
     form = DocumentForm(request.POST, request.FILES, instance=document)
     if form.is_valid():
-        form.save()
+        files = form.cleaned_data.pop('file', [])
+        if files:
+            document.file = files[0]
+        document.save()
         if request.headers.get('HX-Request'):
             response = HttpResponse()
             response['HX-Refresh'] = 'true'
