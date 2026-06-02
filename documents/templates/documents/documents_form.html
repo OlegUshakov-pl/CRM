@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }} - CRM{% endblock %}
+{% block breadcrumb %}{{ title }}{% endblock %}
+{% block content %}
+<div style="max-width: 1080px; width: 100%; margin-left: auto; margin-right: auto;">
+    <h1 class="text-2xl font-bold text-gray-900 mb-6">{{ title }}</h1>
+    <div class="bg-white border border-[#e8e8e8] p-6">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <div class="flex items-center gap-3 mt-6">
+                <button type="submit" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium transition-colors">Save</button>
+                <a href="javascript:history.back()" class="px-4 py-2.5 border border-gray-300 text-sm text-gray-700 hover:bg-gray-50 transition-colors">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

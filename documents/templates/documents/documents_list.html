@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}Documents - CRM{% endblock %}
+{% block breadcrumb %}Documents{% endblock %}
+{% block content %}
+<div style="max-width: 1080px; width: 100%; margin-left: auto; margin-right: auto;">
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-2xl font-bold text-gray-900">Documents</h1>
+    </div>
+
+    <div class="bg-white border border-[#e8e8e8] p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold text-gray-900">All Documents</h2>
+            <span class="text-sm text-gray-500">{{ total_count }} item(s)</span>
+        </div>
+        {% if documents %}
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="text-left text-gray-500 border-b border-gray-200">
+                        <th class="pb-2 font-medium">Number</th>
+                        <th class="pb-2 font-medium">Project</th>
+                        <th class="pb-2 font-medium">Type</th>
+                        <th class="pb-2 font-medium">File</th>
+                        <th class="pb-2 font-medium">Size</th>
+                        <th class="pb-2 font-medium">Created</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for doc in documents %}
+                    <tr class="border-b border-gray-100">
+                        <td class="py-2 text-gray-900">{{ doc.number|default:'—' }}</td>
+                        <td class="py-2 text-gray-600">{{ doc.project.name }}</td>
+                        <td class="py-2 text-gray-600">{{ doc.get_file_type_display }}</td>
+                        <td class="py-2 text-gray-600">{{ doc.filename }}</td>
+                        <td class="py-2 text-gray-600">{% if doc.size %}{{ doc.size|filesizeformat }}{% else %}—{% endif %}</td>
+                        <td class="py-2 text-gray-600">{{ doc.created_at|date:'M d, Y' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-gray-500 text-center py-6">No documents yet.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

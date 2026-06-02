@@ -92,6 +92,20 @@
                     <span class="sidebar-text">Tasks</span>
                 </a>
 
+                <div class="relative group">
+                    <a href="{% url 'documents:list' %}" class="flex items-center gap-2 w-full">
+                        <i data-lucide="book-open-text" class="w-4 h-4 flex-shrink-0"></i>
+                        <span class="sidebar-text flex-1">Documents</span>
+                        <i data-lucide="chevron-right" class="w-3 h-3 sidebar-text text-gray-400 transition-transform group-hover:rotate-90"></i>
+                    </a>
+                    <div class="hidden group-hover:block absolute left-full top-0 pl-2 z-50">
+                        <div class="bg-white border border-[#e8e8e8] shadow-lg min-w-[170px] py-1">
+                            <a href="{% url 'documents:list' %}" class="block px-4 py-2 text-[13px] text-[#222] hover:bg-gray-50 transition-colors">Documents</a>
+                            <a href="{% url 'documents:projects' %}" class="block px-4 py-2 text-[13px] text-[#222] hover:bg-gray-50 transition-colors">Project Documents</a>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="space-y-3">
                     <a href="{% url 'companies:company_list' %}">
                         <i data-lucide="building-2" class="w-4 h-4 flex-shrink-0"></i>

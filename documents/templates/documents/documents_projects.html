@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %}Project Documents - CRM{% endblock %}
+{% block breadcrumb %}Project Documents{% endblock %}
+{% block content %}
+<div style="max-width: 1080px; width: 100%; margin-left: auto; margin-right: auto;">
+    <h1 class="text-2xl font-bold text-gray-900 mb-6">Select Project</h1>
+    {% if projects %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {% for project in projects %}
+        <a href="{% url 'documents:project' project.slug %}" class="block bg-white border border-[#e8e8e8] p-5 hover:shadow-md transition-shadow">
+            <h3 class="font-semibold text-gray-900">{{ project.name }}</h3>
+            <p class="text-sm text-gray-500 mt-1">{{ project.number|default:'' }}</p>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-gray-500">No active projects.</p>
+    {% endif %}
+</div>
+{% endblock %}
