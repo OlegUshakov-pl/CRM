@@ -14,10 +14,21 @@
         </button>
     </div>
 
-    <div class="relative">
-        <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"></i>
-        <input type="text" placeholder="Search notes..." value="{{ query }}" hx-get="{% url 'notes:list' %}" hx-trigger="keyup changed delay:300ms" hx-target="#note-list" name="q" class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none dark:text-gray-200">
-    </div>
+    <form class="flex gap-3" method="get" action="{% url 'notes:list' %}">
+        <div class="relative flex-1">
+            <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"></i>
+            <input type="text" placeholder="Search notes..." name="q" value="{{ query }}"
+                   hx-get="{% url 'notes:list' %}" hx-trigger="keyup changed delay:300ms" hx-target="#note-list" hx-include="#sort-select"
+                   class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none dark:text-gray-200">
+        </div>
+        <select id="sort-select" name="sort" onchange="this.form.submit()"
+                class="px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none dark:text-gray-200">
+            <option value="date_desc" {% if sort == 'date_desc' %}selected{% endif %}>Date</option>
+            <option value="date_asc" {% if sort == 'date_asc' %}selected{% endif %}>Date ↑</option>
+            <option value="project" {% if sort == 'project' %}selected{% endif %}>Project</option>
+            <option value="contact" {% if sort == 'contact' %}selected{% endif %}>Contact</option>
+        </select>
+    </form>
 
     <div id="note-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {% for note in notes %}

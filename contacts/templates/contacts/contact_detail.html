@@ -23,15 +23,15 @@
             </div>
         </div>
         <div class="flex gap-2">
-            <button onclick="openSlideOver('{% url 'contacts:contact_edit_slide' contact.slug %}')" class="px-4 py-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Edit</button>
+            <button onclick="openSlideOver('{% url 'contacts:contact_edit_slide' contact.slug %}')" class="px-4 py-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-[28px] hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Edit</button>
             <form method="post" action="{% url 'contacts:contact_delete' contact.slug %}" onsubmit="return confirm('Delete this contact?')">
                 {% csrf_token %}
-                <button type="submit" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors">Delete</button>
+                <button type="submit" class="px-4 py-2 bg-red-400 hover:bg-red-500 rounded-[20px] text-white shadow-[0_2px_2px_rgba(0,0,0,0.25)] text-[14px]">Delete</button>
             </form>
         </div>
     </div>
 
-    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-6">
         <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Contact Information</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>

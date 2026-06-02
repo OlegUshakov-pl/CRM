@@ -11,12 +11,21 @@ from core.models import log_activity
 def note_list(request):
     notes = Note.objects.filter(is_active=True).select_related('project', 'company', 'contact')
     query = request.GET.get('q', '')
+    sort = request.GET.get('sort', 'date_desc')
     if query:
         notes = notes.filter(title__icontains=query) | notes.filter(content__icontains=query)
+    if sort == 'date_asc':
+        notes = notes.order_by('created_at')
+    elif sort == 'project':
+        notes = notes.order_by('project__name', 'title')
+    elif sort == 'contact':
+        notes = notes.order_by('contact__first_name', 'contact__last_name', 'title')
+    else:
+        notes = notes.order_by('-created_at')
     paginator = Paginator(notes, 12)
     page = request.GET.get('page', 1)
     notes_page = paginator.get_page(page)
-    return render(request, 'notes/note_list.html', {'notes': notes_page, 'query': query})
+    return render(request, 'notes/note_list.html', {'notes': notes_page, 'query': query, 'sort': sort})
 
 
 @login_required

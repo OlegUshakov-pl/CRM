@@ -22,7 +22,7 @@
     <div id="contact-list" class="space-y-3">
         {% for contact in contacts %}
         <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow">
-            <div class="flex items-center gap-3 p-4">
+            <div class="flex items-center gap-2 p-2">
                 <a href="{% url 'contacts:contact_detail' contact.slug %}">
                     {% if contact.avatar %}
                         <img src="{{ contact.avatar.url }}" alt="{{ contact.get_full_name }}" class="w-10 h-10 rounded-full object-cover flex-shrink-0">
@@ -32,7 +32,10 @@
                         </div>
                     {% endif %}
                 </a>
-                <a href="{% url 'contacts:contact_detail' contact.slug %}" class="font-medium text-gray-900 dark:text-white w-[150px] flex-shrink-0">{{ contact.get_full_name }}</a>
+                <a href="{% url 'contacts:contact_detail' contact.slug %}" class="font-medium text-gray-900 dark:text-white w-[120px] flex-shrink-0 truncate">{{ contact.get_full_name }}</a>
+                <span class="text-sm text-gray-500 dark:text-gray-400 w-[90px] flex-shrink-0 truncate" title="{{ contact.position|default:'' }}">{{ contact.position|default:'—' }}</span>
+                <span class="text-sm text-gray-500 dark:text-gray-400 w-[110px] flex-shrink-0 truncate" title="{{ contact.phone|default:'' }}">{{ contact.phone|default:'—' }}</span>
+                <span class="text-sm text-gray-500 dark:text-gray-400 w-[160px] flex-shrink-0 truncate" title="{{ contact.email|default:'' }}">{{ contact.email|default:'—' }}</span>
                 <div class="flex-1 text-sm min-w-0">
                     {% with projects=contact.projects.all %}
                         {% if projects %}
@@ -44,14 +47,14 @@
                         {% endif %}
                     {% endwith %}
                 </div>
-                <div class="text-sm w-[130px] flex-shrink-0 text-center">
+                <div class="text-sm w-[120px] flex-shrink-0 text-center truncate">
                     {% if contact.company %}
                         <a href="{% url 'companies:company_detail' contact.company.slug %}" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ contact.company.name }}</a>
                     {% else %}
                         <span class="text-gray-400">—</span>
                     {% endif %}
                 </div>
-                <div class="flex items-center gap-2 flex-shrink-0 text-sm whitespace-nowrap">
+                <div class="flex items-center gap-1 flex-shrink-0 text-sm whitespace-nowrap">
                     <button onclick="event.stopPropagation(); openSlideOver('{% url 'contacts:contact_edit_slide' contact.slug %}')" class="text-indigo-600 dark:text-indigo-400 hover:underline">Edit</button>
                     <span class="text-gray-300">|</span>
                     <button @click="$store.deleteModal.open('{% url 'contacts:contact_delete' contact.slug %}', '{{ contact.get_full_name|escapejs }}')" class="text-red-600 dark:text-red-400 hover:underline">Delete</button>
