@@ -10,10 +10,6 @@
             <p class="text-sm text-gray-500 mt-1">{{ doc.project.name }} · {{ doc.get_file_type_display }} · {% if doc.size %}{{ doc.size|filesizeformat }}{% endif %}</p>
         </div>
         <div class="flex items-center gap-2">
-            <a href="{% url 'documents:download' doc.pk %}" class="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-[14px] font-medium transition-colors">
-                <i data-lucide="download" class="w-4 h-4"></i>
-                Download
-            </a>
             <a href="{% if request.META.HTTP_REFERER %}{{ request.META.HTTP_REFERER }}{% else %}{% url 'documents:list' %}{% endif %}" class="inline-flex items-center gap-2 px-4 py-2.5 border border-gray-300 text-gray-700 hover:bg-gray-50 text-[14px] transition-colors">
                 <i data-lucide="arrow-left" class="w-4 h-4"></i>
                 Back
