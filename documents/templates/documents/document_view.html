@@ -1,13 +1,13 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block title %}{{ doc.filename }} - CRM{% endblock %}
-{% block breadcrumb %}{{ doc.filename }}{% endblock %}
+{% block breadcrumb %}{% if is_image %}Photo{% else %}{{ doc.filename }}{% endif %}{% endblock %}
 {% block content %}
 <div style="max-width: 1080px; width: 100%; margin-left: auto; margin-right: auto;">
     <div class="flex items-center justify-between mb-6">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900">{{ doc.filename }}</h1>
-            <p class="text-sm text-gray-500 mt-1">{{ doc.project.name }} · {{ doc.get_file_type_display }} · {% if doc.size %}{{ doc.size|filesizeformat }}{% endif %}</p>
+            <h1 class="text-2xl font-bold text-gray-900">{% if is_image %}Photo{% else %}{{ doc.filename }}{% endif %}</h1>
+            <p class="text-sm text-gray-500 mt-1">{% if doc.project %}<a href="{% url 'projects:detail' doc.project.slug %}" class="text-indigo-600 hover:underline">{{ doc.project.name }}</a>{% else %}—{% endif %} · {{ doc.get_file_type_display }} · {% if doc.size %}{{ doc.size|filesizeformat }}{% endif %}</p>
         </div>
         <div class="flex items-center gap-2">
             <a href="{% if request.META.HTTP_REFERER %}{{ request.META.HTTP_REFERER }}{% else %}{% url 'documents:list' %}{% endif %}" class="inline-flex items-center gap-2 px-4 py-2.5 border border-gray-300 text-gray-700 hover:bg-gray-50 text-[14px] transition-colors">
@@ -19,7 +19,6 @@
 
     {% if is_image %}
     <div class="bg-white border border-[#e8e8e8] p-6">
-        <h2 class="text-lg font-semibold text-[#222] mb-4">{{ doc.filename }}</h2>
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
             <a href="{% url 'documents:show' doc.pk %}" target="_blank" class="block aspect-square overflow-hidden bg-gray-100 dark:bg-gray-700 hover:opacity-90 transition-opacity">
                 <img src="{% url 'documents:show' doc.pk %}" alt="{{ doc.filename }}" class="w-full h-full object-cover">

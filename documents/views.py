@@ -111,8 +111,9 @@ def document_create_slide(request, project_slug):
 def document_edit_slide(request, pk):
     document = get_object_or_404(Document, pk=pk)
     form = DocumentForm(instance=document)
+    projects = Project.objects.filter(is_active=True)
     return render(request, 'documents/document_form.html', {
-        'form': form, 'document': document, 'project': document.project,
+        'form': form, 'document': document, 'project': document.project, 'projects': projects,
         'title': 'Edit Document',
     })
 
@@ -185,6 +186,8 @@ def document_update(request, pk):
     document = get_object_or_404(Document, pk=pk)
     form = DocumentForm(request.POST, request.FILES, instance=document)
     if form.is_valid():
+        project = form.cleaned_data.get('project')
+        document.project = project
         files = form.cleaned_data.pop('file', [])
         if files:
             document.file = files[0]

@@ -12,15 +12,29 @@
       enctype="multipart/form-data"
       class="p-6 space-y-4">
     {% csrf_token %}
-    {% for field in form %}
-    <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">{{ field.label }}</label>
-        {{ field }}
-        {% if field.errors %}
-        <p class="mt-1 text-sm text-red-600">{{ field.errors.0 }}</p>
-        {% endif %}
-    </div>
-    {% endfor %}
+    {% if document %}
+        {% for field in form %}
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}
+            <p class="mt-1 text-sm text-red-600">{{ field.errors.0 }}</p>
+            {% endif %}
+        </div>
+        {% endfor %}
+    {% else %}
+        {% for field in form %}
+            {% if field.name != 'project' %}
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}
+            <p class="mt-1 text-sm text-red-600">{{ field.errors.0 }}</p>
+            {% endif %}
+        </div>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
     <div class="flex items-center justify-between gap-3 pt-4 border-t border-[#e8e8e8]">
         <button type="submit" class="px-4 py-2.5 bg-green-500 hover:bg-green-600 rounded-[20px] text-white shadow-[0_2px_2px_rgba(0,0,0,0.25)] text-[14px] font-medium transition-colors">Save</button>
         <button type="button" onclick="closeSlideOver()" class="px-4 py-2.5 text-[#666] bg-gray-100 hover:bg-gray-200 text-[14px] transition-colors">Cancel</button>
