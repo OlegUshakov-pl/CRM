@@ -145,10 +145,7 @@
         </div>
 
         <div class="bg-white border border-[#e8e8e8] p-6">
-            <div class="flex items-center justify-between mb-4">
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Documents</h2>
-                <button onclick="openSlideOver('{% url 'documents:create_slide' project.slug %}')" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">+ Add Document</button>
-            </div>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Documents</h2>
             {% if project.documents.all %}
             <div class="overflow-x-auto">
                 <table class="w-full text-sm">
@@ -161,7 +158,6 @@
                             <th class="pb-2 font-medium">Created</th>
                             <th class="pb-2 font-medium">Show</th>
                             <th class="pb-2 font-medium">Download</th>
-                            <th class="pb-2 font-medium">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -182,10 +178,6 @@
                                 <a href="{% url 'documents:download' doc.pk %}" class="inline-flex items-center"><i data-lucide="download" class="w-4 h-4 text-red-500"></i></a>
                                 {% endif %}
                             </td>
-                            <td class="py-2">
-                                <button onclick="openSlideOver('{% url 'documents:edit_slide' doc.pk %}')" class="text-indigo-600 dark:text-indigo-400 hover:underline mr-2">Edit</button>
-                                <button @click="$store.deleteModal.open('{% url 'documents:delete' doc.pk %}', '{{ doc.number|default:doc.filename|escapejs }}')" class="text-red-600 dark:text-red-400 hover:underline">Delete</button>
-                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -202,15 +194,7 @@
         </div>
 
         <div class="bg-white border border-[#e8e8e8] p-6">
-            <div class="flex items-center justify-between mb-4">
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Materials</h2>
-                <button
-                    onclick="openSlideOver('{% url 'materials:create_slide' project.slug %}')"
-                    class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline"
-                >
-                    + Add Material
-                </button>
-            </div>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Materials</h2>
             {% if project.materials.all %}
             <div class="overflow-x-auto">
                 <table class="w-full text-sm">
@@ -224,7 +208,6 @@
                             <th class="pb-2 font-medium">Unit</th>
                             <th class="pb-2 font-medium">Price</th>
                             <th class="pb-2 font-medium">Total</th>
-                            <th class="pb-2 font-medium">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -243,20 +226,6 @@
                             </td>
                             <td class="py-2 text-gray-900 dark:text-white font-medium">
                                 {% if material.total_price %}${{ material.total_price|floatformat:2 }}{% else %}—{% endif %}
-                            </td>
-                            <td class="py-2">
-                                {% if material.slug %}
-                                <button
-                                    onclick="openSlideOver('{% url 'materials:edit_slide' material.slug %}')"
-                                    class="text-indigo-600 dark:text-indigo-400 hover:underline mr-2"
-                                >Edit</button>
-                                <button
-                                    @click="$store.deleteModal.open('{% url 'materials:delete' material.slug %}', '{{ material.name|escapejs }}')"
-                                    class="text-red-600 dark:text-red-400 hover:underline"
-                                >
-                                    Delete
-                                </button>
-                                {% endif %}
                             </td>
                         </tr>
                         {% endfor %}
@@ -278,10 +247,7 @@
         </div>
 
         <div class="bg-white border border-[#e8e8e8] p-6">
-            <div class="flex items-center justify-between mb-4">
-                <h2 class="text-lg font-semibold text-[#222]">Contacts</h2>
-                <button onclick="openSlideOver('{% url 'contacts:contact_create_slide' %}')" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">+ Add Contact</button>
-            </div>
+            <h2 class="text-lg font-semibold text-[#222] mb-4">Contacts</h2>
             {% if project.contacts.all %}
             <div class="space-y-3">
                 {% for contact in project.contacts.all %}
@@ -306,10 +272,6 @@
                             </p>
                         </div>
                     </a>
-                    <form method="post" action="{% url 'projects:remove_contact' project.slug contact.id %}" class="opacity-0 group-hover:opacity-100 transition-opacity">
-                        {% csrf_token %}
-                        <button type="submit" class="text-xs text-red-500 hover:text-red-700" onclick="return confirm('Remove this contact?')">Delete</button>
-                    </form>
                 </div>
                 {% endfor %}
             </div>
@@ -319,10 +281,7 @@
         </div>
 
         <div class="bg-white border border-[#e8e8e8] p-6">
-            <div class="flex items-center justify-between mb-4">
-                <h2 class="text-lg font-semibold text-[#222]">Project Tasks</h2>
-                <button onclick="openSlideOver('{% url 'tasks:create_slide' %}')" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">+ Add Task</button>
-            </div>
+            <h2 class="text-lg font-semibold text-[#222] mb-4">Project Tasks</h2>
             {% if project.tasks.all %}
             <div class="space-y-2">
                 {% for task in project.tasks.all %}
@@ -346,10 +305,7 @@
                             {{ task.get_status_display }}
                         </span>
                     </div>
-                    <div class="flex items-center gap-3 mt-2 pt-2 border-t border-gray-200 dark:border-gray-600">
-                        <button onclick="openSlideOver('{% url 'tasks:edit_slide' task.slug %}')" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline">Edit</button>
-                        <button @click="$store.deleteModal.open('{% url 'tasks:delete' task.slug %}', '{{ task.title|escapejs }}')" class="text-xs text-red-600 dark:text-red-400 hover:underline">Delete</button>
-                    </div>
+
                 </div>
                 {% endfor %}
             </div>
