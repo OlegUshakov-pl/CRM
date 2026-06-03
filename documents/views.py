@@ -126,11 +126,18 @@ def document_save(request, project_slug):
         files = [f for f in form.cleaned_data.pop('file', []) if f]
         if not files:
             files = [f for f in request.FILES.getlist('file') if f]
-        for f in files:
+        if files:
+            for f in files:
+                Document.objects.create(
+                    project=project,
+                    number=form.cleaned_data.get('number', ''),
+                    file=f,
+                    file_type=form.cleaned_data.get('file_type', 'other'),
+                )
+        else:
             Document.objects.create(
                 project=project,
                 number=form.cleaned_data.get('number', ''),
-                file=f,
                 file_type=form.cleaned_data.get('file_type', 'other'),
             )
         if request.headers.get('HX-Request'):
@@ -156,13 +163,10 @@ def document_common_create_slide(request):
 def document_common_save(request):
     form = CommonDocumentForm(request.POST, request.FILES)
     if form.is_valid():
-        files = [f for f in request.FILES.getlist('file') if f]
+        files = [f for f in form.cleaned_data.pop('file', []) if f]
         if not files:
-            document = form.save(commit=False)
-            if not document.project:
-                document.project = None
-            document.save()
-        else:
+            files = [f for f in request.FILES.getlist('file') if f]
+        if files:
             for f in files:
                 Document.objects.create(
                     project=form.cleaned_data.get('project'),
@@ -170,6 +174,12 @@ def document_common_save(request):
                     file=f,
                     file_type=form.cleaned_data.get('file_type', 'other'),
                 )
+        else:
+            Document.objects.create(
+                project=form.cleaned_data.get('project'),
+                number=form.cleaned_data.get('number', ''),
+                file_type=form.cleaned_data.get('file_type', 'other'),
+            )
         if request.headers.get('HX-Request'):
             response = HttpResponse()
             response['HX-Refresh'] = 'true'
@@ -186,9 +196,8 @@ def document_update(request, pk):
     document = get_object_or_404(Document, pk=pk)
     form = DocumentForm(request.POST, request.FILES, instance=document)
     if form.is_valid():
-        project = form.cleaned_data.get('project')
-        document.project = project
-        files = [f for f in form.cleaned_data.pop('file', []) if f]
+        files = [f for f in form.cleaned_data.get('file', []) if f]
+        document.project = form.cleaned_data.get('project')
         if files:
             document.file = files[0]
         document.save()
