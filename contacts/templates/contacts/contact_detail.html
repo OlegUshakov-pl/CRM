@@ -18,7 +18,7 @@
                 {% endif %}
                 <div>
                     <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ contact.get_full_name }}</h1>
-                    <p class="text-gray-500 dark:text-gray-400">{{ contact.position|default:contact.company.name|default:'No position' }}</p>
+                    <p class="text-gray-500 dark:text-gray-400">{% if contact.position %}{{ contact.position }}{% elif contact.company %}{{ contact.company.name }}{% else %}No position{% endif %}</p>
                 </div>
             </div>
         </div>
@@ -56,7 +56,7 @@
             </div>
             <div>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Company</p>
-                <p class="font-medium text-gray-900 dark:text-white">{{ contact.company.name|default:'—' }}</p>
+                <p class="font-medium text-gray-900 dark:text-white">{% if contact.company %}{{ contact.company.name }}{% else %}—{% endif %}</p>
             </div>
             <div>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Created by</p>
