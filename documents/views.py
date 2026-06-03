@@ -155,7 +155,9 @@ def document_common_save(request):
         else:
             Document.objects.create(project=form.cleaned_data.get('project'), number=form.cleaned_data.get('number', ''), file_type=form.cleaned_data.get('file_type', 'other'))
         if request.headers.get('HX-Request'):
-            return HttpResponse('<script>closeSlideOver()</script>')
+            response = HttpResponse('<script>closeSlideOver()</script>')
+            response['HX-Refresh'] = 'true'
+            return response
         messages.success(request, 'Document added successfully.')
         return redirect('documents:list')
     return render(request, 'documents/document_common_form.html', {'form': form, 'title': 'Add Document'})
