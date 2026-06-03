@@ -164,6 +164,7 @@ def document_common_save(request):
 @login_required
 def document_update(request, pk):
     document = get_object_or_404(Document, pk=pk)
+    old_file = document.file
     form = DocumentForm(request.POST, request.FILES, instance=document)
     if form.is_valid():
         doc = form.save(commit=False)
@@ -173,6 +174,8 @@ def document_update(request, pk):
                 if f:
                     doc.file = f
                     break
+        if not doc.file and old_file:
+            doc.file = old_file
         doc.save()
         if request.headers.get('HX-Request'):
             response = HttpResponse('<script>closeSlideOver()</script>')
