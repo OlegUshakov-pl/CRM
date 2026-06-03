@@ -34,6 +34,12 @@ class NoWrapEmail(EmailMessage):
 
 
 class PasswordResetForm(BasePasswordResetForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['email'].widget.attrs.update({
+            'style': 'width: 100%; font-size: 16px; border: 1px solid #ccc; padding: 10px 12px; outline: none; box-sizing: border-box;',
+        })
+
     def send_mail(self, subject_template_name, email_template_name,
                   context, from_email, to_email, html_email_template_name=None):
         subject = loader.render_to_string(subject_template_name, context)

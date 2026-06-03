@@ -180,13 +180,10 @@
                     <span>/</span>
                     <span class="text-[#222] font-medium text-[14px]">{% block breadcrumb %}Dashboard{% endblock %}</span>
                 </div>
-                <div class="relative" x-data="{ open: false }">
-                    <button @click="open = !open" class="p-1.5 hover:bg-[#e5e7eb] transition-colors">
+                <div>
+                    <button onclick="openSettings()" class="p-1.5 hover:bg-[#e5e7eb] transition-colors">
                         <i data-lucide="settings" class="w-5 h-5" style="color: #666;"></i>
                     </button>
-                    <div x-show="open" @click.outside="open = false" class="absolute right-0 mt-1 w-40 bg-white border border-[#e8e8e8] shadow-lg py-1 z-50 text-[13px]">
-                        <button class="w-full text-left px-4 py-2 text-[#222] hover:bg-gray-50 transition-colors">Main folder</button>
-                    </div>
                 </div>
             </div>
 
@@ -218,6 +215,21 @@
     </div>
 
     {% include 'includes/slide_over.html' %}
+
+    <!-- Settings Slide-over -->
+    <div id="settings-backdrop" class="fixed inset-0 z-40 bg-black/40 transition-opacity duration-300 opacity-0 pointer-events-none" onclick="closeSettings()"></div>
+    <div id="settings-panel" class="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-white shadow-2xl border-l border-[#e8e8e8] transform translate-x-full transition-transform duration-300 ease-in-out overflow-y-auto">
+        <div class="flex items-center justify-between p-6 border-b border-[#e8e8e8]">
+            <h2 class="text-lg font-semibold text-gray-900">Settings</h2>
+            <button onclick="closeSettings()" class="p-1 text-gray-400 hover:text-gray-600 transition-colors">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+        <div class="p-6 space-y-4">
+            <button class="w-full py-3 px-4 bg-violet-400 hover:opacity-90 text-white font-medium text-[13px] transition-opacity rounded-[20px] shadow">Browse</button>
+            <button class="w-full py-3 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium text-[13px] transition-colors rounded-[28px] shadow">Save</button>
+        </div>
+    </div>
 
     <!-- Delete Confirmation Modal -->
     <div x-cloak x-data x-show="$store.deleteModal.show" class="fixed inset-0 z-50 flex items-center justify-center">
@@ -285,6 +297,25 @@
         function closeSlideOver() {
             var backdrop = document.getElementById('slide-over-backdrop');
             var panel = document.getElementById('slide-over');
+            panel.classList.remove('translate-x-0');
+            panel.classList.add('translate-x-full');
+            backdrop.classList.remove('opacity-100');
+            backdrop.classList.add('opacity-0', 'pointer-events-none');
+        }
+
+        function openSettings() {
+            var backdrop = document.getElementById('settings-backdrop');
+            var panel = document.getElementById('settings-panel');
+            backdrop.classList.remove('opacity-0', 'pointer-events-none');
+            backdrop.classList.add('opacity-100');
+            panel.classList.remove('translate-x-full');
+            panel.classList.add('translate-x-0');
+            lucide.createIcons();
+        }
+
+        function closeSettings() {
+            var backdrop = document.getElementById('settings-backdrop');
+            var panel = document.getElementById('settings-panel');
             panel.classList.remove('translate-x-0');
             panel.classList.add('translate-x-full');
             backdrop.classList.remove('opacity-100');
