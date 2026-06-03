@@ -3,6 +3,7 @@
     action="{% if project %}{% url 'projects:edit' project.slug %}{% else %}{% url 'projects:create' %}{% endif %}"
     enctype="multipart/form-data"
     class="space-y-4"
+    {% if not project and is_page %}id="project-create-form"{% endif %}
 >
     {% csrf_token %} {% if form.non_field_errors %}
     <div
@@ -278,6 +279,7 @@
         <button type="submit" name="note_submit" value="1" class="px-4 py-2.5 bg-green-100 dark:bg-green-900/30 text-[14px] font-medium transition-colors">Add Note</button>
     </div>
     {% endif %}
+    {% if project or not is_page %}
     <div class="flex justify-between items-center pt-2">
         <button
             type="submit"
@@ -302,4 +304,5 @@
             Cancel
         </button>
     </div>
+    {% endif %}
 </form>
