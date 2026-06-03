@@ -20,14 +20,13 @@ A modern CRM built with **Django 6.0.5 + Tailwind CSS 4 + Alpine.js + HTMX**.
 - **Companies** — management with logo upload
 - **Contacts** — linked to companies
 - **Materials** — BOM per project (quantity, unit, price)
-- **Tasks** — priorities, statuses, assignments
+- **Tasks** — priorities, statuses, due dates
 - **Notes** — linked to projects, companies, contacts
-- **Documents** — upload, preview (images, PDF, text), download, filter by type/project
+- **Documents** — upload, preview (images, PDF, text), download, filter by type/project/category, multiple file upload
 - **Dark mode** — light/dark toggle
 - **Slide-over forms** — create/edit via animated right panel
 - **Live search** — HTMX-powered search and filters
 - **Sorting** — column-based sort on tables (materials, documents, notes, categories)
-- **Multiple file upload** — batch document upload with multi-file selector
 - **Responsive** — mobile-friendly with collapsible sidebar
 - **Activity logging** — automatic tracking of all CUD actions
 - **Soft delete** — all records preserved via `is_active`
@@ -93,7 +92,7 @@ documents/           Uploaded documents (grouped by project/type)
 | **Material** | project (FK), name, quantity, unit, unit_price, notes |
 | **Task** | title, description, status, priority, due_date, project (FK) |
 | **Note** | title, content, date, project (FK), company (FK), contact (FK) |
-| **Document** | project (FK), number, file, file_type (contracts/reports/drawings/photos/invoices/other), size |
+| **Document** | project (FK, nullable), number, file, file_type (models_3d/documents/drawings/photos/other), size |
 | **Activity** | user, action, description, timestamp, object (GenericFK) |
 
 All models inherit from `TimeStampedModel` (`created_at`, `updated_at`, `created_by`, `is_active`).
