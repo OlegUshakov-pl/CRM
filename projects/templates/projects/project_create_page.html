@@ -33,6 +33,14 @@
 
         <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-6">
             <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Drawings</h2>
+                <button type="button" onclick="openSlideOver('{% url 'parts:common_create_slide' %}')" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">+ Add Drawing</button>
+            </div>
+            <p class="text-gray-500 dark:text-gray-400 text-center py-6">No drawings yet.</p>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-6">
+            <div class="flex items-center justify-between mb-4">
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Contacts</h2>
                 <button type="button" onclick="openSlideOver('{% url 'contacts:contact_create_slide' %}')" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">+ Add Contact</button>
             </div>

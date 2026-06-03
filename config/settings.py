@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     'notes',
     'generator',
     'documents',
+    'parts',
 ]
 
 MIDDLEWARE = [

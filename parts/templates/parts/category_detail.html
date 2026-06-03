@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{{ category.name }}{% endblock %}
+{% block breadcrumb %}Categories / {{ category.name }}{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between mb-6">
+    <h1 class="text-xl font-semibold">{{ category.name }}</h1>
+</div>
+
+<div class="overflow-x-auto">
+    <table class="w-full text-sm">
+        <thead>
+            <tr class="border-b border-[#e8e8e8] text-left">
+                <th class="py-3 px-4 font-medium text-[#8d8d8d]">Number</th>
+                <th class="py-3 px-4 font-medium text-[#8d8d8d]">Project</th>
+                <th class="py-3 px-4 font-medium text-[#8d8d8d]">Size</th>
+                <th class="py-3 px-4 font-medium text-[#8d8d8d]">Rev</th>
+                <th class="py-3 px-4 font-medium text-[#8d8d8d]">Created</th>
+                <th class="py-3 px-4 font-medium text-[#8d8d8d]">Updated</th>
+                <th class="py-3 px-4 font-medium text-[#8d8d8d]"></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for part in parts %}
+            <tr class="border-b border-[#e8e8e8] hover:bg-[#f8f8f8]">
+                <td class="py-3 px-4">{{ part.number }}</td>
+                <td class="py-3 px-4">{{ part.project.name|default:"—" }}</td>
+                <td class="py-3 px-4">{{ part.size|default:"—" }}</td>
+                <td class="py-3 px-4">{{ part.rev|default:"—" }}</td>
+                <td class="py-3 px-4">{{ part.created|date:"Y-m-d"|default:"—" }}</td>
+                <td class="py-3 px-4">{{ part.updated|date:"Y-m-d"|default:"—" }}</td>
+                <td class="py-3 px-4">
+                    <button onclick="openSlideOver('{% url 'parts:edit_slide' part.pk %}')" class="text-indigo-600 hover:underline">Edit</button>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" class="py-10 text-center text-[#8d8d8d]">No drawings in this category.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

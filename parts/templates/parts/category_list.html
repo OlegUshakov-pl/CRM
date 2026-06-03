@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Categories{% endblock %}
+{% block breadcrumb %}Categories{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between mb-6">
+    <h1 class="text-xl font-semibold">Categories</h1>
+    <button onclick="openSlideOver('{% url 'parts:category_create_slide' %}')" class="px-4 py-2 bg-violet-400 hover:opacity-90 text-white font-medium text-[13px] transition-opacity rounded-[20px] shadow">+ Add Category</button>
+</div>
+
+<div class="overflow-x-auto">
+    <table class="w-full text-sm">
+        <thead>
+            <tr class="border-b border-[#e8e8e8] text-left">
+                <th class="py-3 px-4 font-medium text-[#8d8d8d]">Name</th>
+                <th class="py-3 px-4 font-medium text-[#8d8d8d]">Drawings</th>
+                <th class="py-3 px-4 font-medium text-[#8d8d8d]"></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for category in categories %}
+            <tr class="border-b border-[#e8e8e8] hover:bg-[#f8f8f8]">
+                <td class="py-3 px-4"><a href="{% url 'parts:category_detail' category.pk %}" class="text-indigo-600 hover:underline">{{ category.name }}</a></td>
+                <td class="py-3 px-4">{{ category.parts.count }}</td>
+                <td class="py-3 px-4">
+                    <button @click="$store.deleteModal.open('{% url 'parts:category_delete' category.pk %}', '{{ category.name }}')" class="text-red-500 hover:underline text-sm">Delete</button>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3" class="py-10 text-center text-[#8d8d8d]">No categories yet.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
