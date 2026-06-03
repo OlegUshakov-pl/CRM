@@ -1,4 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
@@ -106,7 +107,7 @@ def remove_contact(request, slug, contact_id):
         project.contacts.remove(contact)
         log_activity(request.user, 'updated', f'Removed contact "{contact.get_full_name()}" from "{project.name}"', project)
         messages.success(request, 'Contact removed.')
-    return redirect(request.META.get('HTTP_REFERER', 'projects:detail', slug=slug))
+    return redirect(request.META.get('HTTP_REFERER') or reverse('projects:detail', kwargs={'slug': slug}))
 
 
 @login_required
@@ -119,7 +120,7 @@ def add_contact(request, slug):
             project.contacts.add(contact)
             log_activity(request.user, 'updated', f'Added contact "{contact.get_full_name()}" to "{project.name}"', project)
             messages.success(request, 'Contact added.')
-    return redirect(request.META.get('HTTP_REFERER', 'projects:edit', slug=slug))
+    return redirect(request.META.get('HTTP_REFERER') or reverse('projects:edit', kwargs={'slug': slug}))
 
 
 @login_required

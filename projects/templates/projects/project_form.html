@@ -182,10 +182,7 @@
                             <p class="text-xs text-gray-500 dark:text-gray-400">{{ contact.position|default:contact.email }}</p>
                         </div>
                     </a>
-                    <form method="post" action="{% url 'projects:remove_contact' project.slug contact.id %}" class="opacity-0 group-hover:opacity-100 transition-opacity">
-                        {% csrf_token %}
-                        <button type="submit" class="text-xs text-red-500 hover:text-red-700" onclick="return confirm('Remove this contact?')">Delete</button>
-                    </form>
+                    <button type="button" class="text-xs text-red-500 hover:text-red-700 opacity-0 group-hover:opacity-100 transition-opacity" onclick="if(confirm('Remove {{ contact.get_full_name|escapejs }} from project?')){var f=document.getElementById('remove-contact-form-{{ project.slug }}');f.action='{% url 'projects:remove_contact' project.slug contact.id %}';f.submit()}">Delete</button>
                 </div>
                 {% endfor %}
             </div>
