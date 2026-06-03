@@ -30,10 +30,7 @@ class DocumentForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['project'].required = False
         self.fields['file_type'].label = 'Category'
-        base = Q(is_active=True, documents__isnull=False)
-        if self.instance and self.instance.project_id:
-            base = base | Q(pk=self.instance.project_id)
-        self.fields['project'].queryset = Project.objects.filter(base).distinct()
+        self.fields['project'].queryset = Project.objects.filter(is_active=True)
 
     class Meta:
         model = Document
@@ -64,10 +61,7 @@ class CommonDocumentForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['project'].required = False
         self.fields['file_type'].label = 'Category'
-        base = Q(is_active=True, documents__isnull=False)
-        if self.instance and self.instance.project_id:
-            base = base | Q(pk=self.instance.project_id)
-        self.fields['project'].queryset = Project.objects.filter(base).distinct()
+        self.fields['project'].queryset = Project.objects.filter(is_active=True)
 
     class Meta:
         model = Document
