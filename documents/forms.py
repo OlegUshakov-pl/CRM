@@ -24,6 +24,10 @@ class DocumentForm(forms.ModelForm):
         }),
     )
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['file_type'].label = 'Category'
+
     class Meta:
         model = Document
         fields = ['number', 'file', 'file_type']

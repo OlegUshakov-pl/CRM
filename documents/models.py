@@ -16,11 +16,10 @@ def document_upload_to(instance, filename):
 
 class Document(models.Model):
     FILE_TYPE_CHOICES = [
-        ('contracts', 'Contracts'),
-        ('reports', 'Reports'),
         ('drawings', 'Drawings'),
+        ('models_3d', 'Models 3D'),
+        ('documents', 'Documents'),
         ('photos', 'Photos'),
-        ('invoices', 'Invoices'),
         ('other', 'Other'),
     ]
 

@@ -1,7 +1,7 @@
 import os
 from django.conf import settings
 from django.shortcuts import render, get_object_or_404, redirect
-from django.http import HttpResponse, FileResponse
+from django.http import HttpResponse, FileResponse, Http404
 from django.urls import reverse
 from django.views.static import serve
 from django.contrib.auth.decorators import login_required
@@ -10,6 +10,27 @@ from django.core.paginator import Paginator
 from projects.models import Project
 from .models import Document
 from .forms import DocumentForm, CommonDocumentForm
+
+
+@login_required
+def document_category_list(request):
+    categories = []
+    for choice_value, choice_label in Document.FILE_TYPE_CHOICES:
+        count = Document.objects.filter(file_type=choice_value).count()
+        categories.append({'value': choice_value, 'label': choice_label, 'count': count})
+    return render(request, 'documents/documents_category.html', {'categories': categories})
+
+
+@login_required
+def document_category_detail(request, file_type):
+    valid_values = [c[0] for c in Document.FILE_TYPE_CHOICES]
+    if file_type not in valid_values:
+        raise Http404("Invalid category")
+    label = dict(Document.FILE_TYPE_CHOICES).get(file_type, file_type)
+    documents = Document.objects.filter(file_type=file_type).select_related('project')
+    return render(request, 'documents/documents_category_detail.html', {
+        'documents': documents, 'category_label': label, 'category_value': file_type,
+    })
 
 
 @login_required
@@ -47,8 +68,19 @@ def document_list(request):
 def document_project(request, project_slug):
     project = get_object_or_404(Project, slug=project_slug)
     documents = Document.objects.filter(project=project)
+    sort = request.GET.get('sort', 'created_desc')
+    if sort == 'type':
+        documents = documents.order_by('file_type')
+    elif sort == 'size':
+        documents = documents.order_by('size')
+    elif sort == 'size_desc':
+        documents = documents.order_by('-size')
+    elif sort == 'created':
+        documents = documents.order_by('created_at')
+    else:
+        documents = documents.order_by('-created_at')
     return render(request, 'documents/documents_project.html', {
-        'project': project, 'documents': documents,
+        'project': project, 'documents': documents, 'current_sort': sort,
     })
 
 
