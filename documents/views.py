@@ -188,7 +188,7 @@ def document_update(request, pk):
     if form.is_valid():
         project = form.cleaned_data.get('project')
         document.project = project
-        files = form.cleaned_data.pop('file', [])
+        files = [f for f in form.cleaned_data.pop('file', []) if f]
         if files:
             document.file = files[0]
         document.save()
