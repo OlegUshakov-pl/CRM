@@ -62,6 +62,7 @@ def project_edit(request, slug):
     project = get_object_or_404(Project.objects.prefetch_related('documents', 'materials__category', 'contacts', 'tasks', 'note_entries', 'images'), slug=slug)
     form = ProjectForm(instance=project)
     note_form = NoteForm()
+    available_contacts = Contact.objects.filter(is_active=True).exclude(projects=project)
 
     if request.method == 'POST':
         if 'note_submit' in request.POST:
@@ -93,6 +94,7 @@ def project_edit(request, slug):
         'project': project,
         'is_page': True,
         'note_form': note_form,
+        'available_contacts': available_contacts,
     })
 
 
@@ -105,6 +107,19 @@ def remove_contact(request, slug, contact_id):
         log_activity(request.user, 'updated', f'Removed contact "{contact.get_full_name()}" from "{project.name}"', project)
         messages.success(request, 'Contact removed.')
     return redirect(request.META.get('HTTP_REFERER', 'projects:detail', slug=slug))
+
+
+@login_required
+def add_contact(request, slug):
+    project = get_object_or_404(Project, slug=slug)
+    if request.method == 'POST':
+        contact_id = request.POST.get('contact_id')
+        if contact_id:
+            contact = get_object_or_404(Contact, id=contact_id)
+            project.contacts.add(contact)
+            log_activity(request.user, 'updated', f'Added contact "{contact.get_full_name()}" to "{project.name}"', project)
+            messages.success(request, 'Contact added.')
+    return redirect(request.META.get('HTTP_REFERER', 'projects:edit', slug=slug))
 
 
 @login_required
