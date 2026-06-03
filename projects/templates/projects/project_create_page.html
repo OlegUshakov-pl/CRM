@@ -13,5 +13,47 @@
     <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
         {% include 'projects/project_form.html' with is_page=True %}
     </div>
+
+    <div class="space-y-6 mt-6">
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Documents</h2>
+                <button type="button" onclick="openSlideOver('{% url 'documents:common_create_slide' %}')" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">+ Add Document</button>
+            </div>
+            <p class="text-gray-500 dark:text-gray-400 text-center py-6">No documents yet.</p>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Materials</h2>
+                <button type="button" onclick="openSlideOver('{% url 'materials:common_create_slide' %}')" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">+ Add Material</button>
+            </div>
+            <p class="text-gray-500 dark:text-gray-400 text-center py-6">No materials yet.</p>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Contacts</h2>
+                <button type="button" onclick="openSlideOver('{% url 'contacts:contact_create_slide' %}')" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">+ Add Contact</button>
+            </div>
+            <p class="text-gray-500 dark:text-gray-400 text-center py-4">No contacts yet.</p>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Project Tasks</h2>
+                <button type="button" onclick="openSlideOver('{% url 'tasks:create_slide' %}')" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">+ Add Task</button>
+            </div>
+            <p class="text-gray-500 dark:text-gray-400 text-center py-6">No tasks yet.</p>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Notes</h2>
+                <button type="button" onclick="openSlideOver('{% url 'notes:create_slide' %}')" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">+ Add Note</button>
+            </div>
+            <p class="text-gray-500 dark:text-gray-400 text-center py-6">No notes yet.</p>
+        </div>
+    </div>
 </div>
 {% endblock %}
