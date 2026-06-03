@@ -47,7 +47,9 @@
                     {% for doc in documents %}
                     <tr class="border-b border-gray-100">
                         <td class="py-2 text-gray-900">{{ doc.number|default:'—' }}</td>
-                        <td class="py-2 text-gray-600">{{ doc.project.name }}</td>
+                        <td class="py-2 text-gray-600">
+                            {% if doc.project %}<a href="{% url 'projects:detail' doc.project.slug %}" class="text-indigo-600 hover:underline">{{ doc.project.name }}</a>{% else %}—{% endif %}
+                        </td>
                         <td class="py-2 text-gray-600">{{ doc.get_file_type_display }}</td>
                         <td class="py-2 text-gray-600 max-w-[100px] truncate" title="{{ doc.filename }}">{{ doc.filename|truncatechars:10 }}</td>
                         <td class="py-2 text-gray-600">{% if doc.size %}{{ doc.size|filesizeformat }}{% else %}—{% endif %}</td>

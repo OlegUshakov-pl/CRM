@@ -54,7 +54,7 @@
                     <tr class="border-b border-gray-100">
                         <td class="py-2 text-gray-900">{{ doc.number|default:'—' }}</td>
                         <td class="py-2 text-gray-600">{{ doc.get_file_type_display }}</td>
-                        <td class="py-2 text-gray-600">{{ doc.filename }}</td>
+                        <td class="py-2 text-gray-600 max-w-[100px] truncate" title="{{ doc.filename }}">{{ doc.filename|truncatechars:10 }}</td>
                         <td class="py-2 text-gray-600">{% if doc.size %}{{ doc.size|filesizeformat }}{% else %}—{% endif %}</td>
                         <td class="py-2 text-gray-600">{{ doc.created_at|date:'M d, Y' }}</td>
                         <td class="py-2">

@@ -11,7 +11,9 @@ class DocumentStorage(FileSystemStorage):
 
 
 def document_upload_to(instance, filename):
-    return os.path.join(instance.project.slug, instance.file_type, filename)
+    if instance.project:
+        return os.path.join(instance.project.slug, instance.file_type, filename)
+    return os.path.join('_no_project', instance.file_type, filename)
 
 
 class Document(models.Model):
@@ -23,7 +25,7 @@ class Document(models.Model):
         ('other', 'Other'),
     ]
 
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='documents')
+    project = models.ForeignKey(Project, on_delete=models.SET_NULL, null=True, blank=True, related_name='documents')
     number = models.CharField(max_length=50, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -35,7 +37,8 @@ class Document(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f"{self.number or self.file.name} - {self.project.name}"
+        project_name = self.project.name if self.project else 'No Project'
+        return f"{self.number or self.file.name} - {project_name}"
 
     def save(self, *args, **kwargs):
         if self.file and not self.size:

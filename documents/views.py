@@ -155,8 +155,20 @@ def document_common_create_slide(request):
 def document_common_save(request):
     form = CommonDocumentForm(request.POST, request.FILES)
     if form.is_valid():
-        document = form.save(commit=False)
-        document.save()
+        files = request.FILES.getlist('file')
+        if not files:
+            document = form.save(commit=False)
+            if not document.project:
+                document.project = None
+            document.save()
+        else:
+            for f in files:
+                Document.objects.create(
+                    project=form.cleaned_data.get('project'),
+                    number=form.cleaned_data.get('number', ''),
+                    file=f,
+                    file_type=form.cleaned_data.get('file_type', 'other'),
+                )
         if request.headers.get('HX-Request'):
             response = HttpResponse()
             response['HX-Refresh'] = 'true'
