@@ -59,7 +59,7 @@ def project_create(request):
 
 @login_required
 def project_edit(request, slug):
-    project = get_object_or_404(Project, slug=slug)
+    project = get_object_or_404(Project.objects.prefetch_related('documents', 'materials__category', 'contacts', 'tasks', 'note_entries', 'images'), slug=slug)
     form = ProjectForm(instance=project)
     note_form = NoteForm()
 

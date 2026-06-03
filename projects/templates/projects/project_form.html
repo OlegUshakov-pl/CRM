@@ -55,7 +55,198 @@
         />
         <p class="mt-1 text-[12px] text-[#999]">You can select multiple images</p>
     </div>
-    {% if project %}
+    {% if project and is_page %}
+    <div class="space-y-6">
+
+        <div class="bg-white border border-[#e8e8e8] p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Documents</h2>
+                <button type="button" onclick="openSlideOver('{% url 'documents:create_slide' project.slug %}')" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">+ Add Document</button>
+            </div>
+            {% if project.documents.all %}
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="text-left text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
+                            <th class="pb-2 font-medium">Number</th>
+                            <th class="pb-2 font-medium">Type</th>
+                            <th class="pb-2 font-medium">File</th>
+                            <th class="pb-2 font-medium">Size</th>
+                            <th class="pb-2 font-medium">Created</th>
+                            <th class="pb-2 font-medium">Show</th>
+                            <th class="pb-2 font-medium">Download</th>
+                            <th class="pb-2 font-medium">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for doc in project.documents.all|slice:":4" %}
+                        <tr class="border-b border-gray-100 dark:border-gray-700/50">
+                            <td class="py-2 text-gray-900 dark:text-white">{{ doc.number|default:'—' }}</td>
+                            <td class="py-2 text-gray-600 dark:text-gray-400">{{ doc.get_file_type_display }}</td>
+                            <td class="py-2 text-gray-600 dark:text-gray-400">{{ doc.filename }}</td>
+                            <td class="py-2 text-gray-600 dark:text-gray-400">{% if doc.size %}{{ doc.size|filesizeformat }}{% else %}—{% endif %}</td>
+                            <td class="py-2 text-gray-600 dark:text-gray-400">{{ doc.created_at|date:'M d, Y' }}</td>
+                            <td class="py-2">
+                                {% if doc.file %}
+                                <a href="{% url 'documents:view' doc.pk %}" class="inline-flex items-center"><i data-lucide="eye" class="w-4 h-4 text-red-500"></i></a>
+                                {% endif %}
+                            </td>
+                            <td class="py-2">
+                                {% if doc.file %}
+                                <a href="{% url 'documents:download' doc.pk %}" class="inline-flex items-center"><i data-lucide="download" class="w-4 h-4 text-red-500"></i></a>
+                                {% endif %}
+                            </td>
+                            <td class="py-2">
+                                <button type="button" onclick="openSlideOver('{% url 'documents:edit_slide' doc.pk %}')" class="text-indigo-600 dark:text-indigo-400 hover:underline mr-2">Edit</button>
+                                <button type="button" @click="$store.deleteModal.open('{% url 'documents:delete' doc.pk %}', '{{ doc.number|default:doc.filename|escapejs }}')" class="text-red-600 dark:text-red-400 hover:underline">Delete</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% if project.documents.all|length > 4 %}
+            <div class="mt-4 text-right">
+                <a href="{% url 'documents:project' project.slug %}" class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white transition-colors text-[12px]">Page of documents</a>
+            </div>
+            {% endif %}
+            {% else %}
+            <p class="text-gray-500 dark:text-gray-400 text-center py-6">No documents added yet.</p>
+            {% endif %}
+        </div>
+
+        <div class="bg-white border border-[#e8e8e8] p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Materials</h2>
+                <button type="button" onclick="openSlideOver('{% url 'materials:create_slide' project.slug %}')" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">+ Add Material</button>
+            </div>
+            {% if project.materials.all %}
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="text-left text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
+                            <th class="pb-2 font-medium">Name</th>
+                            <th class="pb-2 font-medium">Category</th>
+                            <th class="pb-2 font-medium">Qty</th>
+                            <th class="pb-2 font-medium">Unit</th>
+                            <th class="pb-2 font-medium">Price</th>
+                            <th class="pb-2 font-medium">Total</th>
+                            <th class="pb-2 font-medium">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for material in project.materials.all|slice:":4" %}
+                        <tr class="border-b border-gray-100 dark:border-gray-700/50">
+                            <td class="py-2 text-gray-900 dark:text-white">{{ material.name }}</td>
+                            <td class="py-2 text-gray-600 dark:text-gray-400">{{ material.category.name|default:'—' }}</td>
+                            <td class="py-2 text-gray-600 dark:text-gray-400">{{ material.quantity }}</td>
+                            <td class="py-2 text-gray-600 dark:text-gray-400">{{ material.get_unit_display }}</td>
+                            <td class="py-2 text-gray-600 dark:text-gray-400">{% if material.unit_price %}${{ material.unit_price }}{% else %}—{% endif %}</td>
+                            <td class="py-2 text-gray-900 dark:text-white font-medium">{% if material.total_price %}${{ material.total_price|floatformat:2 }}{% else %}—{% endif %}</td>
+                            <td class="py-2">
+                                {% if material.slug %}
+                                <button type="button" onclick="openSlideOver('{% url 'materials:edit_slide' material.slug %}')" class="text-indigo-600 dark:text-indigo-400 hover:underline mr-2">Edit</button>
+                                <button type="button" @click="$store.deleteModal.open('{% url 'materials:delete' material.slug %}', '{{ material.name|escapejs }}')" class="text-red-600 dark:text-red-400 hover:underline">Delete</button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% if project.materials.all|length > 4 %}
+            <div class="mt-4 text-right">
+                <a href="{% url 'materials:page' project.slug %}" class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white transition-colors text-[12px]">Page of materials</a>
+            </div>
+            {% endif %}
+            {% else %}
+            <p class="text-gray-500 dark:text-gray-400 text-center py-6">No materials added yet.</p>
+            {% endif %}
+        </div>
+
+        <div class="bg-white border border-[#e8e8e8] p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Contacts</h2>
+                <button type="button" onclick="openSlideOver('{% url 'contacts:contact_create_slide' %}')" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">+ Add Contact</button>
+            </div>
+            {% if project.contacts.all %}
+            <div class="space-y-3">
+                {% for contact in project.contacts.all %}
+                <div class="flex items-center gap-3 group">
+                    <a href="{% url 'contacts:contact_detail' contact.slug %}" class="flex items-center gap-3 flex-1 hover:bg-gray-50 transition-colors -mx-2 px-2 py-1 rounded">
+                        <div class="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/50 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span class="text-xs font-semibold text-indigo-700 dark:text-indigo-300">{{ contact.first_name|first }}{{ contact.last_name|first }}</span>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-900 dark:text-white">{{ contact.get_full_name }}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ contact.position|default:contact.email }}</p>
+                        </div>
+                    </a>
+                    <form method="post" action="{% url 'projects:remove_contact' project.slug contact.id %}" class="opacity-0 group-hover:opacity-100 transition-opacity">
+                        {% csrf_token %}
+                        <button type="submit" class="text-xs text-red-500 hover:text-red-700" onclick="return confirm('Remove this contact?')">Delete</button>
+                    </form>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-gray-500 dark:text-gray-400 text-center py-4">No contacts linked.</p>
+            {% endif %}
+        </div>
+
+        <div class="bg-white border border-[#e8e8e8] p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Project Tasks</h2>
+                <button type="button" onclick="openSlideOver('{% url 'tasks:create_slide' %}')" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">+ Add Task</button>
+            </div>
+            {% if project.tasks.all %}
+            <div class="space-y-2">
+                {% for task in project.tasks.all %}
+                <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/30">
+                    <div class="flex items-center gap-3">
+                        <div class="w-4 h-4 rounded-full border-2 flex-shrink-0 {% if task.priority == 'urgent' %}border-red-400 {% elif task.priority == 'high' %}border-orange-400 {% elif task.priority == 'medium' %}border-blue-400 {% else %}border-gray-400{% endif %}"></div>
+                        <div class="flex-1 min-w-0">
+                            <p class="font-medium text-gray-900 dark:text-white">{{ task.title }}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">{% if task.due_date %}{{ task.due_date|date:'M d' }} · {% endif %}{{ task.get_status_display }}</p>
+                            {% if task.description %}
+                            <p class="text-xs text-gray-400 dark:text-gray-500 mt-1 line-clamp-2">{{ task.description }}</p>
+                            {% endif %}
+                        </div>
+                        <span class="text-xs px-2 py-1 rounded-full flex-shrink-0 {% if task.status == 'done' %}bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 {% elif task.status == 'in_progress' %}bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 {% elif task.status == 'review' %}bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 {% else %}bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300{% endif %}">{{ task.get_status_display }}</span>
+                    </div>
+                    <div class="flex items-center gap-3 mt-2 pt-2 border-t border-gray-200 dark:border-gray-600">
+                        <button type="button" onclick="openSlideOver('{% url 'tasks:edit_slide' task.slug %}')" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline">Edit</button>
+                        <button type="button" @click="$store.deleteModal.open('{% url 'tasks:delete' task.slug %}', '{{ task.title|escapejs }}')" class="text-xs text-red-600 dark:text-red-400 hover:underline">Delete</button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-gray-500 dark:text-gray-400 text-center py-6">No tasks for this project.</p>
+            {% endif %}
+        </div>
+
+        <div class="bg-white border border-[#e8e8e8] p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Notes</h2>
+                <button type="button" onclick="openSlideOver('{% url 'notes:create_slide' %}')" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">+ Add Note</button>
+            </div>
+            {% if project.note_entries.all %}
+            <div class="space-y-3">
+                {% for note in project.note_entries.all %}
+                <div class="p-3 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
+                    <p class="font-medium text-gray-900 dark:text-white">{{ note.title }}</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ note.content|truncatewords:30 }}</p>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-gray-500 dark:text-gray-400 text-center py-6">No notes added yet.</p>
+            {% endif %}
+        </div>
+
+    </div>
+    {% elif project %}
     <div>
         <label class="block text-[14px] font-medium text-[#666] mb-1">Contacts</label>
         {% if project.contacts.all %}
