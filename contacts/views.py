@@ -1,4 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
@@ -28,16 +29,26 @@ def contact_detail(request, slug):
 @login_required
 def contact_create(request):
     form = ContactForm()
+    project_slug = request.POST.get('project') or request.GET.get('project')
     if request.method == 'POST':
         form = ContactForm(request.POST, request.FILES)
         if form.is_valid():
             contact = form.save(commit=False)
             contact.created_by = request.user
             contact.save()
+            if project_slug:
+                from projects.models import Project
+                project = Project.objects.filter(slug=project_slug).first()
+                if project:
+                    project.contacts.add(contact)
             log_activity(request.user, 'created', f'Contact "{contact.get_full_name()}"', contact)
             messages.success(request, 'Contact created successfully.')
+            if request.headers.get('HX-Request'):
+                response = HttpResponse('<script>closeSlideOver()</script>')
+                response['HX-Refresh'] = 'true'
+                return response
             return redirect('contacts:contact_list')
-    return render(request, 'contacts/contact_form.html', {'form': form, 'title': 'Add Contact'})
+    return render(request, 'contacts/contact_form.html', {'form': form, 'title': 'Add Contact', 'project_slug': project_slug})
 
 
 @login_required
@@ -50,6 +61,10 @@ def contact_edit(request, slug):
             form.save()
             log_activity(request.user, 'updated', f'Contact "{contact.get_full_name()}"', contact)
             messages.success(request, 'Contact updated successfully.')
+            if request.headers.get('HX-Request'):
+                response = HttpResponse('<script>closeSlideOver()</script>')
+                response['HX-Refresh'] = 'true'
+                return response
             return redirect('contacts:contact_list')
     return render(request, 'contacts/contact_form.html', {'form': form, 'title': 'Edit Contact', 'contact': contact})
 
@@ -68,7 +83,8 @@ def contact_delete(request, slug):
 @login_required
 def contact_create_slide(request):
     form = ContactForm()
-    return render(request, 'contacts/contact_form.html', {'form': form, 'title': 'Add Contact'})
+    project_slug = request.GET.get('project')
+    return render(request, 'contacts/contact_form.html', {'form': form, 'title': 'Add Contact', 'project_slug': project_slug})
 
 
 @login_required

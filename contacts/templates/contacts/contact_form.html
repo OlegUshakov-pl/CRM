@@ -1,5 +1,10 @@
-<form method="post" action="{% if contact %}{% url 'contacts:contact_edit' contact.slug %}{% else %}{% url 'contacts:contact_create' %}{% endif %}" enctype="multipart/form-data" class="space-y-4">
+<form hx-post="{% if contact %}{% url 'contacts:contact_edit' contact.slug %}{% else %}{% url 'contacts:contact_create' %}{% if project_slug %}?project={{ project_slug }}{% endif %}{% endif %}"
+      hx-target="#slide-over-content"
+      hx-swap="innerHTML"
+      enctype="multipart/form-data"
+      class="space-y-4">
     {% csrf_token %}
+    {% if project_slug and not contact %}<input type="hidden" name="project" value="{{ project_slug }}">{% endif %}
     {% for field in form %}
         <div>
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ field.label }}</label>

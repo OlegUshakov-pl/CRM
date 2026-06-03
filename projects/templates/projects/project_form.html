@@ -167,7 +167,7 @@
         <div class="bg-white border border-[#e8e8e8] p-6">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Contacts</h2>
-                <button type="button" onclick="openSlideOver('{% url 'contacts:contact_create_slide' %}')" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">+ Add Contact</button>
+                <button type="button" onclick="openSlideOver('{% url 'contacts:contact_create_slide' %}?project={{ project.slug }}')" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">+ Add Contact</button>
             </div>
             {% if project.contacts.all %}
             <div class="space-y-3">
