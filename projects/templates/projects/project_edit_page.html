@@ -18,6 +18,11 @@
     </div>
 </div>
 
+<form method="post" action="{% url 'projects:add_contact' project.slug %}" id="contact-form-{{ project.slug }}" style="display:none">
+    {% csrf_token %}
+    <input type="hidden" name="contact_id" value="">
+</form>
+
 <div id="delete-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 opacity-0 pointer-events-none transition-opacity duration-200">
     <div class="bg-white dark:bg-gray-800 shadow-2xl border border-gray-200 dark:border-gray-700 p-6 max-w-md w-full mx-4">
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Delete Project</h3>

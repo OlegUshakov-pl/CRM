@@ -193,16 +193,15 @@
             <p class="text-gray-500 dark:text-gray-400 text-center py-4">No contacts linked.</p>
             {% endif %}
             {% if available_contacts %}
-            <form method="post" action="{% url 'projects:add_contact' project.slug %}" class="flex items-center gap-2 mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
-                {% csrf_token %}
-                <select name="contact_id" class="flex-1 px-3 py-2 border border-[#e8e8e8] text-[13px] outline-none focus:border-violet-300 transition-colors bg-white dark:bg-gray-800">
+            <div class="flex items-center gap-2 mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+                <select id="contact-select-{{ project.slug }}" class="flex-1 px-3 py-2 border border-[#e8e8e8] text-[13px] outline-none focus:border-violet-300 transition-colors bg-white dark:bg-gray-800">
                     <option value="">Add existing contact...</option>
                     {% for c in available_contacts %}
                     <option value="{{ c.id }}">{{ c.get_full_name }} {% if c.company %}· {{ c.company.name }}{% endif %}</option>
                     {% endfor %}
                 </select>
-                <button type="submit" class="px-3 py-2 bg-indigo-500 hover:bg-indigo-600 text-white text-[13px] transition-colors whitespace-nowrap">Add</button>
-            </form>
+                <button type="button" onclick="var s=document.getElementById('contact-select-{{ project.slug }}');if(s.value){document.getElementById('contact-form-{{ project.slug }}').querySelector('[name=contact_id]').value=s.value;document.getElementById('contact-form-{{ project.slug }}').submit()}" class="px-3 py-2 bg-indigo-500 hover:bg-indigo-600 text-white text-[13px] transition-colors whitespace-nowrap">Add</button>
+            </div>
             {% endif %}
         </div>
 
