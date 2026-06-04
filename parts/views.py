@@ -14,6 +14,17 @@ def _number_from_file(number, f):
     return number or ''
 
 
+def _format_size(size_bytes):
+    if not size_bytes:
+        return ''
+    size_bytes = int(size_bytes)
+    for unit in ['B', 'KB', 'MB', 'GB']:
+        if size_bytes < 1024:
+            return f'{size_bytes:.1f} {unit}' if unit != 'B' else f'{size_bytes} B'
+        size_bytes /= 1024
+    return f'{size_bytes:.1f} TB'
+
+
 @login_required
 def part_list(request):
     parts = Part.objects.select_related('category', 'project').all()
@@ -44,7 +55,7 @@ def part_create(request, project_slug):
         if up_files:
             for f in up_files:
                 if f:
-                    Part.objects.create(project=project, number=_number_from_file(form.cleaned_data.get('number'), f), category=form.cleaned_data.get('category'), size=form.cleaned_data.get('size'), rev=form.cleaned_data.get('rev'), created=form.cleaned_data.get('created'), updated=form.cleaned_data.get('updated'), file=f)
+                    Part.objects.create(project=project, number=_number_from_file(form.cleaned_data.get('number'), f), category=form.cleaned_data.get('category'), size=_format_size(f.size), rev=form.cleaned_data.get('rev'), created=form.cleaned_data.get('created'), updated=form.cleaned_data.get('updated'), file=f)
         else:
             part = form.save(commit=False)
             part.number = _number_from_file(form.cleaned_data.get('number'), None)
@@ -123,7 +134,7 @@ def common_save(request):
         if up_files:
             for f in up_files:
                 if f:
-                    Part.objects.create(number=_number_from_file(form.cleaned_data.get('number'), f), category=form.cleaned_data.get('category'), size=form.cleaned_data.get('size'), rev=form.cleaned_data.get('rev'), created=form.cleaned_data.get('created'), updated=form.cleaned_data.get('updated'), file=f)
+                    Part.objects.create(number=_number_from_file(form.cleaned_data.get('number'), f), category=form.cleaned_data.get('category'), size=_format_size(f.size), rev=form.cleaned_data.get('rev'), created=form.cleaned_data.get('created'), updated=form.cleaned_data.get('updated'), file=f)
         else:
             part = form.save(commit=False)
             part.number = _number_from_file(form.cleaned_data.get('number'), None)
