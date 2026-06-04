@@ -17,13 +17,15 @@
     <div id="project-list" class="space-y-4">
         {% for project in projects %}
             <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex">
-                {% if project.image %}
-                    <img src="{{ project.image.url }}" alt="{{ project.name }}" class="w-[250px] flex-shrink-0 object-cover">
-                {% else %}
-                    <div class="w-[250px] flex-shrink-0 bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-                        <i data-lucide="folder-kanban" class="w-12 h-12 text-white/60"></i>
-                    </div>
-                {% endif %}
+                <a href="{% url 'projects:detail' project.slug %}" class="block w-[250px] flex-shrink-0">
+                    {% if project.image %}
+                        <img src="{{ project.image.url }}" alt="{{ project.name }}" class="w-full h-full object-cover">
+                    {% else %}
+                        <div class="w-full h-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                            <i data-lucide="folder-kanban" class="w-12 h-12 text-white/60"></i>
+                        </div>
+                    {% endif %}
+                </a>
                 <div class="p-4 flex-1 flex flex-col">
                     <a href="{% url 'projects:detail' project.slug %}" class="text-sm font-semibold text-indigo-800 hover:text-indigo-600 transition-colors flex items-center" style="height:26px">{{ project.number|default:'Not set' }}</a>
                     <div class="flex items-start justify-between mb-2">
