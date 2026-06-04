@@ -55,7 +55,7 @@ def note_create(request):
             log_activity(request.user, 'created', f'Note "{note.title}"', note)
             messages.success(request, 'Note created successfully.')
             if request.headers.get('HX-Request'):
-                return HttpResponse('<script>closeSlideOver(); var nl = document.getElementById("note-list"); if(nl) htmx.ajax("GET", "/notes/", {target: "#note-list", swap: "innerHTML"}); refreshSection("notes")</script>')
+                return HttpResponse('<script>closeSlideOver(); location.reload();</script>')
             return redirect('notes:list')
     return render(request, 'notes/note_form.html', {'form': form, 'title': 'Add Note'})
 
@@ -71,7 +71,7 @@ def note_edit(request, slug):
             log_activity(request.user, 'updated', f'Note "{note.title}"', note)
             messages.success(request, 'Note updated successfully.')
             if request.headers.get('HX-Request'):
-                return HttpResponse('<script>closeSlideOver(); var nl = document.getElementById("note-list"); if(nl) htmx.ajax("GET", "/notes/", {target: "#note-list", swap: "innerHTML"}); refreshSection("notes")</script>')
+                return HttpResponse('<script>closeSlideOver(); location.reload();</script>')
             return redirect('notes:list')
     return render(request, 'notes/note_form.html', {'form': form, 'title': 'Edit Note', 'note': note})
 
