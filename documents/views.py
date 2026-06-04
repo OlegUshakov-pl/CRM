@@ -143,7 +143,7 @@ def document_save(request, project_slug):
         else:
             Document.objects.create(project=project, number=form.cleaned_data.get('number', ''), file_type=file_type)
         if request.headers.get('HX-Request'):
-            return HttpResponse('<script>closeSlideOver()</script>')
+            return HttpResponse('<script>closeSlideOver(); location.reload();</script>')
         messages.success(request, 'Document(s) added successfully.')
         return redirect('documents:project', project_slug=project_slug)
     return render(request, 'documents/document_form.html', {'form': form, 'project': project, 'title': 'Add Document'})
@@ -203,9 +203,7 @@ def document_update(request, pk):
             doc.file = old_file
         doc.save()
         if request.headers.get('HX-Request'):
-            response = HttpResponse('<script>closeSlideOver()</script>')
-            response['HX-Refresh'] = 'true'
-            return response
+            return HttpResponse('<script>closeSlideOver(); location.reload();</script>')
         messages.success(request, 'Document updated successfully.')
         if doc.project:
             return redirect('documents:project', project_slug=doc.project.slug)

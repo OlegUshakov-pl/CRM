@@ -52,7 +52,7 @@ def task_create(request):
             log_activity(request.user, 'created', f'Task "{task.title}"', task)
             messages.success(request, 'Task created successfully.')
             if request.headers.get('HX-Request'):
-                return HttpResponse('<script>closeSlideOver(); refreshSection("tasks")</script>')
+                return HttpResponse('<script>closeSlideOver(); location.reload();</script>')
             return redirect('tasks:list')
     return render(request, 'tasks/task_form.html', {'form': form, 'title': 'Add Task'})
 
@@ -68,7 +68,7 @@ def task_edit(request, slug):
             log_activity(request.user, 'updated', f'Task "{task.title}"', task)
             messages.success(request, 'Task updated successfully.')
             if request.headers.get('HX-Request'):
-                return HttpResponse('<script>closeSlideOver(); refreshSection("tasks")</script>')
+                return HttpResponse('<script>closeSlideOver(); location.reload();</script>')
             return redirect('tasks:list')
     return render(request, 'tasks/task_form.html', {'form': form, 'title': 'Edit Task', 'task': task})
 
