@@ -17,15 +17,15 @@
     <div id="project-list" class="space-y-4">
         {% for project in projects %}
             <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex">
-                <a href="{% url 'projects:detail' project.slug %}" class="block w-[250px] flex-shrink-0">
-                    {% if project.image %}
+                {% if project.image %}
+                    <button type="button" onclick="openImageModal('{{ project.image.url }}', '{{ project.name|escapejs }}')" class="block w-[250px] flex-shrink-0 cursor-pointer">
                         <img src="{{ project.image.url }}" alt="{{ project.name }}" class="w-full h-full object-cover">
-                    {% else %}
-                        <div class="w-full h-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-                            <i data-lucide="folder-kanban" class="w-12 h-12 text-white/60"></i>
-                        </div>
-                    {% endif %}
-                </a>
+                    </button>
+                {% else %}
+                    <div class="w-[250px] flex-shrink-0 bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                        <i data-lucide="folder-kanban" class="w-12 h-12 text-white/60"></i>
+                    </div>
+                {% endif %}
                 <div class="p-4 flex-1 flex flex-col">
                     <a href="{% url 'projects:detail' project.slug %}" class="text-sm font-semibold text-indigo-800 hover:text-indigo-600 transition-colors flex items-center" style="height:26px">{{ project.number|default:'Not set' }}</a>
                     <div class="flex items-start justify-between mb-2">
@@ -84,6 +84,15 @@
     </div>
 
     {% include 'includes/pagination.html' with page_obj=projects %}
+</div>
+
+<div id="image-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 opacity-0 pointer-events-none transition-opacity duration-200">
+    <div class="relative max-w-4xl max-h-[90vh] mx-4">
+        <button type="button" onclick="closeImageModal()" class="absolute -top-10 right-0 text-white hover:text-gray-300 transition-colors">
+            <i data-lucide="x" class="w-6 h-6"></i>
+        </button>
+        <img id="image-modal-img" src="" alt="" class="max-w-full max-h-[85vh] rounded-lg shadow-2xl">
+    </div>
 </div>
 
 <div id="delete-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 opacity-0 pointer-events-none transition-opacity duration-200">
