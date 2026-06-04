@@ -1,5 +1,6 @@
 from django import forms
 from .models import Category, Material
+from projects.models import Project
 
 
 class CategoryForm(forms.ModelForm):
@@ -12,6 +13,10 @@ class CategoryForm(forms.ModelForm):
 
 
 class MaterialForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['project'].queryset = Project.objects.filter(is_active=True)
+
     class Meta:
         model = Material
         fields = ['name', 'category', 'project', 'quantity', 'unit', 'unit_price', 'notes']

@@ -32,7 +32,7 @@ class DocumentForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['project'].required = False
         self.fields['file_type'].label = 'Category'
-        self.fields['project'].queryset = Project.objects.all()
+        self.fields['project'].queryset = Project.objects.filter(is_active=True)
 
     class Meta:
         model = Document
@@ -63,7 +63,7 @@ class CommonDocumentForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['project'].required = False
         self.fields['file_type'].label = 'Category'
-        self.fields['project'].queryset = Project.objects.all()
+        self.fields['project'].queryset = Project.objects.filter(is_active=True)
 
     class Meta:
         model = Document

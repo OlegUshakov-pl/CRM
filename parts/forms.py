@@ -1,5 +1,6 @@
 from django import forms
 from .models import Category, Part
+from projects.models import Project
 
 
 class MultipleFileInput(forms.ClearableFileInput):
@@ -41,6 +42,7 @@ class PartForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['number'].required = False
+        self.fields['project'].queryset = Project.objects.filter(is_active=True)
 
     class Meta:
         model = Part
