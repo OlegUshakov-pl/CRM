@@ -1,19 +1,19 @@
 import os
 from django.db import models
 from django.conf import settings
-from django.core.files.storage import FileSystemStorage
 from projects.models import Project
+from projects.utils import ProjectFileSystemStorage, sanitize_folder_name
 
 
-class DocumentStorage(FileSystemStorage):
-    def __init__(self):
-        super().__init__(location=settings.DOCUMENTS_ROOT, base_url=settings.DOCUMENTS_URL)
+DocumentStorage = ProjectFileSystemStorage
 
 
 def document_upload_to(instance, filename):
     if instance.project:
-        return os.path.join(instance.project.slug, instance.file_type, filename)
-    return os.path.join('_no_project', instance.file_type, filename)
+        safe_number = sanitize_folder_name(instance.project.number) if instance.project.number else instance.project.slug
+        safe_name = sanitize_folder_name(instance.project.name)
+        return os.path.join(f'{safe_number}_{safe_name}_Project', f'{safe_number}_documents', filename)
+    return os.path.join('_no_project', filename)
 
 
 class Document(models.Model):
@@ -30,7 +30,7 @@ class Document(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     size = models.IntegerField(blank=True, null=True, help_text='File size in bytes')
-    file = models.FileField(upload_to=document_upload_to, storage=DocumentStorage())
+    file = models.FileField(upload_to=document_upload_to, storage=ProjectFileSystemStorage(fallback=str(settings.DOCUMENTS_ROOT)))
     file_type = models.CharField(max_length=50, choices=FILE_TYPE_CHOICES, default='other')
 
     class Meta:
@@ -54,4 +54,10 @@ class Document(models.Model):
 
     @property
     def filepath(self):
+        from projects.utils import get_project_subfolder_path
+        if self.project:
+            safe_number = sanitize_folder_name(self.project.number) if self.project.number else self.project.slug
+            folder = get_project_subfolder_path(self.project, f'{safe_number}_documents')
+            if folder and self.file:
+                return os.path.join(folder, self.filename)
         return os.path.join(settings.DOCUMENTS_ROOT, self.file.name) if self.file else ''

@@ -3,7 +3,6 @@ from django.conf import settings
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse, FileResponse, Http404
 from django.urls import reverse
-from django.views.static import serve
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
@@ -219,15 +218,21 @@ def document_update(request, pk):
 @login_required
 def document_show(request, pk):
     document = get_object_or_404(Document, pk=pk)
-    if not document.file or not os.path.exists(document.filepath):
+    if not document.file:
         return HttpResponse('File not found', status=404)
-    return FileResponse(open(document.filepath, 'rb'), filename=document.filename)
+    file_path = document.file.path
+    if not os.path.exists(file_path):
+        return HttpResponse('File not found', status=404)
+    return FileResponse(open(file_path, 'rb'), filename=document.filename)
 
 
 @login_required
 def document_view(request, pk):
     document = get_object_or_404(Document, pk=pk)
-    if not document.file or not os.path.exists(document.filepath):
+    if not document.file:
+        return HttpResponse('File not found', status=404)
+    file_path = document.file.path
+    if not os.path.exists(file_path):
         return HttpResponse('File not found', status=404)
     ext = os.path.splitext(document.filename)[1].lower()
     is_image = ext in ('.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp', '.svg')
@@ -262,7 +267,10 @@ def document_download(request, pk):
     document = get_object_or_404(Document, pk=pk)
     if not document.file:
         return HttpResponse('File not found', status=404)
-    response = serve(request, document.file.name, document_root=settings.DOCUMENTS_ROOT)
+    file_path = document.file.path
+    if not os.path.exists(file_path):
+        return HttpResponse('File not found', status=404)
+    response = FileResponse(open(file_path, 'rb'), filename=document.filename)
     response['Content-Disposition'] = f'attachment; filename="{document.filename}"'
     return response
 

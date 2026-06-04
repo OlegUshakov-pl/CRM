@@ -1,8 +1,19 @@
+import os
 from django.db import models
 from django.contrib.auth.models import User
+from django.conf import settings
 from core.models import TimeStampedModel, generate_unique_slug
 from companies.models import Company
 from contacts.models import Contact
+from .utils import ProjectFileSystemStorage, sanitize_folder_name
+
+
+def project_image_upload_to(instance, filename):
+    if instance.project and instance.project.number:
+        safe_number = sanitize_folder_name(instance.project.number)
+        safe_name = sanitize_folder_name(instance.project.name)
+        return os.path.join(f'{safe_number}_{safe_name}_Project', f'{safe_number}_documents', filename)
+    return os.path.join('projects', filename)
 
 
 class Project(TimeStampedModel):
@@ -40,7 +51,7 @@ class Project(TimeStampedModel):
 
 class ProjectImage(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='images')
-    image = models.ImageField(upload_to='projects/')
+    image = models.ImageField(upload_to=project_image_upload_to, storage=ProjectFileSystemStorage(fallback=str(settings.MEDIA_ROOT)), blank=True, null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
