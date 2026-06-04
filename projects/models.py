@@ -5,7 +5,7 @@ from django.conf import settings
 from core.models import TimeStampedModel, generate_unique_slug
 from companies.models import Company
 from contacts.models import Contact
-from .utils import ProjectFileSystemStorage, sanitize_folder_name
+from .utils import sanitize_folder_name
 
 
 def project_image_upload_to(instance, filename):
@@ -51,7 +51,7 @@ class Project(TimeStampedModel):
 
 class ProjectImage(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='images')
-    image = models.ImageField(upload_to=project_image_upload_to, storage=ProjectFileSystemStorage(fallback=str(settings.MEDIA_ROOT)), blank=True, null=True)
+    image = models.ImageField(upload_to=project_image_upload_to, blank=True, null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
