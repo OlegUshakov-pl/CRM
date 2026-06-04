@@ -80,7 +80,7 @@ def generate_unique_slug(instance, source_field, ModelClass):
         base_slug = 'untitled'
     slug = base_slug
     counter = 1
-    while ModelClass.objects.filter(slug=slug).exclude(pk=instance.pk).exists():
+    while ModelClass._base_manager.filter(slug=slug).exclude(pk=instance.pk).exists():
         slug = f"{base_slug}-{counter}"
         counter += 1
     return slug
