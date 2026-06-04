@@ -1,11 +1,14 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-from django.core.paginator import Paginator
+from django.db.models import Q
 from projects.models import Project
 from tasks.models import Task
 from companies.models import Company
 from contacts.models import Contact
 from notes.models import Note
+from materials.models import Material
+from parts.models import Part
+from generator.models import Deal
 
 
 @login_required
@@ -21,3 +24,47 @@ def dashboard(request):
         'recent_notes': Note.objects.filter(is_active=True).select_related('project', 'company', 'contact').order_by('-created_at')[:5],
     }
     return render(request, 'core/dashboard.html', context)
+
+
+@login_required
+def search_view(request):
+    query = request.GET.get('q', '').strip()
+    results = {}
+
+    if query:
+        results['projects'] = Project.objects.filter(is_active=True).filter(
+            Q(name__icontains=query) | Q(description__icontains=query) | Q(number__icontains=query)
+        )[:10]
+
+        results['contacts'] = Contact.objects.filter(is_active=True).filter(
+            Q(first_name__icontains=query) | Q(last_name__icontains=query) | Q(email__icontains=query) | Q(phone__icontains=query)
+        )[:10]
+
+        results['companies'] = Company.objects.filter(is_active=True).filter(
+            Q(name__icontains=query) | Q(email__icontains=query) | Q(phone__icontains=query)
+        )[:10]
+
+        results['tasks'] = Task.objects.filter(is_active=True).filter(
+            Q(title__icontains=query) | Q(description__icontains=query)
+        )[:10]
+
+        results['notes'] = Note.objects.filter(is_active=True).filter(
+            Q(title__icontains=query) | Q(content__icontains=query)
+        )[:10]
+
+        results['materials'] = Material.objects.filter(is_active=True).filter(
+            Q(name__icontains=query)
+        )[:10]
+
+        results['parts'] = Part.objects.filter(is_active=True).filter(
+            Q(number__icontains=query) | Q(size__icontains=query)
+        )[:10]
+
+        results['deals'] = Deal.objects.filter(is_active=True).filter(
+            Q(name__icontains=query) | Q(description__icontains=query)
+        )[:10]
+
+    return render(request, 'core/search_results.html', {
+        'results': results,
+        'query': query,
+    })

@@ -1,0 +1,178 @@
+{% extends 'base.html' %}
+{% block title %}Search: {{ query }} - CRM{% endblock %}
+{% block breadcrumb %}Search{% endblock %}
+{% block content %}
+<div class="space-y-6">
+    <div>
+        <h1 class="text-xl font-semibold text-gray-900 dark:text-white">
+            Search results for "{{ query }}"
+        </h1>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            {% with total=results.projects|length|add:results.contacts|length|add:results.companies|length|add:results.tasks|length|add:results.notes|length|add:results.materials|length|add:results.parts|length|add:results.deals|length %}
+                {{ total }} result{{ total|pluralize }} found
+            {% endwith %}
+        </p>
+    </div>
+
+    {% if query %}
+        {% if results.projects %}
+        <div class="bg-white dark:bg-gray-800 border border-[#e8e8e8] dark:border-gray-700">
+            <div class="px-5 py-4 border-b border-[#e8e8e8] dark:border-gray-700">
+                <h2 class="text-sm font-semibold text-gray-900 dark:text-white">Projects</h2>
+            </div>
+            <div class="p-5 space-y-2">
+                {% for project in results.projects %}
+                <a href="{% url 'projects:detail' project.slug %}" class="flex items-center justify-between p-3 hover:bg-[#f8f8f8] dark:hover:bg-gray-700/50 transition-colors rounded">
+                    <div>
+                        <p class="text-[13px] font-medium text-gray-900 dark:text-white">{{ project.name }}</p>
+                        <p class="text-[12px] text-gray-500 dark:text-gray-400">{{ project.company.name|default:'No company' }}</p>
+                    </div>
+                    <span class="text-[11px] px-2 py-0.5 rounded {% if project.status == 'active' %}bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300{% elif project.status == 'planning' %}bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300{% elif project.status == 'completed' %}bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300{% else %}bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300{% endif %}">
+                        {{ project.get_status_display }}
+                    </span>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if results.contacts %}
+        <div class="bg-white dark:bg-gray-800 border border-[#e8e8e8] dark:border-gray-700">
+            <div class="px-5 py-4 border-b border-[#e8e8e8] dark:border-gray-700">
+                <h2 class="text-sm font-semibold text-gray-900 dark:text-white">Contacts</h2>
+            </div>
+            <div class="p-5 space-y-2">
+                {% for contact in results.contacts %}
+                <a href="{% url 'contacts:contact_detail' contact.slug %}" class="flex items-center gap-3 p-3 hover:bg-[#f8f8f8] dark:hover:bg-gray-700/50 transition-colors rounded">
+                    <div class="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/50 rounded-full flex items-center justify-center flex-shrink-0">
+                        <span class="text-xs font-semibold text-indigo-700 dark:text-indigo-300">{{ contact.first_name|first }}{{ contact.last_name|first }}</span>
+                    </div>
+                    <div>
+                        <p class="text-[13px] font-medium text-gray-900 dark:text-white">{{ contact.get_full_name }}</p>
+                        <p class="text-[12px] text-gray-500 dark:text-gray-400">{{ contact.position|default:contact.email }}</p>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if results.companies %}
+        <div class="bg-white dark:bg-gray-800 border border-[#e8e8e8] dark:border-gray-700">
+            <div class="px-5 py-4 border-b border-[#e8e8e8] dark:border-gray-700">
+                <h2 class="text-sm font-semibold text-gray-900 dark:text-white">Companies</h2>
+            </div>
+            <div class="p-5 space-y-2">
+                {% for company in results.companies %}
+                <a href="{% url 'companies:company_detail' company.slug %}" class="flex items-center gap-3 p-3 hover:bg-[#f8f8f8] dark:hover:bg-gray-700/50 transition-colors rounded">
+                    <div class="w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i data-lucide="building-2" class="w-4 h-4 text-gray-500 dark:text-gray-400"></i>
+                    </div>
+                    <div>
+                        <p class="text-[13px] font-medium text-gray-900 dark:text-white">{{ company.name }}</p>
+                        <p class="text-[12px] text-gray-500 dark:text-gray-400">{{ company.email|default:company.phone }}</p>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if results.tasks %}
+        <div class="bg-white dark:bg-gray-800 border border-[#e8e8e8] dark:border-gray-700">
+            <div class="px-5 py-4 border-b border-[#e8e8e8] dark:border-gray-700">
+                <h2 class="text-sm font-semibold text-gray-900 dark:text-white">Tasks</h2>
+            </div>
+            <div class="p-5 space-y-2">
+                {% for task in results.tasks %}
+                <a href="{% url 'tasks:list' %}" class="flex items-center gap-3 p-3 hover:bg-[#f8f8f8] dark:hover:bg-gray-700/50 transition-colors rounded">
+                    <div class="w-4 h-4 rounded-full border-2 flex-shrink-0 {% if task.priority == 'urgent' %}border-red-400{% elif task.priority == 'high' %}border-orange-400{% elif task.priority == 'medium' %}border-blue-400{% else %}border-gray-400{% endif %}"></div>
+                    <div>
+                        <p class="text-[13px] font-medium text-gray-900 dark:text-white">{{ task.title }}</p>
+                        <p class="text-[12px] text-gray-500 dark:text-gray-400">{{ task.get_status_display }}</p>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if results.notes %}
+        <div class="bg-white dark:bg-gray-800 border border-[#e8e8e8] dark:border-gray-700">
+            <div class="px-5 py-4 border-b border-[#e8e8e8] dark:border-gray-700">
+                <h2 class="text-sm font-semibold text-gray-900 dark:text-white">Notes</h2>
+            </div>
+            <div class="p-5 space-y-2">
+                {% for note in results.notes %}
+                <a href="{% url 'notes:detail' note.slug %}" class="block p-3 hover:bg-[#f8f8f8] dark:hover:bg-gray-700/50 transition-colors rounded">
+                    <p class="text-[13px] font-medium text-gray-900 dark:text-white">{{ note.title }}</p>
+                    <p class="text-[12px] text-gray-500 dark:text-gray-400 mt-1">{{ note.content|truncatewords:20 }}</p>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if results.materials %}
+        <div class="bg-white dark:bg-gray-800 border border-[#e8e8e8] dark:border-gray-700">
+            <div class="px-5 py-4 border-b border-[#e8e8e8] dark:border-gray-700">
+                <h2 class="text-sm font-semibold text-gray-900 dark:text-white">Materials</h2>
+            </div>
+            <div class="p-5 space-y-2">
+                {% for material in results.materials %}
+                <div class="p-3 hover:bg-[#f8f8f8] dark:hover:bg-gray-700/50 transition-colors rounded">
+                    <p class="text-[13px] font-medium text-gray-900 dark:text-white">{{ material.name }}</p>
+                    <p class="text-[12px] text-gray-500 dark:text-gray-400">{{ material.get_unit_display }} · {{ material.quantity }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if results.parts %}
+        <div class="bg-white dark:bg-gray-800 border border-[#e8e8e8] dark:border-gray-700">
+            <div class="px-5 py-4 border-b border-[#e8e8e8] dark:border-gray-700">
+                <h2 class="text-sm font-semibold text-gray-900 dark:text-white">Drawings / Parts</h2>
+            </div>
+            <div class="p-5 space-y-2">
+                {% for part in results.parts %}
+                <div class="p-3 hover:bg-[#f8f8f8] dark:hover:bg-gray-700/50 transition-colors rounded">
+                    <p class="text-[13px] font-medium text-gray-900 dark:text-white">{{ part.number }}</p>
+                    <p class="text-[12px] text-gray-500 dark:text-gray-400">{{ part.size|default:'' }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if results.deals %}
+        <div class="bg-white dark:bg-gray-800 border border-[#e8e8e8] dark:border-gray-700">
+            <div class="px-5 py-4 border-b border-[#e8e8e8] dark:border-gray-700">
+                <h2 class="text-sm font-semibold text-gray-900 dark:text-white">Deals</h2>
+            </div>
+            <div class="p-5 space-y-2">
+                {% for deal in results.deals %}
+                <div class="p-3 hover:bg-[#f8f8f8] dark:hover:bg-gray-700/50 transition-colors rounded">
+                    <p class="text-[13px] font-medium text-gray-900 dark:text-white">{{ deal.name }}</p>
+                    <p class="text-[12px] text-gray-500 dark:text-gray-400">{{ deal.get_status_display }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if not results.projects and not results.contacts and not results.companies and not results.tasks and not results.notes and not results.materials and not results.parts and not results.deals %}
+        <div class="text-center py-16">
+            <i data-lucide="search-x" class="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4"></i>
+            <p class="text-gray-500 dark:text-gray-400 text-[15px]">No results found for "{{ query }}"</p>
+            <p class="text-gray-400 dark:text-gray-500 text-[13px] mt-1">Try different keywords or check your spelling</p>
+        </div>
+        {% endif %}
+    {% else %}
+        <div class="text-center py-16">
+            <i data-lucide="search" class="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4"></i>
+            <p class="text-gray-500 dark:text-gray-400 text-[15px]">Enter a search term to find projects, contacts, companies, and more</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
