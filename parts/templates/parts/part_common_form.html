@@ -9,6 +9,7 @@
 <form hx-post="{% url 'parts:common_save' %}"
       hx-target="#slide-over-content"
       hx-swap="innerHTML"
+      enctype="multipart/form-data"
       class="p-6 space-y-4">
     {% csrf_token %}
     {% for field in form %}

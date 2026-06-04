@@ -22,6 +22,17 @@ class Part(TimeStampedModel):
     rev = models.CharField(max_length=50, blank=True, null=True)
     created = models.DateField(blank=True, null=True)
     updated = models.DateField(blank=True, null=True)
+    file = models.FileField(upload_to='parts/', blank=True, null=True)
+
+    MODEL_EXTENSIONS = ['.stp', '.ipt', '.iam', '.sldprt', '.sldasm', '.ics']
+
+    @property
+    def is_model(self):
+        if self.file:
+            import os
+            ext = os.path.splitext(self.file.name)[1].lower()
+            return ext in self.MODEL_EXTENSIONS
+        return False
 
     class Meta:
         ordering = ['number']

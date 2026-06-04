@@ -5,6 +5,7 @@ app_name = 'parts'
 urlpatterns = [
     path('', views.part_list, name='list'),
     path('projects/', views.part_projects, name='projects'),
+    path('model-projects/', views.model_projects, name='model_projects'),
     path('common/create/slide/', views.common_create_slide, name='common_create_slide'),
     path('common/save/', views.common_save, name='common_save'),
     path('common/<int:pk>/delete/', views.common_delete, name='common_delete'),

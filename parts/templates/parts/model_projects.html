@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Project Models{% endblock %}
+{% block breadcrumb %}Project Models{% endblock %}
+{% block content %}
+<h1 class="text-xl font-semibold mb-6">Project Models</h1>
+<div class="space-y-3">
+    {% for project in projects %}
+    <a href="{% url 'parts:page' project.slug %}" class="block p-4 border border-[#e8e8e8] hover:bg-[#f8f8f8] transition-colors">
+        <span class="font-medium">{{ project.name }}</span>
+    </a>
+    {% empty %}
+    <p class="text-[#8d8d8d] text-center py-10">No projects with model files yet.</p>
+    {% endfor %}
+</div>
+{% endblock %}

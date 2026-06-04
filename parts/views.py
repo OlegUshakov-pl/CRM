@@ -33,10 +33,16 @@ def part_create(request, project_slug):
     project = get_object_or_404(Project, slug=project_slug)
     form = PartForm(request.POST)
     if form.is_valid():
-        part = form.save(commit=False)
-        part.project = project
-        part.save()
-        log_activity(request.user, 'created', part, f'Part {part.number} created')
+        up_files = request.FILES.getlist('file')
+        if up_files:
+            for f in up_files:
+                if f:
+                    Part.objects.create(project=project, number=form.cleaned_data.get('number', ''), category=form.cleaned_data.get('category'), size=form.cleaned_data.get('size'), rev=form.cleaned_data.get('rev'), created=form.cleaned_data.get('created'), updated=form.cleaned_data.get('updated'), file=f)
+        else:
+            part = form.save(commit=False)
+            part.project = project
+            part.save()
+        log_activity(request.user, 'created', None, 'Part created')
         if request.headers.get('HX-Request'):
             response = HttpResponse('<script>closeSlideOver()</script>')
             response['HX-Refresh'] = 'true'
@@ -105,8 +111,14 @@ def common_create_slide(request):
 def common_save(request):
     form = CommonPartForm(request.POST)
     if form.is_valid():
-        part = form.save()
-        log_activity(request.user, 'created', part, f'Part {part.number} created')
+        up_files = request.FILES.getlist('file')
+        if up_files:
+            for f in up_files:
+                if f:
+                    Part.objects.create(number=form.cleaned_data.get('number', ''), category=form.cleaned_data.get('category'), size=form.cleaned_data.get('size'), rev=form.cleaned_data.get('rev'), created=form.cleaned_data.get('created'), updated=form.cleaned_data.get('updated'), file=f)
+        else:
+            form.save()
+        log_activity(request.user, 'created', None, 'Part created')
         if request.headers.get('HX-Request'):
             response = HttpResponse('<script>closeSlideOver()</script>')
             response['HX-Refresh'] = 'true'
@@ -127,6 +139,13 @@ def common_delete(request, pk):
         return response
     messages.success(request, 'Part deleted.')
     return redirect('parts:list')
+
+
+@login_required
+def model_projects(request):
+    from projects.models import Project
+    projects = Project.objects.filter(parts__isnull=False, parts__file__isnull=False).distinct()
+    return render(request, 'parts/model_projects.html', {'projects': projects})
 
 
 @login_required
