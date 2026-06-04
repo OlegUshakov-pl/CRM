@@ -281,11 +281,34 @@
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Project Storage Path</label>
             <div class="flex gap-2">
                 <input id="root-path-input" type="text" value="" placeholder="C:\Projects" class="flex-1 px-4 py-2.5 border border-[#e8e8e8] dark:border-[#222] dark:bg-[#111] dark:text-white text-[14px] outline-none focus:border-violet-300 transition-colors">
-                <button onclick="document.getElementById('folder-picker').click()" class="px-4 py-2 bg-violet-400 hover:opacity-90 text-white font-medium text-[13px] transition-opacity rounded-[20px] shadow flex-shrink-0">Browse</button>
+                <button onclick="openFolderModal()" class="px-4 py-2 bg-violet-400 hover:opacity-90 text-white font-medium text-[13px] transition-opacity rounded-[20px] shadow flex-shrink-0">Browse</button>
             </div>
-            <input id="folder-picker" type="file" webkitdirectory style="display:none" onchange="handleFolderPick(this)">
-            <p class="text-xs text-gray-400 dark:text-gray-500">Select the root folder where all project folders will be created.</p>
+            <p class="text-xs text-gray-400 dark:text-gray-500">Enter the full path to the root folder where all project folders will be created (e.g. C:\Projects or D:\CRM).</p>
             <button onclick="saveSettings()" class="w-full py-3 px-4 bg-gray-100 dark:bg-[#1a1a1a] hover:bg-gray-200 dark:hover:bg-[#222] text-gray-700 dark:text-gray-300 font-medium text-[13px] transition-colors rounded-[28px] shadow">Save</button>
+        </div>
+    </div>
+
+    <!-- Folder Path Modal -->
+    <div id="folder-modal-backdrop" class="fixed inset-0 z-50 bg-black/40 transition-opacity duration-300 opacity-0 pointer-events-none" onclick="closeFolderModal()"></div>
+    <div id="folder-modal" class="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
+        <div class="bg-white dark:bg-black rounded-lg shadow-xl z-10 max-w-md w-full mx-4 p-6 relative translate-y-4 opacity-0 transition-all duration-300">
+            <div class="flex items-start gap-4">
+                <div class="w-10 h-10 rounded-full bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <i data-lucide="folder-open" class="w-5 h-5 text-violet-600"></i>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Select Storage Path</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">Enter the full path to the folder where all project folders will be stored. Example: <code class="text-xs bg-gray-100 dark:bg-[#1a1a1a] px-1 py-0.5 rounded">C:\CRM_Projects</code></p>
+                    <div class="mt-4">
+                        <input id="folder-modal-input" type="text" placeholder="C:\Projects" class="w-full px-4 py-2.5 border border-[#e8e8e8] dark:border-[#222] dark:bg-[#111] dark:text-white text-[14px] outline-none focus:border-violet-300 transition-colors">
+                    </div>
+                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-2">You can also paste a path copied from Windows Explorer.</p>
+                </div>
+            </div>
+            <div class="flex justify-end gap-3 mt-6">
+                <button onclick="closeFolderModal()" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-[#1a1a1a] hover:bg-gray-200 dark:hover:bg-[#222] transition-colors rounded">Cancel</button>
+                <button onclick="confirmFolderPath()" class="px-4 py-2 text-sm font-medium text-white bg-violet-400 hover:opacity-90 transition-opacity rounded shadow">Confirm</button>
+            </div>
         </div>
     </div>
 
@@ -401,14 +424,47 @@
                 .catch(() => {});
         }
 
-        function handleFolderPick(input) {
-            if (input.files && input.files.length > 0) {
-                var path = input.files[0].webkitRelativePath || input.files[0].name;
-                var parts = path.split('/');
-                if (parts.length > 1) {
-                    document.getElementById('root-path-input').value = parts[0];
+        function openFolderModal() {
+            var backdrop = document.getElementById('folder-modal-backdrop');
+            var modal = document.getElementById('folder-modal');
+            var dialog = modal.querySelector('div');
+            var input = document.getElementById('folder-modal-input');
+            input.value = document.getElementById('root-path-input').value;
+            backdrop.classList.remove('opacity-0', 'pointer-events-none');
+            modal.classList.remove('pointer-events-none');
+            setTimeout(function() {
+                backdrop.classList.add('opacity-100');
+                dialog.classList.remove('translate-y-4', 'opacity-0');
+                dialog.classList.add('translate-y-0', 'opacity-100');
+                input.focus();
+            }, 10);
+            input.addEventListener('keydown', function onEnter(e) {
+                if (e.key === 'Enter') {
+                    confirmFolderPath();
+                    input.removeEventListener('keydown', onEnter);
                 }
+            });
+        }
+
+        function closeFolderModal() {
+            var backdrop = document.getElementById('folder-modal-backdrop');
+            var modal = document.getElementById('folder-modal');
+            var dialog = modal.querySelector('div');
+            backdrop.classList.remove('opacity-100');
+            dialog.classList.remove('translate-y-0', 'opacity-100');
+            dialog.classList.add('translate-y-4', 'opacity-0');
+            setTimeout(function() {
+                backdrop.classList.add('opacity-0', 'pointer-events-none');
+                modal.classList.add('pointer-events-none');
+            }, 200);
+        }
+
+        function confirmFolderPath() {
+            var path = document.getElementById('folder-modal-input').value.trim();
+            if (path) {
+                document.getElementById('root-path-input').value = path;
             }
+            closeFolderModal();
         }
 
         function saveSettings() {
