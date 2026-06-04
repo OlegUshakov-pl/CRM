@@ -84,8 +84,6 @@ def note_delete(request, slug):
         note.save()
         log_activity(request.user, 'deleted', f'Note "{note.title}"')
         messages.success(request, 'Note deleted successfully.')
-    if note.project:
-        return redirect('projects:edit', slug=note.project.slug)
     return redirect('notes:list')
 
 
