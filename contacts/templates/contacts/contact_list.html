@@ -37,10 +37,12 @@
                 <span class="text-sm text-gray-500 dark:text-gray-400 w-[110px] flex-shrink-0 truncate" title="{{ contact.phone|default:'' }}">{{ contact.phone|default:'—' }}</span>
                 <span class="text-sm text-gray-500 dark:text-gray-400 w-[160px] flex-shrink-0 truncate" title="{{ contact.email|default:'' }}">{{ contact.email|default:'—' }}</span>
                 <div class="flex-1 text-sm min-w-0">
-                    {% with projects=contact.projects.all %}
-                        {% if projects %}
-                            {% for project in projects %}
-                                <a href="{% url 'projects:detail' project.slug %}" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ project.name }}</a>{% if not forloop.last %}, {% endif %}
+                    {% with active_projects=contact.projects.all %}
+                        {% if active_projects %}
+                            {% for project in active_projects %}
+                                {% if project.is_active %}
+                                    <a href="{% url 'projects:detail' project.slug %}" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ project.name }}</a>{% if not forloop.last %}, {% endif %}
+                                {% endif %}
                             {% endfor %}
                         {% else %}
                             <span class="text-gray-400">—</span>
