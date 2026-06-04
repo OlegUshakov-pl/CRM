@@ -40,3 +40,14 @@
         <button type="button" onclick="closeSlideOver()" class="px-6 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium text-[13px] transition-colors rounded-[20px]">Cancel</button>
     </div>
 </form>
+
+<script>
+document.addEventListener('change', function(e) {
+    if (e.target && e.target.name === 'file' && e.target.files.length > 0) {
+        var numInput = document.querySelector('[name="number"]');
+        if (numInput && !numInput.value) {
+            numInput.value = e.target.files[0].name.replace(/\.[^/.]+$/, '');
+        }
+    }
+});
+</script>

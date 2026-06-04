@@ -1,3 +1,4 @@
+import os
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
@@ -5,6 +6,12 @@ from django.contrib import messages
 from core.models import log_activity
 from .models import Part, Category
 from .forms import PartForm, CommonPartForm, CategoryForm
+
+
+def _number_from_file(number, f):
+    if not number and f:
+        return os.path.splitext(f.name)[0]
+    return number or ''
 
 
 @login_required
@@ -37,9 +44,10 @@ def part_create(request, project_slug):
         if up_files:
             for f in up_files:
                 if f:
-                    Part.objects.create(project=project, number=form.cleaned_data.get('number', ''), category=form.cleaned_data.get('category'), size=form.cleaned_data.get('size'), rev=form.cleaned_data.get('rev'), created=form.cleaned_data.get('created'), updated=form.cleaned_data.get('updated'), file=f)
+                    Part.objects.create(project=project, number=_number_from_file(form.cleaned_data.get('number'), f), category=form.cleaned_data.get('category'), size=form.cleaned_data.get('size'), rev=form.cleaned_data.get('rev'), created=form.cleaned_data.get('created'), updated=form.cleaned_data.get('updated'), file=f)
         else:
             part = form.save(commit=False)
+            part.number = _number_from_file(form.cleaned_data.get('number'), None)
             part.project = project
             part.save()
         log_activity(request.user, 'created', None, 'Part created')
@@ -115,9 +123,11 @@ def common_save(request):
         if up_files:
             for f in up_files:
                 if f:
-                    Part.objects.create(number=form.cleaned_data.get('number', ''), category=form.cleaned_data.get('category'), size=form.cleaned_data.get('size'), rev=form.cleaned_data.get('rev'), created=form.cleaned_data.get('created'), updated=form.cleaned_data.get('updated'), file=f)
+                    Part.objects.create(number=_number_from_file(form.cleaned_data.get('number'), f), category=form.cleaned_data.get('category'), size=form.cleaned_data.get('size'), rev=form.cleaned_data.get('rev'), created=form.cleaned_data.get('created'), updated=form.cleaned_data.get('updated'), file=f)
         else:
-            form.save()
+            part = form.save(commit=False)
+            part.number = _number_from_file(form.cleaned_data.get('number'), None)
+            part.save()
         log_activity(request.user, 'created', None, 'Part created')
         if request.headers.get('HX-Request'):
             response = HttpResponse('<script>closeSlideOver()</script>')
