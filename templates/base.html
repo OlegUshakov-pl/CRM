@@ -36,10 +36,12 @@
 
         #sidebar.collapsed { width: 60px; padding-left: 12px; padding-right: 12px; }
         #sidebar.collapsed .sidebar-text,
-        #sidebar.collapsed .flex.items-center.gap-2.mb-7 span,
+        #sidebar.collapsed .flex.items-center.gap-2.mb-7 span { display: none; }
+        #sidebar.collapsed .flex.items-center.gap-2.mb-7 { justify-content: center; margin-bottom: 28px; }
+        #sidebar.collapsed .flex.items-center.gap-2.mb-7 a { justify-content: center; gap: 0; }
+        #sidebar.collapsed nav a { justify-content: center; padding: 5px 0; gap: 0; }
         #sidebar.collapsed nav a .sidebar-text { display: none; }
-        #sidebar.collapsed .flex.items-center.gap-2.mb-7,
-        #sidebar.collapsed button { justify-content: center; }
+        #sidebar.collapsed button { justify-content: center; padding: 8px !important; }
 
         .slide-over-enter { transform: translateX(-100%); }
         .slide-over-enter-active { transform: translateX(0); transition: transform 0.3s ease-out; }
@@ -327,15 +329,8 @@
         function toggleSidebar() {
             var sidebar = document.getElementById("sidebar");
             var icon = document.getElementById("toggle-icon");
-            var btn = document.getElementById("sidebar-toggle-btn");
             sidebar.classList.toggle("collapsed");
-            if (sidebar.classList.contains("collapsed")) {
-                icon.setAttribute("data-lucide", "panel-left-open");
-                btn.classList.remove("pl-0");
-            } else {
-                icon.setAttribute("data-lucide", "panel-left-close");
-                btn.classList.add("pl-0");
-            }
+            icon.setAttribute("data-lucide", sidebar.classList.contains("collapsed") ? "panel-left-open" : "panel-left-close");
             lucide.createIcons();
         }
 
