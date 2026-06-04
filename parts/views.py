@@ -28,7 +28,9 @@ def _format_size(size_bytes):
 
 @login_required
 def part_common_latest(request):
-    parts = Part.objects.select_related('category').order_by('-created')[:5]
+    from django.utils import timezone
+    from datetime import timedelta
+    parts = Part.objects.filter(created_at__gte=timezone.now() - timedelta(minutes=10)).select_related('category').order_by('-created_at')[:5]
     return render(request, 'parts/common_latest.html', {'parts': parts})
 
 

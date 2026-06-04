@@ -11,7 +11,9 @@ from core.models import log_activity
 
 @login_required
 def material_common_latest(request):
-    materials = Material.objects.filter(is_active=True).select_related('category').order_by('-created_at')[:5]
+    from django.utils import timezone
+    from datetime import timedelta
+    materials = Material.objects.filter(is_active=True, created_at__gte=timezone.now() - timedelta(minutes=10)).select_related('category').order_by('-created_at')[:5]
     return render(request, 'materials/common_latest.html', {'materials': materials})
 
 
