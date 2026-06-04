@@ -112,6 +112,20 @@
 
 {% block extra_scripts %}
 <script>
+function openImageModal(url, name) {
+    var img = document.getElementById('image-modal-img');
+    img.src = url;
+    img.alt = name;
+    var m = document.getElementById('image-modal');
+    m.classList.remove('opacity-0', 'pointer-events-none');
+    m.classList.add('opacity-100');
+}
+function closeImageModal() {
+    var m = document.getElementById('image-modal');
+    m.classList.remove('opacity-100');
+    m.classList.add('opacity-0', 'pointer-events-none');
+    document.getElementById('image-modal-img').src = '';
+}
 function showDeleteModal(slug, name) {
     document.getElementById('delete-project-name').textContent = name;
     document.getElementById('delete-form').action = '/projects/' + slug + '/delete/';
@@ -128,6 +142,10 @@ document.addEventListener('DOMContentLoaded', function() {
     var m = document.getElementById('delete-modal');
     if (m) m.addEventListener('click', function(e) {
         if (e.target === this) hideDeleteModal();
+    });
+    var imgModal = document.getElementById('image-modal');
+    if (imgModal) imgModal.addEventListener('click', function(e) {
+        if (e.target === this) closeImageModal();
     });
 });
 </script>
