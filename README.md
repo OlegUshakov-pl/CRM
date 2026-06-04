@@ -71,6 +71,7 @@ materials/           Materials / BOM
 tasks/               Task management
 notes/               Universal notes
 documents/           File management with preview (images, PDF, text)
+parts/               Drawings, parts, models (.stp/.ipt/.sldprt etc.)
 generator/           Template app for new modules
 templates/
   base.html          Base layout
