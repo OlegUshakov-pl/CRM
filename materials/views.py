@@ -191,9 +191,7 @@ def common_save(request):
         if project_id:
             material.project = get_object_or_404(Project, id=project_id)
         material.save()
-        response = HttpResponse('<script>closeSlideOver()</script>')
-        response['HX-Trigger'] = 'refresh-materials'
-        return response
+        return HttpResponse('<script>closeSlideOver(); refreshSection("materials")</script>')
     projects = Project.objects.filter(is_active=True)
     return render(request, 'materials/common_material_form.html', {'form': form, 'projects': projects, 'title': 'Add Material'})
 

@@ -444,6 +444,22 @@
             backdrop.classList.add('opacity-0', 'pointer-events-none');
         }
 
+        function refreshSection(type) {
+            var map = {
+                documents: { id: 'documents-section', url: '{% url "documents:common_latest" %}' },
+                materials: { id: 'materials-section', url: '{% url "materials:common_latest" %}' },
+                parts: { id: 'drawings-section', url: '{% url "parts:common_latest" %}' },
+                contacts: { id: 'contacts-section', url: '{% url "contacts:contact_latest" %}' },
+                tasks: { id: 'tasks-section', url: '{% url "tasks:latest" %}' },
+                notes: { id: 'notes-section', url: '{% url "notes:latest" %}' },
+            };
+            var item = map[type];
+            if (item) {
+                var el = document.getElementById(item.id);
+                if (el) htmx.ajax('GET', item.url, { target: el, swap: 'innerHTML' });
+            }
+        }
+
         document.addEventListener('htmx:afterSwap', function(evt) {
             if (evt.detail.target && evt.detail.target.id === 'slide-over-content') {
                 lucide.createIcons();

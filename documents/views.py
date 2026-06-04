@@ -180,9 +180,7 @@ def document_common_save(request):
         else:
             Document.objects.create(project=project, number=form.cleaned_data.get('number', ''), file_type=file_type)
         if request.headers.get('HX-Request'):
-            response = HttpResponse('<script>closeSlideOver()</script>')
-            response['HX-Trigger'] = 'refresh-documents'
-            return response
+            return HttpResponse('<script>closeSlideOver(); refreshSection("documents")</script>')
         messages.success(request, 'Document added successfully.')
         return redirect('documents:list')
     return render(request, 'documents/document_common_form.html', {'form': form, 'title': 'Add Document'})
@@ -279,7 +277,7 @@ def document_download(request, pk):
 def document_common_latest(request):
     from django.utils import timezone
     from datetime import timedelta
-    documents = Document.objects.filter(is_active=True, created_at__gte=timezone.now() - timedelta(minutes=10)).select_related('project').order_by('-created_at')[:5]
+    documents = Document.objects.filter(created_at__gte=timezone.now() - timedelta(minutes=10)).select_related('project').order_by('-created_at')[:5]
     return render(request, 'documents/common_latest.html', {'documents': documents})
 
 

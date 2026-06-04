@@ -189,9 +189,7 @@ def common_save(request):
             part.save()
         log_activity(request.user, 'created', None, 'Part created')
         if request.headers.get('HX-Request'):
-            response = HttpResponse('<script>closeSlideOver()</script>')
-            response['HX-Trigger'] = 'refresh-parts'
-            return response
+            return HttpResponse('<script>closeSlideOver(); refreshSection("parts")</script>')
         messages.success(request, 'Part added successfully.')
         return redirect('parts:list')
     return render(request, 'parts/part_common_form.html', {'form': form, 'title': 'Add Part'})
