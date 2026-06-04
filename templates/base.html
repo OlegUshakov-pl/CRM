@@ -176,7 +176,6 @@
                     <i data-lucide="panel-left-close" id="toggle-icon" class="w-4 h-4 flex-shrink-0 dark:text-gray-400"></i>
                 </button>
             </nav>
-            <div id="sidebar-path" class="sidebar-text text-[11px] text-gray-400 dark:text-gray-500 mt-4 px-1 leading-tight break-all hidden"></div>
         </aside>
 
         <!-- Main -->
@@ -388,15 +387,6 @@
                 .then(data => {
                     var input = document.getElementById('root-path-input');
                     if (input) input.value = data.value || '';
-                    var sidebarPath = document.getElementById('sidebar-path');
-                    if (sidebarPath) {
-                        if (data.value) {
-                            sidebarPath.textContent = data.value;
-                            sidebarPath.classList.remove('hidden');
-                        } else {
-                            sidebarPath.classList.add('hidden');
-                        }
-                    }
                 })
                 .catch(() => {});
         }
@@ -407,7 +397,6 @@
                 var parts = path.split('/');
                 if (parts.length > 1) {
                     document.getElementById('root-path-input').value = parts[0];
-                    document.getElementById('sidebar-path').textContent = parts[0];
                 }
             }
         }
