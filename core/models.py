@@ -50,6 +50,30 @@ def log_activity(user, action, description, obj=None):
     Activity.objects.create(**kwargs)
 
 
+class AppSetting(models.Model):
+    key = models.CharField(max_length=255, unique=True)
+    value = models.TextField(blank=True, default='')
+
+    class Meta:
+        verbose_name = 'Application Setting'
+        verbose_name_plural = 'Application Settings'
+
+    def __str__(self):
+        return self.key
+
+    @classmethod
+    def get_value(cls, key, default=''):
+        try:
+            return cls.objects.get(key=key).value
+        except cls.DoesNotExist:
+            return default
+
+    @classmethod
+    def set_value(cls, key, value):
+        obj, _ = cls.objects.update_or_create(key=key, defaults={'value': value})
+        return obj
+
+
 def generate_unique_slug(instance, source_field, ModelClass):
     base_slug = slugify(getattr(instance, source_field))
     if not base_slug:

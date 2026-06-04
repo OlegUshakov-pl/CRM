@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
 from projects.models import Project
+from projects.utils import ensure_project_subfolder, sanitize_folder_name
 from .models import Document
 from .forms import DocumentForm, CommonDocumentForm
 
@@ -123,13 +124,25 @@ def document_save(request, project_slug):
     project = get_object_or_404(Project, slug=project_slug)
     form = DocumentForm(request.POST, request.FILES)
     if form.is_valid():
+        file_type = form.cleaned_data.get('file_type', 'other')
         up_files = request.FILES.getlist('file')
+        if up_files and project.number:
+            safe_number = sanitize_folder_name(project.number)
+            subfolder_map = {
+                'drawings': f'{safe_number}_drawings',
+                'models_3d': f'{safe_number}_models',
+                'documents': f'{safe_number}_documents',
+                'photos': f'{safe_number}_documents',
+                'other': f'{safe_number}_documents',
+            }
+            subfolder = subfolder_map.get(file_type, f'{safe_number}_documents')
+            ensure_project_subfolder(project, subfolder)
         if up_files:
             for f in up_files:
                 if f:
-                    Document.objects.create(project=project, number=form.cleaned_data.get('number', ''), file=f, file_type=form.cleaned_data.get('file_type', 'other'))
+                    Document.objects.create(project=project, number=form.cleaned_data.get('number', ''), file=f, file_type=file_type)
         else:
-            Document.objects.create(project=project, number=form.cleaned_data.get('number', ''), file_type=form.cleaned_data.get('file_type', 'other'))
+            Document.objects.create(project=project, number=form.cleaned_data.get('number', ''), file_type=file_type)
         if request.headers.get('HX-Request'):
             return HttpResponse('<script>closeSlideOver()</script>')
         messages.success(request, 'Document(s) added successfully.')
@@ -147,13 +160,26 @@ def document_common_create_slide(request):
 def document_common_save(request):
     form = CommonDocumentForm(request.POST, request.FILES)
     if form.is_valid():
+        project = form.cleaned_data.get('project')
+        file_type = form.cleaned_data.get('file_type', 'other')
         up_files = request.FILES.getlist('file')
+        if up_files and project and project.number:
+            safe_number = sanitize_folder_name(project.number)
+            subfolder_map = {
+                'drawings': f'{safe_number}_drawings',
+                'models_3d': f'{safe_number}_models',
+                'documents': f'{safe_number}_documents',
+                'photos': f'{safe_number}_documents',
+                'other': f'{safe_number}_documents',
+            }
+            subfolder = subfolder_map.get(file_type, f'{safe_number}_documents')
+            ensure_project_subfolder(project, subfolder)
         if up_files:
             for f in up_files:
                 if f:
-                    Document.objects.create(project=form.cleaned_data.get('project'), number=form.cleaned_data.get('number', ''), file=f, file_type=form.cleaned_data.get('file_type', 'other'))
+                    Document.objects.create(project=project, number=form.cleaned_data.get('number', ''), file=f, file_type=file_type)
         else:
-            Document.objects.create(project=form.cleaned_data.get('project'), number=form.cleaned_data.get('number', ''), file_type=form.cleaned_data.get('file_type', 'other'))
+            Document.objects.create(project=project, number=form.cleaned_data.get('number', ''), file_type=file_type)
         if request.headers.get('HX-Request'):
             response = HttpResponse('<script>closeSlideOver()</script>')
             response['HX-Refresh'] = 'true'

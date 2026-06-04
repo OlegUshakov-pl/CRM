@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
+from django.http import JsonResponse
 from projects.models import Project
 from tasks.models import Task
 from companies.models import Company
@@ -9,6 +10,7 @@ from notes.models import Note
 from materials.models import Material
 from parts.models import Part
 from generator.models import Deal
+from .models import AppSetting
 
 
 @login_required
@@ -68,3 +70,20 @@ def search_view(request):
         'results': results,
         'query': query,
     })
+
+
+@login_required
+def save_setting(request):
+    if request.method == 'POST':
+        key = request.POST.get('key', '')
+        value = request.POST.get('value', '')
+        if key:
+            AppSetting.set_value(key, value)
+            return JsonResponse({'ok': True})
+    return JsonResponse({'ok': False}, status=400)
+
+
+@login_required
+def get_setting(request, key):
+    value = AppSetting.get_value(key, '')
+    return JsonResponse({'key': key, 'value': value})

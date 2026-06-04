@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.contrib import messages
 from core.models import log_activity
+from projects.utils import ensure_project_subfolder, sanitize_folder_name
 from .models import Part, Category
 from .forms import PartForm, CommonPartForm, CategoryForm
 
@@ -51,6 +52,25 @@ def part_create(request, project_slug):
     project = get_object_or_404(Project, slug=project_slug)
     form = PartForm(request.POST)
     if form.is_valid():
+        if project.number:
+            safe_number = sanitize_folder_name(project.number)
+            up_files = request.FILES.getlist('file')
+            has_model = False
+            has_drawing = False
+            if up_files:
+                for f in up_files:
+                    if f:
+                        ext = os.path.splitext(f.name)[1].lower()
+                        if ext in Part.MODEL_EXTENSIONS:
+                            has_model = True
+                        else:
+                            has_drawing = True
+            else:
+                has_drawing = True
+            if has_drawing:
+                ensure_project_subfolder(project, f'{safe_number}_drawings')
+            if has_model:
+                ensure_project_subfolder(project, f'{safe_number}_models')
         up_files = request.FILES.getlist('file')
         if up_files:
             for f in up_files:
@@ -130,6 +150,26 @@ def common_create_slide(request):
 def common_save(request):
     form = CommonPartForm(request.POST)
     if form.is_valid():
+        project = form.cleaned_data.get('project')
+        if project and project.number:
+            safe_number = sanitize_folder_name(project.number)
+            up_files = request.FILES.getlist('file')
+            has_model = False
+            has_drawing = False
+            if up_files:
+                for f in up_files:
+                    if f:
+                        ext = os.path.splitext(f.name)[1].lower()
+                        if ext in Part.MODEL_EXTENSIONS:
+                            has_model = True
+                        else:
+                            has_drawing = True
+            else:
+                has_drawing = True
+            if has_drawing:
+                ensure_project_subfolder(project, f'{safe_number}_drawings')
+            if has_model:
+                ensure_project_subfolder(project, f'{safe_number}_models')
         up_files = request.FILES.getlist('file')
         if up_files:
             for f in up_files:
