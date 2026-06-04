@@ -84,45 +84,6 @@
     {% include 'includes/pagination.html' with page_obj=projects %}
 </div>
 
-<div class="bg-white border border-[#e8e8e8] p-6 mt-6">
-    <div class="flex items-center justify-between mb-4">
-        <h2 class="text-lg font-semibold text-gray-900">Drawings &amp; Models</h2>
-        <a href="{% url 'parts:list' %}" class="text-sm text-indigo-600 hover:underline">View all</a>
-    </div>
-    {% with recent_parts=projects.0.parts.all|slice:":5" %}
-    {% if recent_parts %}
-    <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-            <thead>
-                <tr class="text-left text-gray-500 border-b border-gray-200">
-                    <th class="pb-2 font-medium">Number</th>
-                    <th class="pb-2 font-medium">Project</th>
-                    <th class="pb-2 font-medium">File</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for part in recent_parts %}
-                <tr class="border-b border-gray-100">
-                    <td class="py-2 text-gray-900">{{ part.number }}</td>
-                    <td class="py-2 text-gray-600">{{ part.project.name|default:'—' }}</td>
-                    <td class="py-2">
-                        {% if part.file %}
-                        <span class="text-green-600 text-xs">{{ part.file.name }}</span>
-                        {% else %}
-                        <span class="text-gray-400">—</span>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    {% else %}
-    <p class="text-gray-500 text-center py-6">No drawings or models yet.</p>
-    {% endif %}
-    {% endwith %}
-</div>
-
 <div id="delete-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 opacity-0 pointer-events-none transition-opacity duration-200">
     <div class="bg-white shadow-2xl border border-gray-200 p-6 max-w-md w-full mx-4">
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Delete Project</h3>
