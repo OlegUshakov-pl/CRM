@@ -2,13 +2,13 @@
 
 # CRM
 
-A modern CRM built with **Django 6.0.5 + Tailwind CSS 4 + Alpine.js + HTMX**.
+A modern CRM built with **Django 6.0.6 + Tailwind CSS 4 + Alpine.js + HTMX**.
 
 ## Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
-| **Backend** | Django 6.0.5, Python 3.14+ |
+| **Backend** | Django 6.0.6, Python 3.14+ |
 | **Frontend** | Tailwind CSS 4, Alpine.js 3, HTMX 2.0, Lucide Icons |
 | **Database** | SQLite (dev) / PostgreSQL (prod) |
 | **Font** | Montserrat |
