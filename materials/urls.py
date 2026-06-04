@@ -4,6 +4,7 @@ from . import views
 app_name = 'materials'
 urlpatterns = [
     path('', views.material_main, name='main'),
+    path('common/latest/', views.material_common_latest, name='common_latest'),
     path('common/', views.material_common, name='common'),
     path('common/create/slide/', views.common_create_slide, name='common_create_slide'),
     path('common/save/', views.common_save, name='common_save'),

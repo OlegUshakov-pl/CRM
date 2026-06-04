@@ -7,6 +7,7 @@ urlpatterns = [
     path('categories/', views.document_category_list, name='category_list'),
     path('categories/<str:file_type>/', views.document_category_detail, name='category_detail'),
     path('projects/', views.document_projects, name='projects'),
+    path('common/latest/', views.document_common_latest, name='common_latest'),
     path('common/create/slide/', views.document_common_create_slide, name='common_create_slide'),
     path('common/save/', views.document_common_save, name='common_save'),
     path('<slug:project_slug>/', views.document_project, name='project'),

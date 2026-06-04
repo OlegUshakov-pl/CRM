@@ -4,6 +4,7 @@ from . import views
 app_name = 'contacts'
 urlpatterns = [
     path('', views.contact_list, name='contact_list'),
+    path('latest/', views.contact_latest, name='contact_latest'),
     path('create/', views.contact_create, name='contact_create'),
     path('create/slide/', views.contact_create_slide, name='contact_create_slide'),
     path('<slug:slug>/', views.contact_detail, name='contact_detail'),

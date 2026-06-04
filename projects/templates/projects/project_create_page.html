@@ -20,7 +20,9 @@
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Documents</h2>
                 <button type="button" onclick="openSlideOver('{% url 'documents:common_create_slide' %}')" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">+ Add Document</button>
             </div>
-            <p class="text-gray-500 dark:text-gray-400 text-center py-6">No documents yet.</p>
+            <div id="documents-section" hx-get="{% url 'documents:common_latest' %}" hx-trigger="load, refresh-documents from:body" hx-swap="innerHTML">
+                <p class="text-gray-500 dark:text-gray-400 text-center py-6">Loading...</p>
+            </div>
         </div>
 
         <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-6">
@@ -28,7 +30,9 @@
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Materials</h2>
                 <button type="button" onclick="openSlideOver('{% url 'materials:common_create_slide' %}')" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">+ Add Material</button>
             </div>
-            <p class="text-gray-500 dark:text-gray-400 text-center py-6">No materials yet.</p>
+            <div id="materials-section" hx-get="{% url 'materials:common_latest' %}" hx-trigger="load, refresh-materials from:body" hx-swap="innerHTML">
+                <p class="text-gray-500 dark:text-gray-400 text-center py-6">Loading...</p>
+            </div>
         </div>
 
         <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-6">
@@ -36,7 +40,9 @@
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Drawings</h2>
                 <button type="button" onclick="openSlideOver('{% url 'parts:common_create_slide' %}')" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">+ Add Drawing</button>
             </div>
-            <p class="text-gray-500 dark:text-gray-400 text-center py-6">No drawings yet.</p>
+            <div id="drawings-section" hx-get="{% url 'parts:common_latest' %}" hx-trigger="load, refresh-parts from:body" hx-swap="innerHTML">
+                <p class="text-gray-500 dark:text-gray-400 text-center py-6">Loading...</p>
+            </div>
         </div>
 
         <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-6">
@@ -44,7 +50,9 @@
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Contacts</h2>
                 <button type="button" onclick="openSlideOver('{% url 'contacts:contact_create_slide' %}')" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">+ Add Contact</button>
             </div>
-            <p class="text-gray-500 dark:text-gray-400 text-center py-4">No contacts yet.</p>
+            <div id="contacts-section" hx-get="{% url 'contacts:contact_latest' %}" hx-trigger="load, refresh-contacts from:body" hx-swap="innerHTML">
+                <p class="text-gray-500 dark:text-gray-400 text-center py-4">Loading...</p>
+            </div>
         </div>
 
         <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-6">
@@ -52,7 +60,9 @@
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Project Tasks</h2>
                 <button type="button" onclick="openSlideOver('{% url 'tasks:create_slide' %}')" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">+ Add Task</button>
             </div>
-            <p class="text-gray-500 dark:text-gray-400 text-center py-6">No tasks yet.</p>
+            <div id="tasks-section" hx-get="{% url 'tasks:latest' %}" hx-trigger="load, refresh-tasks from:body" hx-swap="innerHTML">
+                <p class="text-gray-500 dark:text-gray-400 text-center py-6">Loading...</p>
+            </div>
         </div>
 
         <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-6">
@@ -60,7 +70,9 @@
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Notes</h2>
                 <button type="button" onclick="openSlideOver('{% url 'notes:create_slide' %}')" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">+ Add Note</button>
             </div>
-            <p class="text-gray-500 dark:text-gray-400 text-center py-6">No notes yet.</p>
+            <div id="notes-section" hx-get="{% url 'notes:latest' %}" hx-trigger="load, refresh-notes from:body" hx-swap="innerHTML">
+                <p class="text-gray-500 dark:text-gray-400 text-center py-6">Loading...</p>
+            </div>
         </div>
     </div>
 

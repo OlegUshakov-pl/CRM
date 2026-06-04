@@ -1,0 +1,26 @@
+{% if materials %}
+<div class="overflow-x-auto">
+    <table class="w-full text-sm">
+        <thead>
+            <tr class="text-left text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
+                <th class="pb-2 font-medium">Name</th>
+                <th class="pb-2 font-medium">Category</th>
+                <th class="pb-2 font-medium">Qty</th>
+                <th class="pb-2 font-medium">Unit</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for material in materials %}
+            <tr class="border-b border-gray-100 dark:border-gray-700/50">
+                <td class="py-2 text-gray-900 dark:text-white">{{ material.name }}</td>
+                <td class="py-2 text-gray-600 dark:text-gray-400">{{ material.category.name|default:'—' }}</td>
+                <td class="py-2 text-gray-600 dark:text-gray-400">{{ material.quantity }}</td>
+                <td class="py-2 text-gray-600 dark:text-gray-400">{{ material.get_unit_display }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<p class="text-gray-500 dark:text-gray-400 text-center py-6">No materials yet.</p>
+{% endif %}

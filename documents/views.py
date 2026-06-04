@@ -181,7 +181,7 @@ def document_common_save(request):
             Document.objects.create(project=project, number=form.cleaned_data.get('number', ''), file_type=file_type)
         if request.headers.get('HX-Request'):
             response = HttpResponse('<script>closeSlideOver()</script>')
-            response['HX-Refresh'] = 'true'
+            response['HX-Trigger'] = 'refresh-documents'
             return response
         messages.success(request, 'Document added successfully.')
         return redirect('documents:list')
@@ -273,6 +273,12 @@ def document_download(request, pk):
     response = FileResponse(open(file_path, 'rb'), filename=document.filename)
     response['Content-Disposition'] = f'attachment; filename="{document.filename}"'
     return response
+
+
+@login_required
+def document_common_latest(request):
+    documents = Document.objects.filter(is_active=True).select_related('project').order_by('-created_at')[:5]
+    return render(request, 'documents/common_latest.html', {'documents': documents})
 
 
 @login_required

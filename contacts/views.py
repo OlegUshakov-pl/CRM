@@ -9,6 +9,12 @@ from core.models import log_activity
 
 
 @login_required
+def contact_latest(request):
+    contacts = Contact.objects.filter(is_active=True).order_by('-created_at')[:5]
+    return render(request, 'contacts/common_latest.html', {'contacts': contacts})
+
+
+@login_required
 def contact_list(request):
     contacts = Contact.objects.filter(is_active=True).select_related('company').prefetch_related('projects').order_by('first_name')
     query = request.GET.get('q', '')
@@ -45,7 +51,7 @@ def contact_create(request):
             messages.success(request, 'Contact created successfully.')
             if request.headers.get('HX-Request'):
                 response = HttpResponse('<script>closeSlideOver()</script>')
-                response['HX-Refresh'] = 'true'
+                response['HX-Trigger'] = 'refresh-contacts'
                 return response
             return redirect('contacts:contact_list')
     return render(request, 'contacts/contact_form.html', {'form': form, 'title': 'Add Contact', 'project_slug': project_slug})

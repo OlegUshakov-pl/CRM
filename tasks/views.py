@@ -1,10 +1,17 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
 from .models import Task
 from .forms import TaskForm
 from core.models import log_activity
+
+
+@login_required
+def task_latest(request):
+    tasks = Task.objects.filter(is_active=True).order_by('-created_at')[:5]
+    return render(request, 'tasks/common_latest.html', {'tasks': tasks})
 
 
 @login_required
@@ -42,6 +49,10 @@ def task_create(request):
             form.save_m2m()
             log_activity(request.user, 'created', f'Task "{task.title}"', task)
             messages.success(request, 'Task created successfully.')
+            if request.headers.get('HX-Request'):
+                response = HttpResponse('<script>closeSlideOver()</script>')
+                response['HX-Trigger'] = 'refresh-tasks'
+                return response
             return redirect('tasks:list')
     return render(request, 'tasks/task_form.html', {'form': form, 'title': 'Add Task'})
 
@@ -56,6 +67,10 @@ def task_edit(request, slug):
             form.save()
             log_activity(request.user, 'updated', f'Task "{task.title}"', task)
             messages.success(request, 'Task updated successfully.')
+            if request.headers.get('HX-Request'):
+                response = HttpResponse('<script>closeSlideOver()</script>')
+                response['HX-Trigger'] = 'refresh-tasks'
+                return response
             return redirect('tasks:list')
     return render(request, 'tasks/task_form.html', {'form': form, 'title': 'Edit Task', 'task': task})
 

@@ -10,6 +10,12 @@ from core.models import log_activity
 
 
 @login_required
+def material_common_latest(request):
+    materials = Material.objects.filter(is_active=True).select_related('category').order_by('-created_at')[:5]
+    return render(request, 'materials/common_latest.html', {'materials': materials})
+
+
+@login_required
 def material_main(request):
     projects = Project.objects.filter(is_active=True, materials__isnull=False).distinct().order_by('-created_at')
     query = request.GET.get('q', '')
@@ -183,8 +189,8 @@ def common_save(request):
         if project_id:
             material.project = get_object_or_404(Project, id=project_id)
         material.save()
-        response = HttpResponse()
-        response['HX-Refresh'] = 'true'
+        response = HttpResponse('<script>closeSlideOver()</script>')
+        response['HX-Trigger'] = 'refresh-materials'
         return response
     projects = Project.objects.filter(is_active=True)
     return render(request, 'materials/common_material_form.html', {'form': form, 'projects': projects, 'title': 'Add Material'})

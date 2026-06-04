@@ -27,6 +27,12 @@ def _format_size(size_bytes):
 
 
 @login_required
+def part_common_latest(request):
+    parts = Part.objects.select_related('category').order_by('-created')[:5]
+    return render(request, 'parts/common_latest.html', {'parts': parts})
+
+
+@login_required
 def part_list(request):
     parts = Part.objects.select_related('category', 'project').all()
     return render(request, 'parts/part_list.html', {'parts': parts})
@@ -182,7 +188,7 @@ def common_save(request):
         log_activity(request.user, 'created', None, 'Part created')
         if request.headers.get('HX-Request'):
             response = HttpResponse('<script>closeSlideOver()</script>')
-            response['HX-Refresh'] = 'true'
+            response['HX-Trigger'] = 'refresh-parts'
             return response
         messages.success(request, 'Part added successfully.')
         return redirect('parts:list')

@@ -1,10 +1,17 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
 from .models import Note
 from .forms import NoteForm
 from core.models import log_activity
+
+
+@login_required
+def note_latest(request):
+    notes = Note.objects.filter(is_active=True).order_by('-created_at')[:5]
+    return render(request, 'notes/common_latest.html', {'notes': notes})
 
 
 @login_required
@@ -45,6 +52,10 @@ def note_create(request):
             note.save()
             log_activity(request.user, 'created', f'Note "{note.title}"', note)
             messages.success(request, 'Note created successfully.')
+            if request.headers.get('HX-Request'):
+                response = HttpResponse('<script>closeSlideOver()</script>')
+                response['HX-Trigger'] = 'refresh-notes'
+                return response
             return redirect('notes:list')
     return render(request, 'notes/note_form.html', {'form': form, 'title': 'Add Note'})
 
@@ -59,6 +70,10 @@ def note_edit(request, slug):
             form.save()
             log_activity(request.user, 'updated', f'Note "{note.title}"', note)
             messages.success(request, 'Note updated successfully.')
+            if request.headers.get('HX-Request'):
+                response = HttpResponse('<script>closeSlideOver()</script>')
+                response['HX-Trigger'] = 'refresh-notes'
+                return response
             return redirect('notes:list')
     return render(request, 'notes/note_form.html', {'form': form, 'title': 'Edit Note', 'note': note})
 
