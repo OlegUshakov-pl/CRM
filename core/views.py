@@ -1,5 +1,6 @@
 import os
 from django.shortcuts import render
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.http import JsonResponse, FileResponse, Http404
@@ -93,11 +94,11 @@ def get_setting(request, key):
 @login_required
 def serve_project_file(request, file_path):
     root_path = AppSetting.get_value('project_root_path', '')
-    if not root_path:
-        raise Http404("Project root not configured")
-    full_path = os.path.normpath(os.path.join(root_path, file_path))
-    if not full_path.startswith(os.path.normpath(root_path)):
-        raise Http404("Invalid path")
-    if not os.path.exists(full_path):
-        raise Http404("File not found")
-    return FileResponse(open(full_path, 'rb'), filename=os.path.basename(full_path))
+    if root_path:
+        full_path = os.path.normpath(os.path.join(root_path, file_path))
+        if full_path.startswith(os.path.normpath(root_path)) and os.path.exists(full_path):
+            return FileResponse(open(full_path, 'rb'), filename=os.path.basename(full_path))
+    media_path = os.path.normpath(os.path.join(str(settings.MEDIA_ROOT), file_path))
+    if os.path.exists(media_path):
+        return FileResponse(open(media_path, 'rb'), filename=os.path.basename(media_path))
+    raise Http404("File not found")
