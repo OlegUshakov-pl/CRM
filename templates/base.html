@@ -104,11 +104,6 @@
                     <span class="sidebar-text">Projects</span>
                 </a>
 
-                <a href="{% url 'projects:import_page' %}">
-                    <i data-lucide="upload" class="w-4 h-4 flex-shrink-0"></i>
-                    <span class="sidebar-text">Import Project</span>
-                </a>
-
                 <div class="relative group">
                     <a href="{% url 'materials:main' %}" class="flex items-center gap-2 w-full">
                         <i data-lucide="package" class="w-4 h-4 flex-shrink-0"></i>
@@ -174,6 +169,11 @@
                     <a href="{% url 'notes:list' %}">
                         <i data-lucide="notebook-pen" class="w-4 h-4 flex-shrink-0"></i>
                         <span class="sidebar-text">Notes</span>
+                    </a>
+
+                    <a href="{% url 'projects:import_page' %}">
+                        <i data-lucide="upload" class="w-4 h-4 flex-shrink-0"></i>
+                        <span class="sidebar-text">Import Project</span>
                     </a>
                 </div>
 
