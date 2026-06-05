@@ -89,7 +89,7 @@ def part_create(request, project_slug):
             part.number = _number_from_file(form.cleaned_data.get('number'), None)
             part.project = project
             part.save()
-        log_activity(request.user, 'created', None, 'Part created')
+        log_activity(request.user, 'created', 'Part created')
         if request.headers.get('HX-Request'):
             response = HttpResponse('<script>closeSlideOver()</script>')
             response['HX-Refresh'] = 'true'
@@ -113,7 +113,7 @@ def part_edit(request, pk):
     form = PartForm(request.POST, instance=part)
     if form.is_valid():
         part = form.save()
-        log_activity(request.user, 'updated', part, f'Part {part.number} updated')
+        log_activity(request.user, 'updated', f'Part {part.number} updated', part)
         if request.headers.get('HX-Request'):
             response = HttpResponse('<script>closeSlideOver()</script>')
             response['HX-Refresh'] = 'true'
@@ -136,7 +136,7 @@ def part_edit_slide(request, pk):
 def part_delete(request, pk):
     part = get_object_or_404(Part, pk=pk)
     project_slug = part.project.slug if part.project else None
-    log_activity(request.user, 'deleted', part, f'Part {part.number} deleted')
+    log_activity(request.user, 'deleted', f'Part {part.number} deleted', part)
     part.delete()
     if request.headers.get('HX-Request'):
         response = HttpResponse('<script>closeSlideOver()</script>')
@@ -187,7 +187,7 @@ def common_save(request):
             part = form.save(commit=False)
             part.number = _number_from_file(form.cleaned_data.get('number'), None)
             part.save()
-        log_activity(request.user, 'created', None, 'Part created')
+        log_activity(request.user, 'created', 'Part created')
         if request.headers.get('HX-Request'):
             return HttpResponse('<script>closeSlideOver(); refreshSection("parts")</script>')
         messages.success(request, 'Part added successfully.')
@@ -198,7 +198,7 @@ def common_save(request):
 @login_required
 def common_delete(request, pk):
     part = get_object_or_404(Part, pk=pk)
-    log_activity(request.user, 'deleted', part, f'Part {part.number} deleted')
+    log_activity(request.user, 'deleted', f'Part {part.number} deleted', part)
     part.delete()
     if request.headers.get('HX-Request'):
         response = HttpResponse('<script>closeSlideOver()</script>')
@@ -239,7 +239,7 @@ def category_save(request):
     form = CategoryForm(request.POST)
     if form.is_valid():
         category = form.save()
-        log_activity(request.user, 'created', category, f'Category {category.name} created')
+        log_activity(request.user, 'created', f'Category {category.name} created', category)
         if request.headers.get('HX-Request'):
             response = HttpResponse('<script>closeSlideOver()</script>')
             response['HX-Refresh'] = 'true'
@@ -252,7 +252,7 @@ def category_save(request):
 @login_required
 def category_delete(request, pk):
     category = get_object_or_404(Category, pk=pk)
-    log_activity(request.user, 'deleted', category, f'Category {category.name} deleted')
+    log_activity(request.user, 'deleted', f'Category {category.name} deleted', category)
     category.delete()
     if request.headers.get('HX-Request'):
         response = HttpResponse('<script>closeSlideOver()</script>')

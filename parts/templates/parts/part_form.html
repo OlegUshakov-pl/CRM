@@ -23,6 +23,7 @@
         </div>
         {% endfor %}
     {% else %}
+        <input type="hidden" name="project" value="{{ project.pk }}">
         {% for field in form %}
             {% if field.name != 'project' %}
         <div>
