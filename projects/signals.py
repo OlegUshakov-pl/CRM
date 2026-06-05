@@ -49,3 +49,8 @@ def create_project_folders(sender, instance, created, raw, **kwargs):
     folder_path = get_unique_folder_path(root_path, base_folder_name)
 
     os.makedirs(folder_path, exist_ok=True)
+
+    documents_folder = os.path.join(folder_path, f"{safe_number}_documents")
+    drawings_folder = os.path.join(folder_path, f"{safe_number}_drawings")
+    os.makedirs(documents_folder, exist_ok=True)
+    os.makedirs(drawings_folder, exist_ok=True)
