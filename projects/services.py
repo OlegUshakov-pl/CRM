@@ -252,13 +252,13 @@ class ImportService:
             created_at=project_data.get('created_at'),
         )
 
+        files_dir = self.tmp_dir / 'files'
+
         image_name = project_data.get('image_name')
         if image_name:
             src = files_dir / image_name
             if src.exists():
                 project.image.save(image_name, open(str(src), 'rb'), save=True)
-
-        files_dir = self.tmp_dir / 'files'
 
         for m_data in self.export_data.get('materials', []):
             category = None
