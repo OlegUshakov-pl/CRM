@@ -2,7 +2,7 @@ import os
 from django.db import models
 from django.conf import settings
 from projects.models import Project
-from projects.utils import ProjectFileSystemStorage, sanitize_folder_name
+from projects.utils import ProjectFileSystemStorage, sanitize_folder_name, get_subfolder_name
 
 
 DocumentStorage = ProjectFileSystemStorage
@@ -10,18 +10,16 @@ DocumentStorage = ProjectFileSystemStorage
 
 def document_upload_to(instance, filename):
     if instance.project:
-        safe_number = sanitize_folder_name(instance.project.number) if instance.project.number else instance.project.slug
-        safe_name = sanitize_folder_name(instance.project.name)
         file_type = getattr(instance, 'file_type', 'other')
         subfolder_map = {
-            'drawings': f'{safe_number}_drawings',
-            'models_3d': f'{safe_number}_models',
-            'documents': f'{safe_number}_documents',
-            'photos': f'{safe_number}_documents',
-            'other': f'{safe_number}_documents',
+            'drawings': get_subfolder_name(instance.project.number, 'subfolder_drawings', 'drawings'),
+            'models_3d': get_subfolder_name(instance.project.number, 'subfolder_models', 'models'),
+            'documents': get_subfolder_name(instance.project.number, 'subfolder_documents', 'documents'),
+            'photos': get_subfolder_name(instance.project.number, 'subfolder_documents', 'documents'),
+            'other': get_subfolder_name(instance.project.number, 'subfolder_documents', 'documents'),
         }
-        subfolder = subfolder_map.get(file_type, f'{safe_number}_documents')
-        return os.path.join(f'{safe_number}_{safe_name}_Project', subfolder, filename)
+        subfolder = subfolder_map.get(file_type, get_subfolder_name(instance.project.number, 'subfolder_documents', 'documents'))
+        return os.path.join(subfolder, filename)
     return os.path.join('_no_project', filename)
 
 
@@ -63,18 +61,8 @@ class Document(models.Model):
 
     @property
     def filepath(self):
-        from projects.utils import get_project_subfolder_path
-        if self.project:
-            safe_number = sanitize_folder_name(self.project.number) if self.project.number else self.project.slug
-            subfolder_map = {
-                'drawings': f'{safe_number}_drawings',
-                'models_3d': f'{safe_number}_models',
-                'documents': f'{safe_number}_documents',
-                'photos': f'{safe_number}_documents',
-                'other': f'{safe_number}_documents',
-            }
-            subfolder = subfolder_map.get(self.file_type, f'{safe_number}_documents')
-            folder = get_project_subfolder_path(self.project, subfolder)
-            if folder and self.file:
-                return os.path.join(folder, self.filename)
+        from core.models import AppSetting
+        root_path = AppSetting.get_value('project_root_path', '')
+        if root_path and self.file:
+            return os.path.join(root_path, self.file.name)
         return os.path.join(settings.DOCUMENTS_ROOT, self.file.name) if self.file else ''

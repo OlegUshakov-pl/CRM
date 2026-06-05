@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
 from projects.models import Project
-from projects.utils import ensure_project_subfolder, sanitize_folder_name
+from projects.utils import ensure_project_subfolder, sanitize_folder_name, get_subfolder_name
 from .models import Document
 from .forms import DocumentForm, CommonDocumentForm
 
@@ -126,16 +126,18 @@ def document_save(request, project_slug):
         file_type = form.cleaned_data.get('file_type', 'other')
         up_files = request.FILES.getlist('file')
         if up_files and project.number:
-            safe_number = sanitize_folder_name(project.number)
             subfolder_map = {
-                'drawings': f'{safe_number}_drawings',
-                'models_3d': f'{safe_number}_models',
-                'documents': f'{safe_number}_documents',
-                'photos': f'{safe_number}_documents',
-                'other': f'{safe_number}_documents',
+                'drawings': get_subfolder_name(project.number, 'subfolder_drawings', 'drawings'),
+                'models_3d': get_subfolder_name(project.number, 'subfolder_models', 'models'),
+                'documents': get_subfolder_name(project.number, 'subfolder_documents', 'documents'),
+                'photos': get_subfolder_name(project.number, 'subfolder_documents', 'documents'),
+                'other': get_subfolder_name(project.number, 'subfolder_documents', 'documents'),
             }
-            subfolder = subfolder_map.get(file_type, f'{safe_number}_documents')
-            ensure_project_subfolder(project, subfolder)
+            subfolder = subfolder_map.get(file_type, get_subfolder_name(project.number, 'subfolder_documents', 'documents'))
+            from core.models import AppSetting
+            root_path = AppSetting.get_value('project_root_path', '')
+            if root_path:
+                os.makedirs(os.path.join(root_path, subfolder), exist_ok=True)
         if up_files:
             for f in up_files:
                 if f:
@@ -163,16 +165,18 @@ def document_common_save(request):
         file_type = form.cleaned_data.get('file_type', 'other')
         up_files = request.FILES.getlist('file')
         if up_files and project and project.number:
-            safe_number = sanitize_folder_name(project.number)
             subfolder_map = {
-                'drawings': f'{safe_number}_drawings',
-                'models_3d': f'{safe_number}_models',
-                'documents': f'{safe_number}_documents',
-                'photos': f'{safe_number}_documents',
-                'other': f'{safe_number}_documents',
+                'drawings': get_subfolder_name(project.number, 'subfolder_drawings', 'drawings'),
+                'models_3d': get_subfolder_name(project.number, 'subfolder_models', 'models'),
+                'documents': get_subfolder_name(project.number, 'subfolder_documents', 'documents'),
+                'photos': get_subfolder_name(project.number, 'subfolder_documents', 'documents'),
+                'other': get_subfolder_name(project.number, 'subfolder_documents', 'documents'),
             }
-            subfolder = subfolder_map.get(file_type, f'{safe_number}_documents')
-            ensure_project_subfolder(project, subfolder)
+            subfolder = subfolder_map.get(file_type, get_subfolder_name(project.number, 'subfolder_documents', 'documents'))
+            from core.models import AppSetting
+            root_path = AppSetting.get_value('project_root_path', '')
+            if root_path:
+                os.makedirs(os.path.join(root_path, subfolder), exist_ok=True)
         if up_files:
             for f in up_files:
                 if f:

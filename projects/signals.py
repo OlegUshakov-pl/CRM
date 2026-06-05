@@ -4,6 +4,7 @@ from django.dispatch import receiver
 from django.utils import timezone
 from .models import Project
 from core.models import AppSetting
+from .utils import get_subfolder_name
 
 
 def sanitize_folder_name(name):
@@ -43,14 +44,10 @@ def create_project_folders(sender, instance, created, raw, **kwargs):
     if not root_path:
         return
 
-    safe_number = sanitize_folder_name(instance.number)
-    safe_name = sanitize_folder_name(instance.name)
-    base_folder_name = f"{safe_number}_{safe_name}_Project"
-    folder_path = get_unique_folder_path(root_path, base_folder_name)
+    documents_folder_name = get_subfolder_name(instance.number, 'subfolder_documents', 'documents')
+    drawings_folder_name = get_subfolder_name(instance.number, 'subfolder_drawings', 'drawings')
+    models_folder_name = get_subfolder_name(instance.number, 'subfolder_models', 'models')
 
-    os.makedirs(folder_path, exist_ok=True)
-
-    documents_folder = os.path.join(folder_path, f"{safe_number}_documents")
-    drawings_folder = os.path.join(folder_path, f"{safe_number}_drawings")
-    os.makedirs(documents_folder, exist_ok=True)
-    os.makedirs(drawings_folder, exist_ok=True)
+    os.makedirs(os.path.join(root_path, documents_folder_name), exist_ok=True)
+    os.makedirs(os.path.join(root_path, drawings_folder_name), exist_ok=True)
+    os.makedirs(os.path.join(root_path, models_folder_name), exist_ok=True)

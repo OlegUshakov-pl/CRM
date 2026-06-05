@@ -11,6 +11,15 @@ def sanitize_folder_name(name):
     return name.strip().rstrip('. ')
 
 
+def get_subfolder_name(project_number, setting_key, default_suffix):
+    from core.models import AppSetting
+    safe_number = sanitize_folder_name(project_number) if project_number else ''
+    template = AppSetting.get_value(setting_key, '')
+    if template:
+        return template.replace('{Number}', safe_number)
+    return f'{safe_number}_{default_suffix}'
+
+
 def get_project_folder_path(project):
     root_path = AppSetting.get_value('project_root_path', '')
     if not root_path:
