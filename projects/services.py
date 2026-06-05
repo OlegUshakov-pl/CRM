@@ -26,7 +26,6 @@ class ExportService:
 
         try:
             self._build_json()
-            self._copy_files()
             zip_path = self._create_zip()
             return zip_path
         except Exception:
