@@ -293,6 +293,10 @@
                 <div class="p-3 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
                     <p class="font-medium text-gray-900 dark:text-white">{{ note.title }}</p>
                     <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ note.content|truncatewords:30 }}</p>
+                    <div class="flex items-center gap-3 mt-2 pt-2 border-t border-gray-200 dark:border-gray-600">
+                        <button type="button" onclick="openSlideOver('{% url 'notes:edit_slide' note.slug %}')" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline">Edit</button>
+                        <button type="button" @click="$store.deleteModal.open('{% url 'notes:delete' note.slug %}', '{{ note.title|escapejs }}')" class="text-xs text-red-600 dark:text-red-400 hover:underline">Delete</button>
+                    </div>
                 </div>
                 {% endfor %}
             </div>
@@ -314,7 +318,8 @@
                             <span class="text-[12px] text-gray-400">{{ note.created_at|date:'M d, Y' }}</span>
                         </div>
                         <p class="text-[14px] text-gray-600 dark:text-gray-400">{{ note.content|truncatewords:50 }}</p>
-                        <div class="mt-1">
+                        <div class="mt-1 flex items-center gap-3">
+                            <button type="button" onclick="openSlideOver('{% url 'notes:edit_slide' note.slug %}')" class="text-[12px] text-indigo-600 dark:text-indigo-400 hover:underline">Edit</button>
                             <button type="button" onclick="showNoteDeleteModal('{% url 'notes:delete' note.slug %}')" class="text-[12px] text-red-400 hover:text-red-600 transition-colors">Delete</button>
                         </div>
                     </div>
