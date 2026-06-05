@@ -23,6 +23,7 @@ A modern CRM built with **Django 6.0.6 + Tailwind CSS 4 + Alpine.js + HTMX**.
 - **Tasks** — priorities, statuses, due dates
 - **Notes** — linked to projects, companies, contacts
 - **Documents** — upload, preview (images, PDF, text), download, filter by type/project/category, multiple file upload
+- **Export / Import** — full project transfer between CRM instances via ZIP archive
 - **Dark mode** — light/dark toggle
 - **Slide-over forms** — create/edit via animated right panel
 - **Live search** — HTMX-powered search and filters
@@ -66,7 +67,7 @@ accounts/            Auth (login, logout, profile)
 core/                Dashboard, base model, activity logging
 companies/           Company management
 contacts/            Contact management
-projects/            Project management
+projects/            Project management, export/import services
 materials/           Materials / BOM
 tasks/               Task management
 notes/               Universal notes
@@ -101,6 +102,49 @@ All models inherit from `TimeStampedModel` (`created_at`, `updated_at`, `created
 ## UX
 
 All forms use a slide-over panel from the right, keeping the main content stable.
+
+## Export / Import
+
+Projects can be exported and imported between CRM instances as ZIP archives.
+
+### What's included in the export
+
+- Project data (number, name, description, status, dates, budget, image)
+- Materials
+- Tasks
+- Notes
+- Documents (files)
+- Parts / Drawings (files)
+- Gallery images (files)
+
+### Export format
+
+```json
+{
+  "export_version": 1,
+  "project": { "number", "name", "description", "status", "dates", "budget", "image_name" },
+  "materials": [{ "name", "category", "quantity", "unit", "unit_price", "notes" }],
+  "tasks": [{ "title", "description", "status", "priority", "due_date" }],
+  "notes": [{ "title", "content", "date" }],
+  "documents": [{ "number", "file_type", "size", "file_name" }],
+  "parts": [{ "number", "category", "size", "rev", "created", "updated", "file_name" }],
+  "images": [{ "image_name" }]
+}
+```
+
+### Import checks
+
+- ZIP integrity
+- `export.json` presence and valid JSON
+- Supported `export_version`
+- `files/` directory exists
+- All referenced files present in archive
+
+### Services
+
+Business logic lives in `projects/services.py`:
+- `ExportService` — generates ZIP from a project
+- `ImportService` — validates and restores a project from ZIP
 
 ## Generator App
 
