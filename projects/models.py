@@ -5,14 +5,18 @@ from django.conf import settings
 from core.models import TimeStampedModel, generate_unique_slug
 from companies.models import Company
 from contacts.models import Contact
-from .utils import sanitize_folder_name
+from .utils import sanitize_folder_name, get_subfolder_name, ProjectFileSystemStorage
 
 
 def project_image_upload_to(instance, filename):
-    if instance.project and instance.project.number:
-        safe_number = sanitize_folder_name(instance.project.number)
-        safe_name = sanitize_folder_name(instance.project.name)
-        return os.path.join(f'{safe_number}_{safe_name}_Project', f'{safe_number}_documents', filename)
+    number = None
+    if hasattr(instance, 'project') and instance.project:
+        number = instance.project.number
+    elif hasattr(instance, 'number'):
+        number = instance.number
+    if number:
+        subfolder = get_subfolder_name(number, 'subfolder_documents', 'documents')
+        return os.path.join(subfolder, filename)
     return os.path.join('projects', filename)
 
 
@@ -35,7 +39,7 @@ class Project(TimeStampedModel):
     end_date = models.DateField(blank=True, null=True)
     budget = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
     number = models.CharField(max_length=11, blank=True, null=True, verbose_name='Project Number')
-    image = models.ImageField(upload_to='projects/', blank=True, null=True)
+    image = models.ImageField(upload_to=project_image_upload_to, storage=ProjectFileSystemStorage(), blank=True, null=True)
 
     class Meta:
         ordering = ['-created_at']
@@ -51,7 +55,7 @@ class Project(TimeStampedModel):
 
 class ProjectImage(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='images')
-    image = models.ImageField(upload_to=project_image_upload_to, blank=True, null=True)
+    image = models.ImageField(upload_to=project_image_upload_to, storage=ProjectFileSystemStorage(), blank=True, null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
