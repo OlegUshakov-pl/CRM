@@ -44,7 +44,7 @@ class Document(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     size = models.IntegerField(blank=True, null=True, help_text='File size in bytes')
-    file = models.FileField(upload_to=document_upload_to, storage=ProjectFileSystemStorage(fallback=str(settings.DOCUMENTS_ROOT)))
+    file = models.FileField(upload_to=document_upload_to, storage=ProjectFileSystemStorage())
     file_type = models.CharField(max_length=50, choices=FILE_TYPE_CHOICES, default='other')
 
     class Meta:
@@ -72,4 +72,4 @@ class Document(models.Model):
         root_path = AppSetting.get_value('project_root_path', '')
         if root_path and self.file:
             return os.path.join(root_path, self.file.name)
-        return os.path.join(settings.DOCUMENTS_ROOT, self.file.name) if self.file else ''
+        return os.path.join(settings.MEDIA_ROOT, self.file.name) if self.file else ''
