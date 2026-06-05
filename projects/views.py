@@ -1,3 +1,6 @@
+from pathlib import Path
+
+from django.http import FileResponse, HttpResponseBadRequest
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
@@ -6,6 +9,7 @@ from django.core.paginator import Paginator
 from django.db.models import Prefetch
 from .models import Project, ProjectImage
 from .forms import ProjectForm
+from .services import ExportService, ImportService
 from contacts.models import Contact
 from notes.forms import NoteForm
 from materials.models import Material
@@ -154,3 +158,56 @@ def project_edit_slide(request, slug):
     project = get_object_or_404(Project, slug=slug)
     form = ProjectForm(instance=project)
     return render(request, 'projects/project_form.html', {'form': form, 'title': 'Edit Project', 'project': project})
+
+
+@login_required
+def project_export(request, slug):
+    project = get_object_or_404(Project, slug=slug)
+    service = ExportService(project)
+    try:
+        zip_path = service.export()
+        response = FileResponse(
+            open(str(zip_path), 'rb'),
+            content_type='application/zip',
+            as_attachment=True,
+            filename=f'{project.name}.zip',
+        )
+        return response
+    except Exception as e:
+        messages.error(request, f'Export failed: {e}')
+        return redirect('projects:detail', slug=slug)
+    finally:
+        service.cleanup()
+
+
+@login_required
+def project_import_page(request):
+    return render(request, 'projects/project_import.html')
+
+
+@login_required
+def project_import(request):
+    if request.method != 'POST':
+        return redirect('projects:import_page')
+
+    zip_file = request.FILES.get('zip_file')
+    if not zip_file:
+        messages.error(request, 'Please select a ZIP file.')
+        return redirect('projects:import_page')
+
+    service = ImportService(zip_file)
+    try:
+        if not service.validate():
+            for error in service.errors:
+                messages.error(request, error)
+            return redirect('projects:import_page')
+
+        project = service.import_project()
+        log_activity(request.user, 'created', f'Project "{project.name}" imported', project)
+        messages.success(request, f'Project "{project.name}" imported successfully.')
+        return redirect('projects:detail', slug=project.slug)
+    except Exception as e:
+        messages.error(request, f'Import failed: {e}')
+        return redirect('projects:import_page')
+    finally:
+        service.cleanup()

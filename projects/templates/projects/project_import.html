@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Import Project - CRM{% endblock %}
+{% block breadcrumb %}Import Project{% endblock %}
+{% block content %}
+<div class="max-w-xl mx-auto">
+    <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Import Project</h1>
+    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-6">
+        <form method="post" action="{% url 'projects:import' %}" enctype="multipart/form-data" class="space-y-4">
+            {% csrf_token %}
+            <div>
+                <label class="block text-[14px] font-medium text-[#666] mb-1">ZIP Archive</label>
+                <input type="file" name="zip_file" accept=".zip" required
+                    class="w-full px-4 py-2.5 border border-[#e8e8e8] text-[14px] outline-none focus:border-violet-300 transition-colors file:mr-3 file:py-1.5 file:px-3 file:border-0 file:bg-gray-100 file:text-sm file:font-medium hover:file:bg-gray-200">
+                <p class="mt-1 text-[12px] text-[#999]">Select a project export ZIP file</p>
+            </div>
+            <div class="flex justify-between items-center pt-2">
+                <button type="submit" class="px-4 py-2.5 bg-green-500 hover:bg-green-600 rounded-[20px] text-white shadow-[0_2px_2px_rgba(0,0,0,0.25)] text-[14px] font-medium transition-colors">
+                    Import
+                </button>
+                <a href="{% url 'projects:list' %}" class="px-4 py-2.5 text-[#666] bg-gray-100 hover:bg-gray-200 transition-colors text-[14px]">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

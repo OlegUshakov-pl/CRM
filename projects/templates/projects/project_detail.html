@@ -329,7 +329,7 @@
         {% endif %}
     </div>
     <div class="flex justify-end mt-6">
-        <button class="text-sm text-red-500 hover:text-red-600 hover:underline">Export</button>
+        <a href="{% url 'projects:export' project.slug %}" class="px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white transition-colors text-[14px]">Export</a>
     </div>
 </div>
 
