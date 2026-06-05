@@ -34,19 +34,24 @@ class ExportService:
 
     def _build_json(self):
         p = self.project
+        project_data = {
+            'number': p.number or '',
+            'name': p.name,
+            'description': p.description or '',
+            'status': p.status,
+            'start_date': p.start_date.isoformat() if p.start_date else None,
+            'end_date': p.end_date.isoformat() if p.end_date else None,
+            'budget': str(p.budget) if p.budget else None,
+            'created_at': timezone.localtime(p.created_at).isoformat() if p.created_at else None,
+            'created_by_username': p.created_by.username if p.created_by else None,
+            'image_name': p.image.name if p.image else None,
+        }
+        if p.image and p.image.name:
+            self._copy_file_to_export(p.image.path, p.image.name)
+
         data = {
             'export_version': EXPORT_VERSION,
-            'project': {
-                'number': p.number or '',
-                'name': p.name,
-                'description': p.description or '',
-                'status': p.status,
-                'start_date': p.start_date.isoformat() if p.start_date else None,
-                'end_date': p.end_date.isoformat() if p.end_date else None,
-                'budget': str(p.budget) if p.budget else None,
-                'created_at': timezone.localtime(p.created_at).isoformat() if p.created_at else None,
-                'created_by_username': p.created_by.username if p.created_by else None,
-            },
+            'project': project_data,
             'materials': self._serialize_materials(),
             'tasks': self._serialize_tasks(),
             'notes': self._serialize_notes(),
@@ -212,6 +217,12 @@ class ImportService:
         return len(self.errors) == 0
 
     def _check_files(self, files_dir):
+        image_name = self.export_data.get('project', {}).get('image_name')
+        if image_name:
+            file_path = files_dir / image_name
+            if not file_path.exists():
+                self.errors.append(f'Missing file: {image_name}')
+
         sections = ['documents', 'parts', 'images']
         for section in sections:
             for entry in self.export_data.get(section, []):
@@ -240,6 +251,12 @@ class ImportService:
             budget=project_data.get('budget'),
             created_at=project_data.get('created_at'),
         )
+
+        image_name = project_data.get('image_name')
+        if image_name:
+            src = files_dir / image_name
+            if src.exists():
+                project.image.save(image_name, open(str(src), 'rb'), save=True)
 
         files_dir = self.tmp_dir / 'files'
 
