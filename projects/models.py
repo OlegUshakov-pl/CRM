@@ -9,14 +9,16 @@ from .utils import sanitize_folder_name, get_subfolder_name, ProjectFileSystemSt
 
 
 def project_image_upload_to(instance, filename):
-    number = None
+    project = None
     if hasattr(instance, 'project') and instance.project:
-        number = instance.project.number
-    elif hasattr(instance, 'number'):
-        number = instance.number
-    if number:
-        subfolder = get_subfolder_name(number, 'subfolder_documents', 'documents')
-        return os.path.join(subfolder, filename)
+        project = instance.project
+    elif hasattr(instance, 'number') and hasattr(instance, 'name'):
+        project = instance
+    if project and project.number:
+        from documents.models import get_project_folder_name
+        folder = get_project_folder_name(project)
+        subfolder = get_subfolder_name(project.number, 'subfolder_documents', 'documents')
+        return os.path.join(folder, subfolder, filename)
     return os.path.join('projects', filename)
 
 

@@ -8,8 +8,15 @@ from projects.utils import ProjectFileSystemStorage, sanitize_folder_name, get_s
 DocumentStorage = ProjectFileSystemStorage
 
 
+def get_project_folder_name(project):
+    safe_number = sanitize_folder_name(project.number) if project.number else ''
+    safe_name = sanitize_folder_name(project.name)
+    return f'{safe_number}_{safe_name}_Project'
+
+
 def document_upload_to(instance, filename):
     if instance.project:
+        folder = get_project_folder_name(instance.project)
         file_type = getattr(instance, 'file_type', 'other')
         subfolder_map = {
             'drawings': get_subfolder_name(instance.project.number, 'subfolder_drawings', 'drawings'),
@@ -19,7 +26,7 @@ def document_upload_to(instance, filename):
             'other': get_subfolder_name(instance.project.number, 'subfolder_documents', 'documents'),
         }
         subfolder = subfolder_map.get(file_type, get_subfolder_name(instance.project.number, 'subfolder_documents', 'documents'))
-        return os.path.join(subfolder, filename)
+        return os.path.join(folder, subfolder, filename)
     return os.path.join('_no_project', filename)
 
 

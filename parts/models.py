@@ -7,12 +7,14 @@ from projects.utils import ProjectFileSystemStorage, sanitize_folder_name, get_s
 
 def part_upload_to(instance, filename):
     if instance.project and instance.project.number:
+        from documents.models import get_project_folder_name
+        folder = get_project_folder_name(instance.project)
         ext = os.path.splitext(filename)[1].lower()
         if ext in Part.MODEL_EXTENSIONS:
             subfolder = get_subfolder_name(instance.project.number, 'subfolder_models', 'models')
         else:
             subfolder = get_subfolder_name(instance.project.number, 'subfolder_drawings', 'drawings')
-        return os.path.join(subfolder, filename)
+        return os.path.join(folder, subfolder, filename)
     return os.path.join('parts', filename)
 
 

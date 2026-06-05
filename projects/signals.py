@@ -44,10 +44,14 @@ def create_project_folders(sender, instance, created, raw, **kwargs):
     if not root_path:
         return
 
+    safe_number = sanitize_folder_name(instance.number)
+    safe_name = sanitize_folder_name(instance.name)
+    project_folder = f'{safe_number}_{safe_name}_Project'
+
     documents_folder_name = get_subfolder_name(instance.number, 'subfolder_documents', 'documents')
     drawings_folder_name = get_subfolder_name(instance.number, 'subfolder_drawings', 'drawings')
     models_folder_name = get_subfolder_name(instance.number, 'subfolder_models', 'models')
 
-    os.makedirs(os.path.join(root_path, documents_folder_name), exist_ok=True)
-    os.makedirs(os.path.join(root_path, drawings_folder_name), exist_ok=True)
-    os.makedirs(os.path.join(root_path, models_folder_name), exist_ok=True)
+    os.makedirs(os.path.join(root_path, project_folder, documents_folder_name), exist_ok=True)
+    os.makedirs(os.path.join(root_path, project_folder, drawings_folder_name), exist_ok=True)
+    os.makedirs(os.path.join(root_path, project_folder, models_folder_name), exist_ok=True)
