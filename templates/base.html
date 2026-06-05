@@ -278,12 +278,8 @@
         </div>
         <div class="p-6 space-y-4">
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Project Storage Path</label>
-            <div class="flex gap-2">
-                <input id="root-path-input" type="text" value="" placeholder="C:\Projects" class="flex-1 px-4 py-2.5 border border-[#e8e8e8] dark:border-[#222] dark:bg-[#111] dark:text-white text-[14px] outline-none focus:border-violet-300 transition-colors">
-                <button onclick="document.getElementById('folder-picker').click()" class="px-4 py-2 bg-violet-400 hover:opacity-90 text-white font-medium text-[13px] transition-opacity rounded-[20px] shadow flex-shrink-0">Browse</button>
-            </div>
-            <input id="folder-picker" type="file" webkitdirectory style="display:none" onchange="handleFolderPick(this)">
-            <p class="text-xs text-gray-400 dark:text-gray-500">Select the root folder where all project folders will be created.</p>
+            <input id="root-path-input" type="text" value="" placeholder="D:\Projects" class="w-full px-4 py-2.5 border border-[#e8e8e8] dark:border-[#222] dark:bg-[#111] dark:text-white text-[14px] outline-none focus:border-violet-300 transition-colors">
+            <p class="text-xs text-gray-400 dark:text-gray-500">Enter the full path where project folders will be created (e.g. <code>D:\Projects</code>).</p>
 
             <div class="pt-2 border-t border-[#e8e8e8] dark:border-[#222]">
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Subfolder Names</label>
@@ -421,16 +417,6 @@
                     if (input && data.value) input.value = data.value;
                 })
                 .catch(() => {});
-        }
-
-        function handleFolderPick(input) {
-            if (input.files && input.files.length > 0) {
-                var path = input.files[0].webkitRelativePath || input.files[0].name;
-                var parts = path.split('/');
-                if (parts.length > 1) {
-                    document.getElementById('root-path-input').value = parts[0];
-                }
-            }
         }
 
         function saveSettings() {
