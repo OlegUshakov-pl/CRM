@@ -1,7 +1,8 @@
+import os
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
-from django.http import JsonResponse
+from django.http import JsonResponse, FileResponse, Http404
 from projects.models import Project
 from tasks.models import Task
 from companies.models import Company
@@ -87,3 +88,16 @@ def save_setting(request):
 def get_setting(request, key):
     value = AppSetting.get_value(key, '')
     return JsonResponse({'key': key, 'value': value})
+
+
+@login_required
+def serve_project_file(request, file_path):
+    root_path = AppSetting.get_value('project_root_path', '')
+    if not root_path:
+        raise Http404("Project root not configured")
+    full_path = os.path.normpath(os.path.join(root_path, file_path))
+    if not full_path.startswith(os.path.normpath(root_path)):
+        raise Http404("Invalid path")
+    if not os.path.exists(full_path):
+        raise Http404("File not found")
+    return FileResponse(open(full_path, 'rb'), filename=os.path.basename(full_path))

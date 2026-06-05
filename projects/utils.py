@@ -85,4 +85,5 @@ class ProjectFileSystemStorage(FileSystemStorage):
         return os.path.getsize(self.path(name))
 
     def url(self, name):
-        return os.path.join(settings.MEDIA_URL, name)
+        from django.urls import reverse
+        return reverse('core:serve_project_file', kwargs={'file_path': name})

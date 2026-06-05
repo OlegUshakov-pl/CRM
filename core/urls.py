@@ -7,4 +7,5 @@ urlpatterns = [
     path('search/', views.search_view, name='search'),
     path('settings/save/', views.save_setting, name='save_setting'),
     path('settings/<str:key>/', views.get_setting, name='get_setting'),
+    path('project-files/<path:file_path>', views.serve_project_file, name='serve_project_file'),
 ]
