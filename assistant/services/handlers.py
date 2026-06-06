@@ -392,7 +392,7 @@ def _handle_open_browser(ctx: CommandContext) -> CommandResult:
     if not url:
         return CommandResult(ok=False, error=t('browser_missing_url', lang))
 
-    from .browser import BrowserService
+    from .browser import BrowserService, _ensure_scheme
     bs = BrowserService()
     try:
         fetch = bs.fetch(url)
@@ -412,21 +412,22 @@ def _handle_open_browser(ctx: CommandContext) -> CommandResult:
     else:
         pdfs = []
 
+    safe_url = _ensure_scheme(url)
     rel = bs.screenshot_path(url)
     pdf_part = t('browser_pdf_part', lang, n=len(pdfs)) if pdfs else ''
 
     return CommandResult(
         ok=True,
-        message=t('browser_done', lang, url=url, titles=len(titles), pdfs=pdf_part),
+        message=t('browser_done', lang, url=safe_url, titles=len(titles), pdfs=pdf_part),
         payload={
             'object': 'browser',
-            'url': url,
+            'url': safe_url,
             'final_url': fetch.final_url,
             'titles': titles,
             'pdf_links': pdfs,
             'image_url': settings.MEDIA_URL + rel,
         },
-        actions=[{'type': 'open_url', 'label': t('browser_open_new_tab', lang), 'url': url}],
+        actions=[{'type': 'open_url', 'label': t('browser_open_new_tab', lang), 'url': safe_url}],
     )
 
 
