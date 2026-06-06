@@ -16,8 +16,10 @@ urlpatterns = [
     path('deals/', include('generator.urls')),
     path('documents/', include('documents.urls')),
     path('parts/', include('parts.urls')),
+    path('assistant/', include('assistant.urls')),
 ]
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.DOCUMENTS_URL, document_root=settings.DOCUMENTS_ROOT)
+    urlpatterns += static(settings.AI_FILES_URL, document_root=settings.AI_FILES_ROOT)

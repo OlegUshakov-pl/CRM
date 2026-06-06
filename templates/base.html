@@ -171,6 +171,11 @@
                         <span class="sidebar-text">Notes</span>
                     </a>
 
+                    <a href="{% url 'assistant:ai_files' %}">
+                        <i data-lucide="folder-star" class="w-4 h-4 flex-shrink-0"></i>
+                        <span class="sidebar-text">AI Files</span>
+                    </a>
+
                     <a href="{% url 'projects:import_page' %}">
                         <i data-lucide="upload" class="w-4 h-4 flex-shrink-0"></i>
                         <span class="sidebar-text">Import Project</span>
@@ -271,6 +276,7 @@
     </div>
 
     {% include 'includes/slide_over.html' %}
+    {% include 'includes/chat_widget.html' %}
 
     <!-- Settings Slide-over -->
     <div id="settings-backdrop" class="fixed inset-0 z-40 bg-black/40 transition-opacity duration-300 opacity-0 pointer-events-none" onclick="closeSettings()"></div>

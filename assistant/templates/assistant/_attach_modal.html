@@ -1,0 +1,22 @@
+{% load static %}
+<div id="attach-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center">
+    <div class="absolute inset-0 bg-black/50" onclick="this.parentElement.classList.add('hidden')"></div>
+    <div class="bg-white dark:bg-[#0a0a0a] border border-light dark:border-[#222] rounded shadow-xl z-10 w-full max-w-md p-5">
+        <h3 class="text-base font-semibold text-gray-900 dark:text-white mb-2">Attach to project / Прикрепить к проекту</h3>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">File: <strong id="attach-file-name"></strong></p>
+        <form id="attach-form">
+            <input type="hidden" id="attach-file-id" value="">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Project / Проект</label>
+            <select id="attach-project" class="w-full px-3 py-2 border border-light dark:border-[#222] dark:bg-[#111] dark:text-white text-[13px] rounded">
+                <option value="">— select / выберите —</option>
+                {% for p in all_projects %}
+                <option value="{{ p.id }}">{{ p.number|default:"" }} {{ p.name }}</option>
+                {% endfor %}
+            </select>
+            <div class="flex justify-end gap-2 mt-4">
+                <button type="button" id="attach-cancel" class="px-3 py-2 text-[13px] bg-gray-100 dark:bg-[#1a1a1a] dark:text-white rounded">Cancel / Отмена</button>
+                <button type="submit" class="px-3 py-2 text-[13px] bg-indigo-600 text-white rounded">Attach / Прикрепить</button>
+            </div>
+        </form>
+    </div>
+</div>

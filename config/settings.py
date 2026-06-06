@@ -26,6 +26,7 @@ INSTALLED_APPS = [
     'generator',
     'documents',
     'parts',
+    'assistant',
 ]
 
 MIDDLEWARE = [
@@ -86,6 +87,17 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DOCUMENTS_ROOT = BASE_DIR / 'documents'
 DOCUMENTS_URL = '/files/'
+
+AI_FILES_ROOT = BASE_DIR / 'ai_files'
+AI_FILES_URL = '/ai-files/'
+AI_FILES_MAX_SIZE = 50 * 1024 * 1024
+AI_FILES_TOTAL_QUOTA = 1024 * 1024 * 1024
+
+AI_BROWSER_BLACKLIST = [
+    'malware-site.example',
+    'phishing.example',
+]
+AI_BROWSER_TIMEOUT = 20
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 

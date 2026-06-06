@@ -1,0 +1,402 @@
+{% load static %}
+<div id="ai-chat-root" x-data="aiChat()" x-init="init()" x-cloak>
+    <!-- Floating button -->
+    <button x-show="!open" @click="openChat()"
+            class="fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg flex items-center justify-center transition-all"
+            title="AI Assistant">
+        <i data-lucide="sparkles" class="w-6 h-6"></i>
+    </button>
+
+    <!-- Backdrop (only wide mode) -->
+    <div x-show="open && wide" @click="open=false" class="fixed inset-0 z-40 bg-black/30"></div>
+
+    <!-- Panel -->
+    <div x-show="open" x-transition.opacity
+         :class="wide ? 'fixed inset-y-0 right-0 z-50 w-1/2 bg-white dark:bg-[#0a0a0a] border-l border-light dark:border-[#222] shadow-2xl flex' : 'fixed bottom-6 right-6 z-50 w-[450px] max-w-[calc(100vw-2rem)] h-[70vh] max-h-[700px] bg-white dark:bg-[#0a0a0a] border border-light dark:border-[#222] shadow-2xl rounded-lg flex flex-col'"
+         class="flex flex-col">
+        <div :class="wide ? 'w-full flex flex-col' : 'flex flex-col h-full'">
+            <!-- Header -->
+            <div class="flex items-center justify-between px-4 py-3 border-b border-light dark:border-[#222]">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center">
+                        <i data-lucide="sparkles" class="w-4 h-4"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold text-gray-900 dark:text-white">AI Assistant</p>
+                        <p class="text-[11px] text-gray-500 dark:text-gray-400" x-text="storageInfo"></p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-1">
+                    <button @click="toggleLang()" :title="'Language: ' + lang.toUpperCase()"
+                            class="px-2 py-1 text-[11px] font-medium bg-gray-100 dark:bg-[#1a1a1a] text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-[#222]">
+                        <span x-text="lang.toUpperCase()"></span>
+                    </button>
+                    <button @click="wide = !wide" :title="wide ? 'Normal mode' : 'Wide mode'"
+                            class="p-1.5 hover:bg-gray-100 dark:hover:bg-[#1a1a1a] rounded">
+                        <i :data-lucide="wide ? 'panel-right-close' : 'panel-right-open'" class="w-4 h-4 text-gray-500"></i>
+                    </button>
+                    <button @click="clear()" title="Clear"
+                            class="p-1.5 hover:bg-gray-100 dark:hover:bg-[#1a1a1a] rounded">
+                        <i data-lucide="trash-2" class="w-4 h-4 text-gray-500"></i>
+                    </button>
+                    <button @click="open=false" title="Close"
+                            class="p-1.5 hover:bg-gray-100 dark:hover:bg-[#1a1a1a] rounded">
+                        <i data-lucide="x" class="w-4 h-4 text-gray-500"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Messages -->
+            <div class="flex-1 overflow-y-auto p-3 space-y-3" id="ai-chat-messages">
+                <template x-for="m in messages" :key="m.id">
+                    <div :class="m.role === 'user' ? 'flex justify-end' : 'flex justify-start'">
+                        <div :class="m.role === 'user'
+                                    ? 'max-w-[85%] bg-indigo-600 text-white px-3 py-2 rounded-lg text-[13px] whitespace-pre-wrap'
+                                    : 'max-w-[90%] bg-gray-100 dark:bg-[#1a1a1a] text-gray-900 dark:text-gray-100 px-3 py-2 rounded-lg text-[13px] whitespace-pre-wrap'">
+                            <p x-text="m.content"></p>
+                            <template x-if="m.payload && m.payload.needs_confirmation">
+                                <div class="mt-2 flex gap-2">
+                                    <button @click="confirm(m)"
+                                            class="px-3 py-1.5 text-[12px] bg-emerald-600 hover:bg-emerald-700 text-white rounded"
+                                            x-text="confirmLabel"></button>
+                                    <button @click="cancelConfirm()"
+                                            class="px-3 py-1.5 text-[12px] bg-gray-200 dark:bg-[#222] rounded"
+                                            x-text="cancelLabel"></button>
+                                </div>
+                            </template>
+                            <template x-if="m.payload && m.payload.actions && m.payload.actions.length">
+                                <div class="mt-2 flex flex-wrap gap-2">
+                                    <template x-for="(a,i) in m.payload.actions" :key="i">
+                                        <a :href="a.url || '#'" target="_blank"
+                                           class="px-3 py-1.5 text-[12px] bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-200 rounded">
+                                            <span x-text="a.label"></span>
+                                        </a>
+                                    </template>
+                                </div>
+                            </template>
+                            <template x-if="m.payload && m.payload.undoable && m.payload.undo_token">
+                                <div class="mt-2">
+                                    <button @click="undo(m.payload.undo_token, m.id)"
+                                            :id="'undo-' + m.id"
+                                            class="px-3 py-1.5 text-[12px] bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 rounded">
+                                        <i data-lucide="rotate-ccw" class="w-3 h-3 inline"></i>
+                                        <span x-text="undoLabel"></span> (<span :id="'undo-timer-' + m.id">10</span><span x-text="sUnit"></span>)
+                                    </button>
+                                </div>
+                            </template>
+                            <template x-if="m.payload && m.payload.payload && m.payload.payload.drawings">
+                                <div class="mt-2 space-y-1">
+                                    <template x-for="(d,i) in m.payload.payload.drawings" :key="i">
+                                        <div class="px-2 py-1 bg-white dark:bg-[#111] border border-light dark:border-[#222] rounded text-[12px] flex items-center justify-between">
+                                            <span>
+                                                <strong x-text="d.number || '—'"></strong>
+                                                <span class="text-gray-500" x-text="' • ' + (d.category || '')"></span>
+                                            </span>
+                                            <a :href="d.file_url" target="_blank" class="text-indigo-600 hover:underline">↗</a>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+                            <template x-if="m.payload && m.payload.payload && m.payload.payload.phone">
+                                <div class="mt-2 text-[12px] space-y-1 text-gray-700 dark:text-gray-300">
+                                    <p>📞 <span x-text="m.payload.payload.phone"></span></p>
+                                    <p>✉️ <span x-text="m.payload.payload.email"></span></p>
+                                    <p>🏢 <span x-text="m.payload.payload.company"></span></p>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+                <div x-show="loading" class="flex justify-start">
+                    <div class="bg-gray-100 dark:bg-[#1a1a1a] px-3 py-2 rounded-lg text-[13px] text-gray-500">
+                        <span x-text="loadingText"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Browser panel (Module 3) -->
+            <div x-show="browserOpen" class="border-t border-light dark:border-[#222] p-3 bg-gray-50 dark:bg-[#111]">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-[12px] text-gray-500" x-text="previewLabel + browserUrl"></span>
+                    <div class="flex items-center gap-1">
+                        <a :href="browserUrl" target="_blank" class="px-2 py-1 text-[12px] bg-white dark:bg-[#222] rounded border border-light dark:border-[#222]">
+                            <i data-lucide="external-link" class="w-3 h-3 inline"></i> Open
+                        </a>
+                        <a :href="browserImage" download class="px-2 py-1 text-[12px] bg-white dark:bg-[#222] rounded border border-light dark:border-[#222]">
+                            <i data-lucide="download" class="w-3 h-3 inline"></i> Screenshot
+                        </a>
+                        <button @click="browserOpen=false" class="px-2 py-1 text-[12px] bg-white dark:bg-[#222] rounded border border-light dark:border-[#222]">
+                            <i data-lucide="x" class="w-3 h-3 inline"></i> Close
+                        </button>
+                    </div>
+                </div>
+                <div class="bg-white dark:bg-black border border-light dark:border-[#222] rounded overflow-hidden">
+                    <img :src="browserImage" alt="preview" class="w-full h-auto block">
+                </div>
+            </div>
+
+            <!-- Input -->
+            <div class="border-t border-light dark:border-[#222] p-3">
+                <div class="flex items-end gap-2">
+                    <textarea x-ref="input" x-model="text" @keydown.enter.prevent="if(!$event.shiftKey) send()"
+                              rows="1" :placeholder="placeholder"
+                              class="flex-1 resize-none border border-light dark:border-[#222] dark:bg-[#111] dark:text-white text-[13px] px-3 py-2 rounded outline-none focus:border-indigo-400 max-h-32"></textarea>
+                    <button @click="micTooltip()" :title="micTitle"
+                            class="p-2 text-gray-400 hover:text-indigo-600">
+                        <i data-lucide="mic" class="w-5 h-5"></i>
+                    </button>
+                    <button @click="send()" :disabled="!text.trim() || loading"
+                            class="p-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded disabled:opacity-50">
+                        <i data-lucide="send" class="w-5 h-5"></i>
+                    </button>
+                </div>
+                <p class="text-[11px] text-gray-400 mt-1" x-text="voiceNote"></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const I18N = {
+    en: {
+        placeholder: 'What to do?',
+        thinking: 'Thinking...',
+        executing: 'Executing...',
+        clearConfirm: 'Clear chat history?',
+        voiceTooltip: 'Voice control will be added in the next release (v2).',
+        micTitle: 'Voice (coming soon)',
+        voiceNote: 'Voice control will be added in the next release.',
+        previewLabel: 'Preview: ',
+        confirmLabel: 'Confirm',
+        cancelLabel: 'Cancel',
+        undoLabel: 'Undo',
+        sUnit: 's',
+        storageInfo: (u, total, pct) => `AI Files: ${u} / ${total} (${pct}%)`,
+        errorPrefix: 'Error: ',
+        confirmMsg: 'Confirm',
+        cancelled: 'Action cancelled.',
+        undid: 'Undone.',
+        undoFailed: 'Could not undo.',
+    },
+    ru: {
+        placeholder: 'Что сделать?',
+        thinking: 'Думаю...',
+        executing: 'Выполняю...',
+        clearConfirm: 'Очистить историю чата?',
+        voiceTooltip: 'Голосовое управление будет добавлено в следующем обновлении (v2).',
+        micTitle: 'Голос скоро',
+        voiceNote: 'Голосовое управление будет добавлено в следующем обновлении.',
+        previewLabel: 'Просмотр: ',
+        confirmLabel: 'Подтвердить',
+        cancelLabel: 'Отмена',
+        undoLabel: 'Отменить',
+        sUnit: 'с',
+        storageInfo: (u, total, pct) => `AI Files: ${u} / ${total} (${pct}%)`,
+        errorPrefix: 'Ошибка: ',
+        confirmMsg: 'Подтверждаю',
+        cancelled: 'Действие отменено.',
+        undid: 'Отменено.',
+        undoFailed: 'Не удалось.',
+    }
+};
+function detectLang(text) {
+    if (!text) return 'en';
+    for (const ch of text) {
+        if (ch >= '\u0400' && ch <= '\u04FF') return 'ru';
+    }
+    return 'en';
+}
+function aiChat() {
+    return {
+        open: false,
+        wide: false,
+        text: '',
+        messages: [],
+        loading: false,
+        lang: localStorage.getItem('ai_lang') || 'en',
+        storageInfo: '',
+        browserOpen: false,
+        browserUrl: '',
+        browserImage: '',
+        undoTimers: {},
+        init() {
+            this.refresh();
+            this.recomputeLabels();
+        },
+        recomputeLabels() {
+            const L = I18N[this.lang];
+            this.placeholder = L.placeholder;
+            this.loadingText = L.thinking;
+            this.voiceNote = L.voiceNote;
+            this.micTitle = L.micTitle;
+            this.previewLabel = L.previewLabel;
+            this.confirmLabel = L.confirmLabel;
+            this.cancelLabel = L.cancelLabel;
+            this.undoLabel = L.undoLabel;
+            this.sUnit = L.sUnit;
+        },
+        toggleLang() {
+            this.lang = this.lang === 'en' ? 'ru' : 'en';
+            localStorage.setItem('ai_lang', this.lang);
+            this.recomputeLabels();
+        },
+        getCSRFToken() {
+            var c = document.cookie.split(';');
+            for (var i=0;i<c.length;i++){ var x=c[i].trim(); if (x.startsWith('csrftoken=')) return x.substring(10); }
+            return '';
+        },
+        async refresh() {
+            try {
+                var r = await fetch('{% url "assistant:panel_state" %}');
+                if (!r.ok) return;
+                var data = await r.json();
+                this.messages = data.messages || [];
+                this.updateStorage(data.storage_used, data.storage_quota);
+                this.$nextTick(() => { if (window.lucide) lucide.createIcons(); this.scrollDown(); });
+            } catch (e) {}
+        },
+        updateStorage(used, quota) {
+            if (typeof used !== 'number' || !quota) return;
+            var pct = Math.round(used / quota * 100);
+            this.storageInfo = I18N[this.lang].storageInfo(this.fmtSize(used), this.fmtSize(quota), pct);
+        },
+        fmtSize(b) {
+            if (b < 1024) return b + ' B';
+            if (b < 1024*1024) return (b/1024).toFixed(1) + ' KB';
+            if (b < 1024*1024*1024) return (b/1024/1024).toFixed(1) + ' MB';
+            return (b/1024/1024/1024).toFixed(2) + ' GB';
+        },
+        openChat() {
+            this.open = true;
+            this.$nextTick(() => { if (window.lucide) lucide.createIcons(); this.scrollDown(); });
+        },
+        scrollDown() {
+            var el = document.getElementById('ai-chat-messages');
+            if (el) el.scrollTop = el.scrollHeight;
+        },
+        async send() {
+            var msg = this.text.trim();
+            if (!msg) return;
+            this.text = '';
+            this.messages.push({id: 'tmp-' + Date.now(), role: 'user', content: msg, payload: {}, created_at: new Date().toISOString()});
+            this.loading = true;
+            this.loadingText = I18N[this.lang].thinking;
+            this.scrollDown();
+            try {
+                var r = await fetch('{% url "assistant:chat" %}', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json', 'X-CSRFToken': this.getCSRFToken()},
+                    body: JSON.stringify({message: msg, lang: this.lang})
+                });
+                var data = await r.json();
+                this.handleResponse(data);
+            } catch (e) {
+                this.messages.push({id: 'err-'+Date.now(), role: 'assistant', content: I18N[this.lang].errorPrefix + e, payload: {}});
+            } finally {
+                this.loading = false;
+                this.scrollDown();
+            }
+        },
+        async confirm(msg) {
+            this.messages.push({id: 'tmp-conf-'+Date.now(), role: 'user', content: I18N[this.lang].confirmMsg, payload: {}, created_at: new Date().toISOString()});
+            this.loading = true;
+            this.loadingText = I18N[this.lang].executing;
+            try {
+                var r = await fetch('{% url "assistant:chat" %}', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json', 'X-CSRFToken': this.getCSRFToken()},
+                    body: JSON.stringify({message: 'confirm', confirm: true, confirm_token: msg.id, lang: this.lang})
+                });
+                var data = await r.json();
+                this.handleResponse(data);
+            } catch (e) {
+                this.messages.push({id: 'err-'+Date.now(), role: 'assistant', content: I18N[this.lang].errorPrefix + e, payload: {}});
+            } finally {
+                this.loading = false;
+                this.scrollDown();
+            }
+        },
+        cancelConfirm() {
+            this.messages.push({id: 'tmp-cancel-'+Date.now(), role: 'assistant', content: I18N[this.lang].cancelled, payload: {}});
+        },
+        async undo(token, msgId) {
+            var btn = document.getElementById('undo-' + msgId);
+            if (btn) btn.disabled = true;
+            try {
+                var r = await fetch('{% url "assistant:chat" %}', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json', 'X-CSRFToken': this.getCSRFToken()},
+                    body: JSON.stringify({undo_token: token, lang: this.lang})
+                });
+                var data = await r.json();
+                this.messages.push({id: 'undo-'+Date.now(), role: 'assistant', content: data.message || (data.ok ? I18N[this.lang].undid : I18N[this.lang].undoFailed), payload: {}});
+            } catch (e) {
+                this.messages.push({id: 'err-'+Date.now(), role: 'assistant', content: I18N[this.lang].errorPrefix + e, payload: {}});
+            }
+            this.scrollDown();
+        },
+        handleResponse(data) {
+            if (data.message) {
+                var payload = {
+                    needs_confirmation: data.needs_confirmation,
+                    confirmation_text: data.confirmation_text,
+                    actions: data.actions || [],
+                    undoable: data.undoable,
+                    undo_token: data.undo_token,
+                    payload: data.payload || {}
+                };
+                this.messages.push({
+                    id: data.message_id || ('srv-'+Date.now()),
+                    role: 'assistant',
+                    content: data.message,
+                    payload: payload,
+                    created_at: new Date().toISOString()
+                });
+                if (data.undoable && data.undo_token && data.message_id) {
+                    this.startUndoTimer(data.message_id);
+                }
+            }
+            if (data.payload && data.payload.url) {
+                this.openBrowser(data.payload.url);
+            }
+            this.$nextTick(() => { if (window.lucide) lucide.createIcons(); this.scrollDown(); });
+        },
+        startUndoTimer(msgId) {
+            var n = 10;
+            var el = document.getElementById('undo-timer-' + msgId);
+            var self = this;
+            this.undoTimers[msgId] = setInterval(function(){
+                n--;
+                if (el) el.textContent = n;
+                if (n <= 0) {
+                    clearInterval(self.undoTimers[msgId]);
+                    var btn = document.getElementById('undo-' + msgId);
+                    if (btn) btn.disabled = true;
+                }
+            }, 1000);
+        },
+        async clear() {
+            if (!confirm(I18N[this.lang].clearConfirm)) return;
+            await fetch('{% url "assistant:clear_chat" %}', {
+                method: 'POST', headers: {'X-CSRFToken': this.getCSRFToken()}
+            });
+            this.messages = [];
+        },
+        async openBrowser(url) {
+            this.wide = true;
+            this.browserOpen = true;
+            this.browserUrl = url;
+            try {
+                var r = await fetch('{% url "assistant:browser_preview" %}?url=' + encodeURIComponent(url));
+                var d = await r.json();
+                if (d.ok) this.browserImage = d.image_url;
+            } catch (e) {
+                this.browserImage = '';
+            }
+        },
+        micTooltip() {
+            alert(I18N[this.lang].voiceTooltip);
+        }
+    }
+}
+</script>

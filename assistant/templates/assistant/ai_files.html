@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+{% block title %}AI Files{% endblock %}
+{% block breadcrumb %}AI Files{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-between mb-6">
+    <div>
+        <h1 class="text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+            <i data-lucide="folder-star" class="w-6 h-6 text-indigo-500"></i>
+            AI Files
+        </h1>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Sandbox for files downloaded by the AI from the internet.</p>
+    </div>
+    <div class="flex items-center gap-2">
+        <button onclick="document.getElementById('ai-file-upload').click()"
+                class="px-4 py-2 text-[13px] font-medium bg-indigo-600 hover:bg-indigo-700 text-white rounded flex items-center gap-2">
+            <i data-lucide="upload" class="w-4 h-4"></i> Upload file
+        </button>
+        <form method="post" action="{% url 'assistant:ai_file_cleanup' %}"
+              onsubmit="return aiConfirm('Delete all AI Files older than 30 days? / Удалить все AI Files старше 30 дней?');" class="inline">
+            {% csrf_token %}
+            <input type="hidden" name="days" value="30">
+            <button class="px-4 py-2 text-[13px] font-medium bg-gray-100 dark:bg-[#1a1a1a] hover:bg-gray-200 dark:hover:bg-[#222] text-gray-700 dark:text-gray-300 rounded flex items-center gap-2">
+                <i data-lucide="trash-2" class="w-4 h-4"></i> Cleanup &gt; 30 days
+            </button>
+        </form>
+    </div>
+</div>
+
+<div class="bg-white dark:bg-[#0a0a0a] border border-light dark:border-[#222] rounded p-4 mb-4">
+    <div class="flex flex-wrap items-center gap-3">
+        <div class="text-sm text-gray-700 dark:text-gray-300">
+            Used <strong>{{ storage_used|filesizeformat }}</strong> of <strong>{{ storage_quota|filesizeformat }}</strong>
+            <span class="ml-2 inline-block w-32 h-2 bg-gray-200 dark:bg-[#1a1a1a] rounded overflow-hidden align-middle">
+                <span class="block h-full bg-indigo-500" style="width: {{ storage_pct }}%"></span>
+            </span>
+        </div>
+        <div class="flex-1"></div>
+        <form method="get" class="flex items-center gap-2">
+            <select name="category" onchange="this.form.submit()"
+                    class="text-[13px] px-3 py-1.5 border border-light dark:border-[#222] dark:bg-[#111] dark:text-white rounded">
+                <option value="all" {% if category == 'all' %}selected{% endif %}>All</option>
+                <option value="image" {% if category == 'image' %}selected{% endif %}>Images</option>
+                <option value="pdf" {% if category == 'pdf' %}selected{% endif %}>PDF</option>
+                <option value="document" {% if category == 'document' %}selected{% endif %}>Documents</option>
+            </select>
+            <input type="text" name="q" value="{{ q }}" placeholder="Search by name or URL…"
+                   class="text-[13px] px-3 py-1.5 border border-light dark:border-[#222] dark:bg-[#111] dark:text-white rounded">
+            <button class="px-3 py-1.5 text-[13px] bg-gray-100 dark:bg-[#1a1a1a] dark:text-white rounded">
+                <i data-lucide="search" class="w-4 h-4 inline"></i>
+            </button>
+        </form>
+    </div>
+</div>
+
+<form id="bulk-form" method="post" action="{% url 'assistant:ai_file_bulk_delete' %}">
+    {% csrf_token %}
+    <div class="flex items-center justify-end mb-2">
+        <button type="submit" onclick="return aiConfirm('Delete selected files? / Удалить выбранные файлы?')"
+                class="text-[12px] px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded">
+            Delete selected
+        </button>
+    </div>
+    <div class="bg-white dark:bg-[#0a0a0a] border border-light dark:border-[#222] rounded overflow-hidden">
+        <table class="w-full text-[13px]">
+            <thead class="bg-gray-50 dark:bg-[#111] text-left text-gray-500 dark:text-gray-400">
+                <tr>
+                    <th class="p-3 w-8"><input type="checkbox" onclick="document.querySelectorAll('.row-chk').forEach(c=>c.checked=this.checked)"></th>
+                    <th class="p-3">Preview</th>
+                    <th class="p-3">Name</th>
+                    <th class="p-3">Source</th>
+                    <th class="p-3">Date</th>
+                    <th class="p-3">Size</th>
+                    <th class="p-3 text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for f in files %}
+                <tr class="border-t border-light dark:border-[#222] hover:bg-gray-50 dark:hover:bg-[#111]">
+                    <td class="p-3"><input type="checkbox" name="ids" value="{{ f.id }}" class="row-chk"></td>
+                    <td class="p-3">
+                        {% if f.category == 'image' and f.file %}
+                            <img src="{{ f.file.url }}" alt="" class="w-10 h-10 object-cover rounded">
+                        {% else %}
+                            <div class="w-10 h-10 bg-gray-100 dark:bg-[#1a1a1a] flex items-center justify-center rounded">
+                                <i data-lucide="{% if f.category == 'pdf' %}file-text{% else %}file{% endif %}" class="w-5 h-5 text-gray-400"></i>
+                            </div>
+                        {% endif %}
+                    </td>
+                    <td class="p-3 font-medium text-gray-900 dark:text-white">{{ f.original_name }}</td>
+                    <td class="p-3 text-gray-500 dark:text-gray-400 truncate max-w-[200px]">
+                        {% if f.source_url %}
+                            <a href="{{ f.source_url }}" target="_blank" class="hover:text-indigo-500 truncate inline-block max-w-full align-middle">{{ f.source_url }}</a>
+                        {% else %}—{% endif %}
+                    </td>
+                    <td class="p-3 text-gray-500 dark:text-gray-400">{{ f.created_at|date:"d.m.Y H:i" }}</td>
+                    <td class="p-3 text-gray-500 dark:text-gray-400">{{ f.size|filesizeformat }}</td>
+                    <td class="p-3 text-right">
+                        <a href="{% url 'assistant:ai_file_download' f.id %}"
+                           class="text-indigo-600 hover:underline mr-2" title="Download / Скачать"><i data-lucide="download" class="w-4 h-4 inline"></i></a>
+                        <button type="button" data-attach="{{ f.id }}" data-name="{{ f.original_name }}"
+                                class="text-emerald-600 hover:underline mr-2 js-attach" title="Attach / Прикрепить"><i data-lucide="paperclip" class="w-4 h-4 inline"></i></button>
+                        <button type="button" data-delete="{{ f.id }}" data-url="{% url 'assistant:ai_file_delete' f.id %}"
+                                class="text-red-500 hover:underline js-delete" title="Delete / Удалить"><i data-lucide="trash" class="w-4 h-4 inline"></i></button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7" class="p-8 text-center text-gray-400">No files.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</form>
+
+{% include 'assistant/_attach_modal.html' %}
+<input type="file" id="ai-file-upload" class="hidden" accept=".jpg,.jpeg,.png,.gif,.webp,.bmp,.pdf,.docx,.xlsx,.dwg">
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function getCSRFToken() {
+    var c = document.cookie.split(';');
+    for (var i=0;i<c.length;i++){ var x=c[i].trim(); if (x.startsWith('csrftoken=')) return x.substring(10); }
+    return '';
+}
+function aiConfirm(msg) { return confirm(msg); }
+function aiAlertOk(msg) { alert(msg); }
+document.getElementById('ai-file-upload').addEventListener('change', async function(e){
+    var fd = new FormData(); fd.append('file', e.target.files[0]);
+    fd.append('csrfmiddlewaretoken', getCSRFToken());
+    var r = await fetch('{% url "assistant:ai_file_upload" %}', {method:'POST', body: fd});
+    if (r.ok) location.reload(); else alert('Upload failed / Не удалось загрузить.');
+});
+document.querySelectorAll('.js-delete').forEach(btn => btn.addEventListener('click', async function(){
+    if (!confirm('Delete the file? / Удалить файл?')) return;
+    var r = await fetch(this.dataset.url, {method:'POST', headers:{'X-CSRFToken': getCSRFToken()}});
+    if (r.ok) location.reload();
+}));
+document.querySelectorAll('.js-attach').forEach(btn => btn.addEventListener('click', function(){
+    document.getElementById('attach-file-id').value = this.dataset.attach;
+    document.getElementById('attach-file-name').textContent = this.dataset.name;
+    document.getElementById('attach-modal').classList.remove('hidden');
+}));
+document.getElementById('attach-cancel')?.addEventListener('click', function(){
+    document.getElementById('attach-modal').classList.add('hidden');
+});
+document.getElementById('attach-form')?.addEventListener('submit', async function(e){
+    e.preventDefault();
+    var fileId = document.getElementById('attach-file-id').value;
+    var projectId = document.getElementById('attach-project').value;
+    if (!projectId) { alert('Choose a project / Выберите проект'); return; }
+    var fd = new FormData(); fd.append('project_id', projectId);
+    fd.append('csrfmiddlewaretoken', getCSRFToken());
+    var r = await fetch('/assistant/ai-files/' + fileId + '/attach/', {method:'POST', body: fd});
+    var data = await r.json();
+    if (data.ok) { alert('Attached / Прикреплено'); document.getElementById('attach-modal').classList.add('hidden'); }
+    else alert((data.error || 'Error / Ошибка'));
+});
+</script>
+{% endblock %}
