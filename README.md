@@ -1,41 +1,41 @@
 # CRM
 
-Django 6 + Tailwind CSS 4 + Alpine.js + HTMX + Ollama AI — система управления проектами, контрагентами и задачами для инженерно-производственной сферы.
+Django 6 + Tailwind CSS 4 + Alpine.js + HTMX + Ollama AI — a project management, contractor and task tracking system for engineering and manufacturing.
 
-## Стек
+## Stack
 
-| Слой | Технологии |
-|------|-----------|
+| Layer | Technologies |
+|-------|-------------|
 | Backend | Django 6.0, Python 3.14+, SQLite |
 | Frontend | Tailwind CSS 4, Alpine.js 3, HTMX 2.0, Lucide Icons |
-| AI | Ollama (локальная LLM), rule-based command processing |
-| Шрифт | Montserrat |
+| AI | Ollama (local LLM), rule-based command processing |
+| Font | Montserrat |
 
-## Функциональность
+## Features
 
-### Основные модули
+### Core Modules
 
-| Модуль | Описание |
-|--------|---------|
-| **Dashboard** | Главная страница с ключевыми метриками, последними проектами, задачами и заметками |
-| **Companies** | Управление компаниями (название, email, телефон, сайт, адрес, логотип) |
-| **Contacts** | Контакты с привязкой к компаниям и аватарами |
-| **Projects** | Проекты (статусы, бюджет, даты, галерея изображений, экспорт/импорт ZIP) |
-| **Materials / BOM** | Спецификации материалов по проектам (количество, единицы, цены, категории) |
-| **Tasks** | Задачи (приоритеты, статусы, сроки, фильтрация) |
-| **Notes** | Универсальные заметки с привязкой к проектам, компаниям, контактам |
-| **Documents** | Загрузка и просмотр файлов (изображения, PDF, текст), фильтрация по типу и проекту |
-| **Parts** | Чертежи и 3D-модели (.stp, .ipt, .sldprt, .ics и др.) |
-| **Generator** | Шаблон для быстрого создания новых модулей (пример: Deal pipeline) |
+| Module | Description |
+|--------|-------------|
+| **Dashboard** | Home page with key metrics, recent projects, tasks and notes |
+| **Companies** | Company management (name, email, phone, website, address, logo) |
+| **Contacts** | Contacts linked to companies with avatars |
+| **Projects** | Projects (statuses, budget, dates, image gallery, ZIP export/import) |
+| **Materials / BOM** | Bill of materials per project (quantity, units, prices, categories) |
+| **Tasks** | Tasks (priorities, statuses, due dates, filtering) |
+| **Notes** | Universal notes linked to projects, companies, contacts |
+| **Documents** | File upload with preview (images, PDF, text), filter by type and project |
+| **Parts** | Drawings and 3D models (.stp, .ipt, .sldprt, .ics, etc.) |
+| **Generator** | Template for rapid module scaffolding (example: Deal pipeline) |
 
 ### AI Assistant
 
-Встроенный AI-ассистент на базе Ollama с двумя режимами:
+Built-in AI assistant powered by Ollama with two modes:
 
-- **CHAT** — свободное общение с выбранной моделью Ollama
-- **COMMANDS** — выполнение CRM-команд через естественный язык
+- **CHAT** — free conversation with a selected Ollama model
+- **COMMANDS** — execute CRM commands via natural language
 
-**Примеры команд:**
+**Example commands:**
 ```
 Create project 001, Office Building on 2026-06-15
 Add task Call client on 2026-06-10
@@ -49,85 +49,85 @@ Open bbc.com
 Download file from https://example.com/image.png
 ```
 
-**Возможности:**
-- Голосовой ввод (Web Speech API)
-- Браузер: открытие URL, скриншоты, извлечение заголовков и PDF-ссылок
-- AI Files: загрузка файлов из сети, прикрепление к проектам, управление хранилищем
-- Откат действий (undo) с окном 10 секунд
-- Все действия логируются в AILog
-- Выбор модели из списка установленных в Ollama
+**Capabilities:**
+- Voice input (Web Speech API)
+- Browser agent: open URLs, take screenshots, extract titles and PDF links
+- AI Files: download files from the web, attach to projects, manage storage
+- Undo with a 10-second window for create/delete actions
+- All actions logged to AILog
+- Model selection from installed Ollama models
 
-### Общие возможности
+### Cross-cutting Features
 
-- Slide-over формы — CRUD без перезагрузки страницы через HTMX
-- Мягкое удаление (soft delete) через `is_active`
-- Глобальный поиск по всем сущностям
-- Логирование активности (Activity log с Generic Foreign Key)
-- Экспорт/импорт проектов в ZIP
-- Темная тема (dark mode)
-- Адаптивный интерфейс
+- Slide-over forms — CRUD without page navigation via HTMX
+- Soft delete via `is_active` flag
+- Global search across all entity types
+- Activity logging with Generic Foreign Key
+- Project export/import as ZIP
+- Dark mode
+- Responsive design
 
-## Быстрый старт
+## Quick Start
 
 ```bash
-# Клонировать репозиторий
+# Clone the repository
 git clone <repo-url> && cd CRM
 
-# Python-зависимости
+# Python dependencies
 python -m pip install -r requirements.txt
 
-# Node-зависимости (Tailwind CLI)
+# Node dependencies (Tailwind CLI)
 npm install
 
-# Собрать Tailwind CSS
+# Build Tailwind CSS
 npm run build
 
-# Миграции
+# Run migrations
 python manage.py migrate
 
-# Суперпользователь
+# Create superuser
 python manage.py createsuperuser
 
-# Запуск
+# Start dev server
 python manage.py runserver
 ```
 
-Сервер будет доступен по адресу `http://127.0.0.1:8000`.
+The server will be available at `http://127.0.0.1:8000`.
 
-Для AI-ассистента требуется запущенный Ollama: `http://localhost:11434` (настраивается в `settings.py`).
+For the AI assistant, a running Ollama instance is required at `http://localhost:11434` (configurable in `settings.py`).
 
-## Структура проекта
+## Project Structure
 
 ```
 CRM/
-├── config/           # Настройки, корневые URLs, WSGI/ASGI
-├── accounts/         # Аутентификация (логин, профиль, сброс пароля)
-├── core/             # Dashboard, TimeStampedModel, Activity, AppSetting, поиск
-├── companies/        # Управление компаниями
-├── contacts/         # Управление контактами
-├── projects/         # Управление проектами, экспорт/импорт
-├── materials/        # Спецификации (BOM), категории
-├── tasks/            # Управление задачами
-├── notes/            # Универсальные заметки
-├── documents/        # Управление файлами с превью
-├── parts/            # Чертежи и 3D-модели
-├── assistant/        # AI-чат, Ollama, браузер, AI Files
+├── config/           # Settings, root URLs, WSGI/ASGI
+├── accounts/         # Authentication (login, profile, password reset)
+├── core/             # Dashboard, TimeStampedModel, Activity, AppSetting, search
+├── companies/        # Company management
+├── contacts/         # Contact management
+├── projects/         # Project management, export/import
+├── materials/        # Bill of materials (BOM), categories
+├── tasks/            # Task management
+├── notes/            # Universal notes
+├── documents/        # File management with preview
+├── parts/            # Drawings and 3D models
+├── assistant/        # AI chat, Ollama, browser, AI Files
 │   └── services/     # Command registry, handlers, browser, files, i18n
-├── generator/        # Шаблон для новых модулей (Deal pipeline)
-├── templates/        # Базовый layout, инклюды
+├── generator/        # Module scaffolding template (Deal pipeline)
+├── templates/        # Base layout, includes
 │   ├── base.html
 │   └── includes/     # sidebar, topbar, chat_widget, pagination, slide_over
 ├── static/           # Tailwind CSS (src → dist)
 │   └── src/styles.css
-└── media/            # Загруженные пользователем файлы
+└── media/            # User uploaded files
 ```
 
-## Модели данных
+## Data Models
 
-Все модели наследуют `TimeStampedModel` (created_at, updated_at, created_by, is_active).
+All models inherit `TimeStampedModel` (created_at, updated_at, created_by, is_active).
 
-| Модель | Ключевые поля |
-|--------|--------------|
+| Model | Key Fields |
+|-------|-----------|
 | Company | name, email, phone, website, address, logo |
 | Contact | company (FK), first_name, last_name, email, phone, position, avatar |
 | Project | name, number, description, status, company (FK), contacts (M2M), dates, budget, image |
@@ -147,22 +147,22 @@ CRM/
 | Deal (example) | name, description, status, priority, value, company (FK), contacts (M2M), assigned_to, due_date |
 | AppSetting | key, value |
 
-## Разработка
+## Development
 
 ```bash
-# Запустить Tailwind в режиме watch
+# Watch mode for Tailwind CSS
 npm run dev
 
-# Или собрать production
+# Production build
 npm run build
 
-# Собрать статику Django
+# Collect Django static files
 python manage.py collectstatic
 ```
 
-## Архитектурные решения
+## Architecture
 
-- **Slide-over формы** — большинство CRUD-операций выполняются в боковой панели через HTMX, без навигации
-- **Файловая система проектов** — файлы организованы в структуру `{number}_{name}_Project/{documents,drawings,models}/`
-- **Правила для AI** — intent detection через regex (не требует NLP-модели), все write-операции с двухшаговым подтверждением
-- **Версионирование** — версия приложения `1.2.{commit_count}` определяется по количеству коммитов git
+- **Slide-over forms** — most CRUD operations use HTMX slide-over panels without page navigation
+- **Project file system** — files are organized as `{number}_{name}_Project/{documents,drawings,models}/`
+- **AI rules** — intent detection via regex (no NLP model required); all write operations require two-step confirmation
+- **Versioning** — app version `1.2.{commit_count}` derived from git commit count
