@@ -59,6 +59,38 @@ def _log(user, action: str, status: str, description: str, *,
         logger.warning('Failed to write AILog: %s', e)
 
 
+def _ollama_chat(text: str, model: str, user) -> Dict[str, Any]:
+    """Send a message to Ollama and return the response."""
+    import urllib.request
+    import urllib.error
+    base = getattr(settings, 'OLLAMA_BASE_URL', 'http://localhost:11434')
+    if not model:
+        return {'ok': False, 'message': 'No model selected. Choose a model from the dropdown.'}
+    payload = {
+        'model': model,
+        'messages': [{'role': 'user', 'content': text}],
+        'stream': False,
+    }
+    try:
+        data = json.dumps(payload).encode('utf-8')
+        req = urllib.request.Request(
+            f'{base}/api/chat',
+            data=data,
+            headers={'Content-Type': 'application/json'},
+            method='POST',
+        )
+        with urllib.request.urlopen(req, timeout=120) as resp:
+            result = json.loads(resp.read().decode())
+            msg = result.get('message', {}).get('content', '')
+            if not msg:
+                msg = 'Empty response from model.'
+            return {'ok': True, 'message': msg}
+    except urllib.error.URLError as e:
+        return {'ok': False, 'message': f'Cannot connect to Ollama: {e}'}
+    except Exception as e:
+        return {'ok': False, 'message': f'Ollama error: {e}'}
+
+
 @login_required
 @require_GET
 def panel_state(request):
@@ -86,8 +118,8 @@ def panel_state(request):
 @require_POST
 def chat(request):
     """
-    Single API endpoint per spec 6.2: POST {message, confirm_token?, confirm?}.
-    Handles: Q&A, commands, confirmations, undo.
+    Single API endpoint per spec 6.2: POST {message, confirm_token?, confirm?, mode?, model?}.
+    Handles: Q&A, commands, confirmations, undo, Ollama chat.
     """
     start = time.time()
     try:
@@ -99,10 +131,11 @@ def chat(request):
     confirm = bool(body.get('confirm'))
     confirm_token = body.get('confirm_token') or ''
     undo_token = body.get('undo_token') or ''
+    mode = body.get('mode') or 'chat'
+    model = body.get('model') or ''
     lang = detect_lang(text) if text else 'en'
 
     session = _get_or_create_session(request.user)
-    llm = LLMService()
     duration_ms = 0
 
     if undo_token:
@@ -112,6 +145,28 @@ def chat(request):
 
     if not text:
         return JsonResponse({'ok': False, 'error': t('empty_message', lang)}, status=400)
+
+    # Ollama chat mode
+    if mode == 'chat' and not confirm:
+        _save_message(session, 'user', text, kind='text')
+        ollama_result = _ollama_chat(text, model, request.user)
+        duration_ms = int((time.time() - start) * 1000)
+        m = _save_message(session, 'assistant', ollama_result['message'], kind='result',
+                          payload={'model': model, 'mode': 'chat'})
+        _log(request.user, 'chat', 'ok' if ollama_result['ok'] else 'error',
+             f'Ollama chat ({model})',
+             request_text=text, response_text=ollama_result['message'],
+             payload={'model': model}, duration_ms=duration_ms, session=session)
+        return JsonResponse({
+            'ok': ollama_result['ok'],
+            'message': ollama_result['message'],
+            'actions': [],
+            'payload': {'model': model, 'mode': 'chat'},
+            'message_id': m.id,
+        })
+
+    # Commands mode or confirmations
+    llm = LLMService()
 
     if not confirm:
         result = llm.process(text, request.user, session=session)

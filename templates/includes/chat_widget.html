@@ -165,8 +165,8 @@
                     </button>
                 </div>
             </div>
-            <button @click="micTooltip()" :title="micTitle"
-                    class="p-2 text-gray-400 hover:text-indigo-600">
+            <button @click="toggleSpeech()" :class="speechRecording ? 'text-red-500 animate-pulse' : 'text-gray-400 hover:text-indigo-600'"
+                    class="p-2" :title="speechRecording ? 'Stop recording' : 'Voice input'">
                 <i data-lucide="mic" class="w-5 h-5"></i>
             </button>
             <button @click="send()" :disabled="!text.trim() || loading"
@@ -262,6 +262,73 @@ function aiChat() {
             this.mode = m;
             localStorage.setItem('ai_mode', m);
             this.updatePlaceholder();
+        },
+        speechRecording: false,
+        speechRecognition: null,
+        toggleSpeech: function() {
+            var self = this;
+            if (this.speechRecording) {
+                if (this.speechRecognition) this.speechRecognition.stop();
+                this.speechRecording = false;
+                return;
+            }
+            var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                alert('Speech recognition is not supported in this browser.');
+                return;
+            }
+            var rec = new SpeechRecognition();
+            rec.lang = 'en-US';
+            rec.interimResults = true;
+            rec.continuous = false;
+            rec.onresult = function(event) {
+                var transcript = '';
+                for (var i = event.resultIndex; i < event.results.length; i++) {
+                    transcript += event.results[i][0].transcript;
+                }
+                self.text = transcript;
+            };
+            rec.onend = function() {
+                self.speechRecording = false;
+                if (self.text.trim()) {
+                    self.messages.push({
+                        id: 'voice-' + Date.now(),
+                        role: 'user',
+                        content: self.text.trim(),
+                        payload: {},
+                        created_at: new Date().toISOString()
+                    });
+                    var msg = self.text.trim();
+                    self.text = '';
+                    self.loading = true;
+                    self.loadingText = LABELS.thinking;
+                    self.scrollDown();
+                    fetch('{% url "assistant:chat" %}', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json', 'X-CSRFToken': self.getCSRFToken()},
+                        body: JSON.stringify({message: msg, model: self.currentModel, mode: self.mode})
+                    })
+                    .then(function(r) { return r.json(); })
+                    .then(function(data) { self.handleResponse(data); })
+                    .catch(function(e) {
+                        self.messages.push({id: 'err-'+Date.now(), role: 'assistant', content: LABELS.errorPrefix + e, payload: {}});
+                    })
+                    .finally(function() {
+                        self.loading = false;
+                        self.scrollDown();
+                    });
+                }
+            };
+            rec.onerror = function(event) {
+                self.speechRecording = false;
+                if (event.error !== 'no-speech') {
+                    self.messages.push({id: 'err-'+Date.now(), role: 'assistant', content: LABELS.errorPrefix + event.error, payload: {}});
+                    self.scrollDown();
+                }
+            };
+            this.speechRecognition = rec;
+            this.speechRecording = true;
+            rec.start();
         },
         getCSRFToken: function() {
             var c = document.cookie.split(';');
@@ -450,9 +517,6 @@ function aiChat() {
                 .then(function(r) { return r.json(); })
                 .then(function(d) { if (d.ok) self.browserImage = d.image_url; })
                 .catch(function() { self.browserImage = ''; });
-        },
-        micTooltip: function() {
-            alert(LABELS.voiceTooltip);
         }
     }
 }
