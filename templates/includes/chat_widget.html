@@ -23,7 +23,7 @@
     </div>
 
     <!-- Messages -->
-    <div class="flex-1 overflow-y-auto p-3 space-y-3" id="ai-chat-messages">
+    <div class="flex-1 overflow-y-auto p-3 space-y-1" id="ai-chat-messages">
         <template x-for="m in messages" :key="m.id">
             <div :class="m.role === 'user' ? 'flex justify-end' : 'flex justify-start'">
                 <div :class="m.role === 'user'
