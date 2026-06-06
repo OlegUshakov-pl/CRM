@@ -102,3 +102,8 @@ def serve_project_file(request, file_path):
     if os.path.exists(media_path):
         return FileResponse(open(media_path, 'rb'), filename=os.path.basename(media_path))
     raise Http404("File not found")
+
+
+@login_required
+def help_page(request):
+    return render(request, 'core/help.html')

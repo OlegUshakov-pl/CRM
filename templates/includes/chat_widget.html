@@ -15,10 +15,6 @@
             </div>
         </div>
         <div class="flex items-center gap-1">
-            <button @click="toggleLang()" :title="'Language: ' + lang.toUpperCase()"
-                    class="px-2 py-1 text-[11px] font-medium bg-gray-100 dark:bg-[#1a1a1a] text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-[#222]">
-                <span x-text="lang.toUpperCase()"></span>
-            </button>
             <button @click="showClearModal = true" title="Clear"
                     class="p-1.5 hover:bg-gray-100 dark:hover:bg-[#1a1a1a] rounded">
                 <i data-lucide="trash-2" class="w-4 h-4 text-gray-500"></i>
@@ -185,47 +181,25 @@
 </div>
 
 <script>
-var I18N = {
-    en: {
-        placeholder: 'What are you looking for?',
-        thinking: 'Thinking...',
-        executing: 'Executing...',
-        clearConfirm: 'Clear chat history?',
-        clearBtn: 'Clear',
-        voiceTooltip: 'Voice control will be added in the next release (v2).',
-        micTitle: 'Voice (coming soon)',
-        previewLabel: 'Preview: ',
-        confirmLabel: 'Confirm',
-        cancelLabel: 'Cancel',
-        undoLabel: 'Undo',
-        sUnit: 's',
-        storageInfo: function(u, total, pct) { return 'AI Files: ' + u + ' / ' + total + ' (' + pct + '%)'; },
-        errorPrefix: 'Error: ',
-        confirmMsg: 'Confirm',
-        cancelled: 'Action cancelled.',
-        undid: 'Undone.',
-        undoFailed: 'Could not undo.',
-    },
-    ru: {
-        placeholder: 'Что ищете?',
-        thinking: 'Думаю...',
-        executing: 'Выполняю...',
-        clearConfirm: 'Очистить историю чата?',
-        clearBtn: 'Очистить',
-        voiceTooltip: 'Голосовое управление будет добавлено в следующем обновлении (v2).',
-        micTitle: 'Голос скоро',
-        previewLabel: 'Просмотр: ',
-        confirmLabel: 'Подтвердить',
-        cancelLabel: 'Отмена',
-        undoLabel: 'Отменить',
-        sUnit: 'с',
-        storageInfo: function(u, total, pct) { return 'AI Files: ' + u + ' / ' + total + ' (' + pct + '%)'; },
-        errorPrefix: 'Ошибка: ',
-        confirmMsg: 'Подтверждаю',
-        cancelled: 'Действие отменено.',
-        undid: 'Отменено.',
-        undoFailed: 'Не удалось.',
-    }
+var LABELS = {
+    placeholder: 'What are you looking for?',
+    thinking: 'Thinking...',
+    executing: 'Executing...',
+    clearConfirm: 'Clear chat history?',
+    clearBtn: 'Clear',
+    voiceTooltip: 'Voice control will be added in the next release (v2).',
+    micTitle: 'Voice (coming soon)',
+    previewLabel: 'Preview: ',
+    confirmLabel: 'Confirm',
+    cancelLabel: 'Cancel',
+    undoLabel: 'Undo',
+    sUnit: 's',
+    storageInfo: function(u, total, pct) { return 'AI Files: ' + u + ' / ' + total + ' (' + pct + '%)'; },
+    errorPrefix: 'Error: ',
+    confirmMsg: 'Confirm',
+    cancelled: 'Action cancelled.',
+    undid: 'Undone.',
+    undoFailed: 'Could not undo.',
 };
 function aiChat() {
     return {
@@ -234,7 +208,6 @@ function aiChat() {
         text: '',
         messages: [],
         loading: false,
-        lang: localStorage.getItem('ai_lang') || 'en',
         storageInfo: '',
         browserOpen: false,
         browserUrl: '',
@@ -245,27 +218,18 @@ function aiChat() {
         modelsLoading: false,
         currentModel: localStorage.getItem('ollama_model') || '',
         init: function() {
+            this.placeholder = LABELS.placeholder;
+            this.loadingText = LABELS.thinking;
+            this.micTitle = LABELS.micTitle;
+            this.previewLabel = LABELS.previewLabel;
+            this.confirmLabel = LABELS.confirmLabel;
+            this.cancelLabel = LABELS.cancelLabel;
+            this.undoLabel = LABELS.undoLabel;
+            this.sUnit = LABELS.sUnit;
+            this.clearConfirmText = LABELS.clearConfirm;
+            this.clearLabel = LABELS.clearBtn;
             this.refresh();
-            this.recomputeLabels();
             this.loadModels();
-        },
-        recomputeLabels: function() {
-            var L = I18N[this.lang];
-            this.placeholder = L.placeholder;
-            this.loadingText = L.thinking;
-            this.micTitle = L.micTitle;
-            this.previewLabel = L.previewLabel;
-            this.confirmLabel = L.confirmLabel;
-            this.cancelLabel = L.cancelLabel;
-            this.undoLabel = L.undoLabel;
-            this.sUnit = L.sUnit;
-            this.clearConfirmText = L.clearConfirm;
-            this.clearLabel = L.clearBtn;
-        },
-        toggleLang: function() {
-            this.lang = this.lang === 'en' ? 'ru' : 'en';
-            localStorage.setItem('ai_lang', this.lang);
-            this.recomputeLabels();
         },
         getCSRFToken: function() {
             var c = document.cookie.split(';');
@@ -286,7 +250,7 @@ function aiChat() {
         updateStorage: function(used, quota) {
             if (typeof used !== 'number' || !quota) return;
             var pct = Math.round(used / quota * 100);
-            this.storageInfo = I18N[this.lang].storageInfo(this.fmtSize(used), this.fmtSize(quota), pct);
+            this.storageInfo = LABELS.storageInfo(this.fmtSize(used), this.fmtSize(quota), pct);
         },
         fmtSize: function(b) {
             if (b < 1024) return b + ' B';
@@ -336,18 +300,18 @@ function aiChat() {
             this.text = '';
             this.messages.push({id: 'tmp-' + Date.now(), role: 'user', content: msg, payload: {}, created_at: new Date().toISOString()});
             this.loading = true;
-            this.loadingText = I18N[this.lang].thinking;
+            this.loadingText = LABELS.thinking;
             this.scrollDown();
             var self = this;
             fetch('{% url "assistant:chat" %}', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json', 'X-CSRFToken': this.getCSRFToken()},
-                body: JSON.stringify({message: msg, lang: this.lang, model: this.currentModel})
+                body: JSON.stringify({message: msg, model: this.currentModel})
             })
             .then(function(r) { return r.json(); })
             .then(function(data) { self.handleResponse(data); })
             .catch(function(e) {
-                self.messages.push({id: 'err-'+Date.now(), role: 'assistant', content: I18N[self.lang].errorPrefix + e, payload: {}});
+                self.messages.push({id: 'err-'+Date.now(), role: 'assistant', content: LABELS.errorPrefix + e, payload: {}});
             })
             .finally(function() {
                 self.loading = false;
@@ -355,19 +319,19 @@ function aiChat() {
             });
         },
         confirm: function(msg) {
-            this.messages.push({id: 'tmp-conf-'+Date.now(), role: 'user', content: I18N[this.lang].confirmMsg, payload: {}, created_at: new Date().toISOString()});
+            this.messages.push({id: 'tmp-conf-'+Date.now(), role: 'user', content: LABELS.confirmMsg, payload: {}, created_at: new Date().toISOString()});
             this.loading = true;
-            this.loadingText = I18N[this.lang].executing;
+            this.loadingText = LABELS.executing;
             var self = this;
             fetch('{% url "assistant:chat" %}', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json', 'X-CSRFToken': this.getCSRFToken()},
-                body: JSON.stringify({message: 'confirm', confirm: true, confirm_token: msg.id, lang: this.lang})
+                body: JSON.stringify({message: 'confirm', confirm: true, confirm_token: msg.id})
             })
             .then(function(r) { return r.json(); })
             .then(function(data) { self.handleResponse(data); })
             .catch(function(e) {
-                self.messages.push({id: 'err-'+Date.now(), role: 'assistant', content: I18N[self.lang].errorPrefix + e, payload: {}});
+                self.messages.push({id: 'err-'+Date.now(), role: 'assistant', content: LABELS.errorPrefix + e, payload: {}});
             })
             .finally(function() {
                 self.loading = false;
@@ -375,7 +339,7 @@ function aiChat() {
             });
         },
         cancelConfirm: function() {
-            this.messages.push({id: 'tmp-cancel-'+Date.now(), role: 'assistant', content: I18N[this.lang].cancelled, payload: {}});
+            this.messages.push({id: 'tmp-cancel-'+Date.now(), role: 'assistant', content: LABELS.cancelled, payload: {}});
         },
         undo: function(token, msgId) {
             var btn = document.getElementById('undo-' + msgId);
@@ -384,14 +348,14 @@ function aiChat() {
             fetch('{% url "assistant:chat" %}', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json', 'X-CSRFToken': this.getCSRFToken()},
-                body: JSON.stringify({undo_token: token, lang: this.lang})
+                body: JSON.stringify({undo_token: token})
             })
             .then(function(r) { return r.json(); })
             .then(function(data) {
-                self.messages.push({id: 'undo-'+Date.now(), role: 'assistant', content: data.message || (data.ok ? I18N[self.lang].undid : I18N[self.lang].undoFailed), payload: {}});
+                self.messages.push({id: 'undo-'+Date.now(), role: 'assistant', content: data.message || (data.ok ? LABELS.undid : LABELS.undoFailed), payload: {}});
             })
             .catch(function(e) {
-                self.messages.push({id: 'err-'+Date.now(), role: 'assistant', content: I18N[self.lang].errorPrefix + e, payload: {}});
+                self.messages.push({id: 'err-'+Date.now(), role: 'assistant', content: LABELS.errorPrefix + e, payload: {}});
             });
             this.scrollDown();
         },
@@ -456,7 +420,7 @@ function aiChat() {
                 .catch(function() { self.browserImage = ''; });
         },
         micTooltip: function() {
-            alert(I18N[this.lang].voiceTooltip);
+            alert(LABELS.voiceTooltip);
         }
     }
 }

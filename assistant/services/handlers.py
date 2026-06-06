@@ -3,10 +3,9 @@ Concrete command handlers for the 10 CRM commands in v1.
 
 Each handler:
 - Receives a CommandContext with parsed params.
-- For write actions that are critical → returns needs_confirmation=True.
+- For write actions that are critical -> returns needs_confirmation=True.
 - Logs into Activity with description prefixed by 'AI Chat' (per spec 1.1).
 - Marks the result as undoable when possible (per spec 1.2).
-- Responds in the user's input language (EN/RU).
 """
 import logging
 import re
@@ -470,20 +469,15 @@ def _handle_download_file(ctx: CommandContext) -> CommandResult:
     )
 
 
-# === Patterns (English + Russian) ===
+# === Patterns (English only) ===
 
 PROJECT_CREATE_PATTERNS = [
-    r'создай?\s+проект\s+(?P<number>[A-Za-zА-Яа-я0-9_\-]+)[\s,]+(?P<name>.+?)(?:\s+на\s+(?P<date>\S+))?$',
-    r'новый\s+проект[\s:]+(?P<name>.+?)(?:\s+номер\s+(?P<number>[A-Za-zА-Яа-я0-9_\-]+))?(?:\s+на\s+(?P<date>\S+))?$',
     r'create\s+project\s+(?P<number>[A-Za-z0-9_\-]+)[\s,]+(?P<name>.+?)(?:\s+(?:on|by|for)\s+(?P<date>\S+))?$',
     r'create\s+project\s+(?P<name>.+?)(?:\s+(?:on|by|for)\s+(?P<date>\S+))?$',
     r'new\s+project[\s:]+(?P<name>.+?)(?:\s+(?:number|#)\s*(?P<number>[A-Za-z0-9_\-]+))?(?:\s+(?:on|for)\s+(?P<date>\S+))?$',
 ]
 
 TASK_CREATE_PATTERNS = [
-    r'добавь\s+задач[уы]?\s+(?P<title>.+?)\s+на\s+(?P<date>\S+)$',
-    r'новая\s+задача[\s:]+(?P<title>.+?)(?:\s+на\s+(?P<date>\S+))?$',
-    r'(?:создай|поставь)\s+задач[уы]?\s+(?P<title>.+?)(?:\s+на\s+(?P<date>\S+))?$',
     r'add\s+task\s+(?P<title>.+?)\s+(?:on|by|for)\s+(?P<date>\S+)$',
     r'add\s+task\s+(?P<title>.+?)$',
     r'new\s+task[\s:]+(?P<title>.+?)(?:\s+(?:on|by|for)\s+(?P<date>\S+))?$',
@@ -491,59 +485,42 @@ TASK_CREATE_PATTERNS = [
 ]
 
 CONTACT_FIND_PATTERNS = [
-    r'найди\s+контакт\s+(?P<name>.+?)(?:\s+и\s+покажи\s+(?:телефон|почту|email))?$',
-    r'поищи\s+контакт\s+(?P<name>.+?)$',
-    r'покажи\s+контакт\s+(?P<name>.+?)$',
     r'find\s+contact\s+(?P<name>.+?)$',
     r'search\s+contact\s+(?P<name>.+?)$',
     r'show\s+contact\s+(?P<name>.+?)$',
 ]
 
 MATERIAL_ADD_PATTERNS = [
-    r'добавь\s+материал\s+(?P<name>.+?)\s+(?P<quantity>\d+(?:[.,]\d+)?)\s*(?P<unit>pcs|кг|kg|м|m|м2|m2|м3|m3|л|l|set|комплект)?(?:\s+в\s+проект\s+(?P<project>.+?))?$',
-    r'материал\s+(?P<name>.+?)\s+(?P<quantity>\d+(?:[.,]\d+)?)\s*(?P<unit>pcs|кг|kg|м|m|м2|m2|м3|m3|л|l|set|комплект)?\s+в\s+проект\s+(?P<project>.+?)$',
     r'add\s+material\s+(?P<name>.+?)\s+(?P<quantity>\d+(?:[.,]\d+)?)\s*(?P<unit>pcs|kg|m|m2|m3|l|set)?\s+to\s+(?:project\s+)?(?P<project>.+?)$',
 ]
 
 DOCUMENT_UPLOAD_PATTERNS = [
-    r'загрузи\s+файл\s+(?P<file_name>[\w\.\-]+)\s+в\s+(?:документ|документы)\s+проекта\s+(?P<project>.+?)$',
-    r'прикрепи\s+(?P<file_name>[\w\.\-]+)\s+к\s+проекту\s+(?P<project>.+?)$',
     r'upload\s+(?P<file_name>[\w\.\-]+)\s+to\s+(?:project\s+)?(?P<project>.+?)$',
 ]
 
 DRAWINGS_SHOW_PATTERNS = [
-    r'покажи\s+(?:все\s+)?чертежи\s+по\s+проекту\s+(?P<project>.+?)$',
-    r'список\s+чертежей\s+(?:проекта\s+)?(?P<project>.+?)$',
     r'show\s+(?:all\s+)?drawings\s+(?:of|for|by)\s+(?:project\s+)?(?P<project>.+?)$',
     r'list\s+drawings\s+(?:of|for)\s+(?:project\s+)?(?P<project>.+?)$',
 ]
 
 COMPANY_SHOW_PATTERNS = [
-    r'какая\s+компания\s+у\s+проекта\s+(?P<project>.+?)$',
-    r'компания\s+проекта\s+(?P<project>.+?)$',
     r'who\s+is\s+(?:the\s+)?company\s+(?:of|for)\s+(?:project\s+)?(?P<project>.+?)$',
     r"what(?:'s|\s+is)\s+(?:the\s+)?company\s+(?:of|for)\s+(?:project\s+)?(?P<project>.+?)$",
     r'show\s+company\s+(?:of|for)\s+(?:project\s+)?(?P<project>.+?)$',
 ]
 
 NOTE_CREATE_PATTERNS = [
-    r'создай\s+заметк[уы]?\s+(?P<title>.+?)\s+к\s+проекту\s+(?P<project>.+?)$',
-    r'добавь\s+заметк[уы]?\s+(?P<title>.+?)(?:\s+к\s+проекту\s+(?P<project>.+?))?$',
     r'create\s+note\s+(?P<title>.+?)\s+(?:to|for)\s+(?:project\s+)?(?P<project>.+?)$',
     r'create\s+note\s+(?P<title>.+?)$',
     r'add\s+note\s+(?P<title>.+?)(?:\s+(?:to|for)\s+(?:project\s+)?(?P<project>.+?))?$',
 ]
 
 BROWSER_OPEN_PATTERNS = [
-    r'открой\s+(?P<url>(?:https?://)?[\w\.\-]+\.[a-z]{2,}[^\s]*)',
-    r'покажи\s+(?:мне\s+)?сайт\s+(?P<url>(?:https?://)?[\w\.\-]+\.[a-z]{2,}[^\s]*)',
     r'open\s+(?P<url>(?:https?://)?[\w\.\-]+\.[a-z]{2,}[^\s]*)',
     r'show\s+(?:me\s+)?(?:website|site)\s+(?P<url>(?:https?://)?[\w\.\-]+\.[a-z]{2,}[^\s]*)',
 ]
 
 DOWNLOAD_FILE_PATTERNS = [
-    r'скачай\s+(?:картинк[уы]|файл|pdf|документ)\s+с\s+(?P<url>(?:https?://)?[\S]+)',
-    r'загрузи\s+(?:себе\s+)?(?:файл\s+)?с\s+(?P<url>(?:https?://)?[\S]+)',
     r'download\s+(?:file|image|pdf|document)\s+from\s+(?P<url>(?:https?://)?[\S]+)',
     r'get\s+(?:file|image|pdf)\s+from\s+(?P<url>(?:https?://)?[\S]+)',
 ]

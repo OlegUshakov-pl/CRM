@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Help - CRM{% endblock %}
+{% block breadcrumb %}Help{% endblock %}
+{% block content %}
+<div class="max-w-3xl space-y-8">
+    <div>
+        <h1 class="text-xl font-semibold">AI Assistant Help</h1>
+        <p class="text-soft text-[13px] mt-1">Available commands and features</p>
+    </div>
+
+    <!-- Projects -->
+    <div class="border border-light p-5">
+        <div class="flex items-center gap-2 mb-3">
+            <div class="w-8 h-8 bg-[#f0eeff] rounded flex items-center justify-center">
+                <i data-lucide="briefcase" class="w-4 h-4 purple"></i>
+            </div>
+            <h2 class="text-[15px] font-semibold">Projects</h2>
+        </div>
+        <div class="space-y-2 text-[13px] text-gray-600 dark:text-gray-400">
+            <p><code class="bg-gray-100 dark:bg-[#1a1a1a] px-1.5 py-0.5 rounded">Create project [Number], [Name] on [Date]</code></p>
+            <p><code class="bg-gray-100 dark:bg-[#1a1a1a] px-1.5 py-0.5 rounded">Create project [Name] on [Date]</code></p>
+            <p class="text-soft text-[12px]">Example: "Create project 001, Office Building on 2026-06-15"</p>
+        </div>
+    </div>
+
+    <!-- Tasks -->
+    <div class="border border-light p-5">
+        <div class="flex items-center gap-2 mb-3">
+            <div class="w-8 h-8 bg-[#f0faf0] rounded flex items-center justify-center">
+                <i data-lucide="calendar-check" class="w-4 h-4 text-green-600"></i>
+            </div>
+            <h2 class="text-[15px] font-semibold">Tasks</h2>
+        </div>
+        <div class="space-y-2 text-[13px] text-gray-600 dark:text-gray-400">
+            <p><code class="bg-gray-100 dark:bg-[#1a1a1a] px-1.5 py-0.5 rounded">Add task [Text] on [Date]</code></p>
+            <p><code class="bg-gray-100 dark:bg-[#1a1a1a] px-1.5 py-0.5 rounded">New task: [Text] on [Date]</code></p>
+            <p class="text-soft text-[12px]">Example: "Add task Call client tomorrow"</p>
+        </div>
+    </div>
+
+    <!-- Contacts -->
+    <div class="border border-light p-5">
+        <div class="flex items-center gap-2 mb-3">
+            <div class="w-8 h-8 bg-[#fff5f0] rounded flex items-center justify-center">
+                <i data-lucide="contact" class="w-4 h-4 text-orange-500"></i>
+            </div>
+            <h2 class="text-[15px] font-semibold">Contacts</h2>
+        </div>
+        <div class="space-y-2 text-[13px] text-gray-600 dark:text-gray-400">
+            <p><code class="bg-gray-100 dark:bg-[#1a1a1a] px-1.5 py-0.5 rounded">Find contact [Name]</code></p>
+            <p><code class="bg-gray-100 dark:bg-[#1a1a1a] px-1.5 py-0.5 rounded">Show contact [Name]</code></p>
+            <p class="text-soft text-[12px]">Example: "Find contact Ivan"</p>
+        </div>
+    </div>
+
+    <!-- Materials -->
+    <div class="border border-light p-5">
+        <div class="flex items-center gap-2 mb-3">
+            <div class="w-8 h-8 bg-[#f0f5ff] rounded flex items-center justify-center">
+                <i data-lucide="package" class="w-4 h-4 text-blue-500"></i>
+            </div>
+            <h2 class="text-[15px] font-semibold">Materials</h2>
+        </div>
+        <div class="space-y-2 text-[13px] text-gray-600 dark:text-gray-400">
+            <p><code class="bg-gray-100 dark:bg-[#1a1a1a] px-1.5 py-0.5 rounded">Add material [Name] [Quantity] to project [Project]</code></p>
+            <p class="text-soft text-[12px]">Example: "Add material Bolt 50 to project Test"</p>
+        </div>
+    </div>
+
+    <!-- Documents -->
+    <div class="border border-light p-5">
+        <div class="flex items-center gap-2 mb-3">
+            <div class="w-8 h-8 bg-[#fdf5ff] rounded flex items-center justify-center">
+                <i data-lucide="book-open-text" class="w-4 h-4 text-purple-500"></i>
+            </div>
+            <h2 class="text-[15px] font-semibold">Documents</h2>
+        </div>
+        <div class="space-y-2 text-[13px] text-gray-600 dark:text-gray-400">
+            <p><code class="bg-gray-100 dark:bg-[#1a1a1a] px-1.5 py-0.5 rounded">Upload file [name] to project documents of [Project]</code></p>
+            <p><code class="bg-gray-100 dark:bg-[#1a1a1a] px-1.5 py-0.5 rounded">Show all drawings of project [Name]</code></p>
+            <p class="text-soft text-[12px]">Example: "Show all drawings of project Test"</p>
+        </div>
+    </div>
+
+    <!-- Companies -->
+    <div class="border border-light p-5">
+        <div class="flex items-center gap-2 mb-3">
+            <div class="w-8 h-8 bg-[#f5f5f0] rounded flex items-center justify-center">
+                <i data-lucide="building-2" class="w-4 h-4 text-yellow-600"></i>
+            </div>
+            <h2 class="text-[15px] font-semibold">Companies</h2>
+        </div>
+        <div class="space-y-2 text-[13px] text-gray-600 dark:text-gray-400">
+            <p><code class="bg-gray-100 dark:bg-[#1a1a1a] px-1.5 py-0.5 rounded">What is the company of project [Name]</code></p>
+            <p><code class="bg-gray-100 dark:bg-[#1a1a1a] px-1.5 py-0.5 rounded">Show company of project [Name]</code></p>
+            <p class="text-soft text-[12px]">Example: "What is the company of project Test"</p>
+        </div>
+    </div>
+
+    <!-- Notes -->
+    <div class="border border-light p-5">
+        <div class="flex items-center gap-2 mb-3">
+            <div class="w-8 h-8 bg-[#f5f0ff] rounded flex items-center justify-center">
+                <i data-lucide="notebook-pen" class="w-4 h-4 text-violet-500"></i>
+            </div>
+            <h2 class="text-[15px] font-semibold">Notes</h2>
+        </div>
+        <div class="space-y-2 text-[13px] text-gray-600 dark:text-gray-400">
+            <p><code class="bg-gray-100 dark:bg-[#1a1a1a] px-1.5 py-0.5 rounded">Create note [Title] for project [Name]</code></p>
+            <p><code class="bg-gray-100 dark:bg-[#1a1a1a] px-1.5 py-0.5 rounded">Add note [Title]</code></p>
+            <p class="text-soft text-[12px]">Example: "Create note Meeting for project Test"</p>
+        </div>
+    </div>
+
+    <!-- Browser -->
+    <div class="border border-light p-5">
+        <div class="flex items-center gap-2 mb-3">
+            <div class="w-8 h-8 bg-[#f0faf5] rounded flex items-center justify-center">
+                <i data-lucide="globe" class="w-4 h-4 text-teal-500"></i>
+            </div>
+            <h2 class="text-[15px] font-semibold">Browser</h2>
+        </div>
+        <div class="space-y-2 text-[13px] text-gray-600 dark:text-gray-400">
+            <p><code class="bg-gray-100 dark:bg-[#1a1a1a] px-1.5 py-0.5 rounded">Open [URL]</code></p>
+            <p><code class="bg-gray-100 dark:bg-[#1a1a1a] px-1.5 py-0.5 rounded">Show website [URL]</code></p>
+            <p><code class="bg-gray-100 dark:bg-[#1a1a1a] px-1.5 py-0.5 rounded">Download file from [URL]</code></p>
+            <p class="text-soft text-[12px]">Example: "Open bbc.com"</p>
+        </div>
+    </div>
+
+    <!-- Questions -->
+    <div class="border border-light p-5">
+        <div class="flex items-center gap-2 mb-3">
+            <div class="w-8 h-8 bg-[#f0f5ff] rounded flex items-center justify-center">
+                <i data-lucide="help-circle" class="w-4 h-4 text-blue-400"></i>
+            </div>
+            <h2 class="text-[15px] font-semibold">Questions</h2>
+        </div>
+        <div class="space-y-2 text-[13px] text-gray-600 dark:text-gray-400">
+            <p><code class="bg-gray-100 dark:bg-[#1a1a1a] px-1.5 py-0.5 rounded">How many active tasks?</code></p>
+            <p><code class="bg-gray-100 dark:bg-[#1a1a1a] px-1.5 py-0.5 rounded">Show the latest document</code></p>
+            <p><code class="bg-gray-100 dark:bg-[#1a1a1a] px-1.5 py-0.5 rounded">How many active projects?</code></p>
+            <p class="text-soft text-[12px]">You can ask in English or Russian.</p>
+        </div>
+    </div>
+
+    <p class="text-[12px] text-gray-400">Voice control will be added in v2.</p>
+</div>
+{% endblock %}
