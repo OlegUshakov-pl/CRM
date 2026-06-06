@@ -1,10 +1,10 @@
 {% load static %}
 <div id="ai-chat-root" x-data="aiChat()" x-init="init()" x-cloak>
-    <!-- Floating button -->
+    <!-- Trigger button (inline, placed by parent in the sidebar) -->
     <button x-show="!open" @click="openChat()"
-            class="fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg flex items-center justify-center transition-all"
+            class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors inline-flex items-center justify-center"
             title="AI Assistant">
-        <i data-lucide="sparkles" class="w-6 h-6"></i>
+        <i data-lucide="sparkles" class="w-5 h-5"></i>
     </button>
 
     <!-- Backdrop (only wide mode) -->

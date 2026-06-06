@@ -185,6 +185,10 @@
                 <button id="sidebar-toggle-btn" onclick="toggleSidebar()" class="p-2 hover:bg-gray-100 dark:hover:bg-[#1a1a1a] rounded flex items-center gap-2 mt-4 pl-0">
                     <i data-lucide="panel-left-close" id="toggle-icon" class="w-4 h-4 flex-shrink-0 dark:text-gray-400"></i>
                 </button>
+
+                <div class="mt-3 pt-3 border-t border-[#e8e8e8] dark:border-[#222] flex items-center gap-2">
+                    {% include 'includes/chat_widget.html' %}
+                </div>
             </nav>
         </aside>
 
@@ -276,7 +280,6 @@
     </div>
 
     {% include 'includes/slide_over.html' %}
-    {% include 'includes/chat_widget.html' %}
 
     <!-- Settings Slide-over -->
     <div id="settings-backdrop" class="fixed inset-0 z-40 bg-black/40 transition-opacity duration-300 opacity-0 pointer-events-none" onclick="closeSettings()"></div>
