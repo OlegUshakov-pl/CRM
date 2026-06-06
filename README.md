@@ -1,134 +1,168 @@
 # CRM
 
-<!-- Django 6.0.6 + Tailwind CSS 4 + Alpine.js + HTMX + Ollama AI -->
+Django 6 + Tailwind CSS 4 + Alpine.js + HTMX + Ollama AI — система управления проектами, контрагентами и задачами для инженерно-производственной сферы.
 
-## Quick Start
+## Стек
+
+| Слой | Технологии |
+|------|-----------|
+| Backend | Django 6.0, Python 3.14+, SQLite |
+| Frontend | Tailwind CSS 4, Alpine.js 3, HTMX 2.0, Lucide Icons |
+| AI | Ollama (локальная LLM), rule-based command processing |
+| Шрифт | Montserrat |
+
+## Функциональность
+
+### Основные модули
+
+| Модуль | Описание |
+|--------|---------|
+| **Dashboard** | Главная страница с ключевыми метриками, последними проектами, задачами и заметками |
+| **Companies** | Управление компаниями (название, email, телефон, сайт, адрес, логотип) |
+| **Contacts** | Контакты с привязкой к компаниям и аватарами |
+| **Projects** | Проекты (статусы, бюджет, даты, галерея изображений, экспорт/импорт ZIP) |
+| **Materials / BOM** | Спецификации материалов по проектам (количество, единицы, цены, категории) |
+| **Tasks** | Задачи (приоритеты, статусы, сроки, фильтрация) |
+| **Notes** | Универсальные заметки с привязкой к проектам, компаниям, контактам |
+| **Documents** | Загрузка и просмотр файлов (изображения, PDF, текст), фильтрация по типу и проекту |
+| **Parts** | Чертежи и 3D-модели (.stp, .ipt, .sldprt, .ics и др.) |
+| **Generator** | Шаблон для быстрого создания новых модулей (пример: Deal pipeline) |
+
+### AI Assistant
+
+Встроенный AI-ассистент на базе Ollama с двумя режимами:
+
+- **CHAT** — свободное общение с выбранной моделью Ollama
+- **COMMANDS** — выполнение CRM-команд через естественный язык
+
+**Примеры команд:**
+```
+Create project 001, Office Building on 2026-06-15
+Add task Call client on 2026-06-10
+Find contact Ivan
+Add material Bolt 50 to project Test
+Upload file drawing.pdf to project Test
+Show all drawings of project Test
+What is the company of project Test
+Create note Meeting for project Test
+Open bbc.com
+Download file from https://example.com/image.png
+```
+
+**Возможности:**
+- Голосовой ввод (Web Speech API)
+- Браузер: открытие URL, скриншоты, извлечение заголовков и PDF-ссылок
+- AI Files: загрузка файлов из сети, прикрепление к проектам, управление хранилищем
+- Откат действий (undo) с окном 10 секунд
+- Все действия логируются в AILog
+- Выбор модели из списка установленных в Ollama
+
+### Общие возможности
+
+- Slide-over формы — CRUD без перезагрузки страницы через HTMX
+- Мягкое удаление (soft delete) через `is_active`
+- Глобальный поиск по всем сущностям
+- Логирование активности (Activity log с Generic Foreign Key)
+- Экспорт/импорт проектов в ZIP
+- Темная тема (dark mode)
+- Адаптивный интерфейс
+
+## Быстрый старт
 
 ```bash
-# Install Python dependencies
+# Клонировать репозиторий
+git clone <repo-url> && cd CRM
+
+# Python-зависимости
 python -m pip install -r requirements.txt
 
-# Install Node dependencies
+# Node-зависимости (Tailwind CLI)
 npm install
 
-# Build Tailwind CSS
+# Собрать Tailwind CSS
 npm run build
 
-# Run migrations
+# Миграции
 python manage.py migrate
 
-# Create superuser
+# Суперпользователь
 python manage.py createsuperuser
 
-# Start dev server
+# Запуск
 python manage.py runserver
 ```
 
-## Stack
+Сервер будет доступен по адресу `http://127.0.0.1:8000`.
 
-<!-- Backend: Django 6.0.6, Python 3.14+ -->
-<!-- Frontend: Tailwind CSS 4, Alpine.js 3, HTMX 2.0, Lucide Icons -->
-<!-- Database: SQLite -->
-<!-- Font: Montserrat -->
-<!-- AI: Ollama (local LLM) -->
+Для AI-ассистента требуется запущенный Ollama: `http://localhost:11434` (настраивается в `settings.py`).
 
-## Apps
+## Структура проекта
 
-<!-- core — Dashboard, TimeStampedModel, Activity logging, AppSetting -->
-<!-- accounts — Auth (login, logout, profile) -->
-<!-- companies — Company CRUD (name, email, phone, website, address, logo) -->
-<!-- contacts — Contact CRUD (linked to companies, avatar) -->
-<!-- projects — Project CRUD (status, gallery, materials, notes, contacts, export/import ZIP) -->
-<!-- materials — BOM per project (quantity, unit, price, categories) -->
-<!-- tasks — Task CRUD (priorities, statuses, due dates) -->
-<!-- notes — Notes linked to projects, companies, contacts -->
-<!-- documents — File upload with preview (images, PDF, text), filter by type/project/category -->
-<!-- parts — Drawings and 3D models (.stp, .ipt, .sldprt, etc.) -->
-<!-- assistant — AI chat with Ollama, voice input, browser screenshots, AI Files storage -->
-<!-- generator — Template app for new modules -->
+```
+CRM/
+├── config/           # Настройки, корневые URLs, WSGI/ASGI
+├── accounts/         # Аутентификация (логин, профиль, сброс пароля)
+├── core/             # Dashboard, TimeStampedModel, Activity, AppSetting, поиск
+├── companies/        # Управление компаниями
+├── contacts/         # Управление контактами
+├── projects/         # Управление проектами, экспорт/импорт
+├── materials/        # Спецификации (BOM), категории
+├── tasks/            # Управление задачами
+├── notes/            # Универсальные заметки
+├── documents/        # Управление файлами с превью
+├── parts/            # Чертежи и 3D-модели
+├── assistant/        # AI-чат, Ollama, браузер, AI Files
+│   └── services/     # Command registry, handlers, browser, files, i18n
+├── generator/        # Шаблон для новых модулей (Deal pipeline)
+├── templates/        # Базовый layout, инклюды
+│   ├── base.html
+│   └── includes/     # sidebar, topbar, chat_widget, pagination, slide_over
+├── static/           # Tailwind CSS (src → dist)
+│   └── src/styles.css
+└── media/            # Загруженные пользователем файлы
+```
 
-## AI Assistant
+## Модели данных
 
-<!-- Modes: -->
-<!--   CHAT — talk to Ollama models (select from installed models) -->
-<!--   COMMANDS — CRM commands (create projects, tasks, contacts, etc.) -->
-<!-- Voice input via Web Speech API -->
-<!-- Browser: open URLs, take screenshots, extract titles and PDF links -->
-<!-- AI Files: download files from web, attach to projects, manage storage -->
-<!-- Undo: 10-second undo window for create/delete actions -->
-<!-- All actions logged to AILog -->
+Все модели наследуют `TimeStampedModel` (created_at, updated_at, created_by, is_active).
 
-## Commands
+| Модель | Ключевые поля |
+|--------|--------------|
+| Company | name, email, phone, website, address, logo |
+| Contact | company (FK), first_name, last_name, email, phone, position, avatar |
+| Project | name, number, description, status, company (FK), contacts (M2M), dates, budget, image |
+| ProjectImage | project (FK), image, uploaded_at |
+| Material | project (FK), category (FK), name, quantity, unit, unit_price, notes |
+| Category (materials) | name |
+| Task | title, description, status, priority, due_date, project (FK) |
+| Note | title, content, date, project (FK), company (FK), contact (FK) |
+| Document | project (FK), number, file, file_type, size |
+| Part | project (FK), category (FK), number, size, rev, file |
+| Category (parts) | name |
+| ChatSession | user, title, is_active, last_message_at |
+| ChatMessage | session (FK), role, kind, content, payload |
+| AIFile | owner (FK), file, original_name, source_url, size, category |
+| AILog | user, session (FK), action, status, description, request/response, payload |
+| Activity | user, action, description, content_type, object_id (GenericFK) |
+| Deal (example) | name, description, status, priority, value, company (FK), contacts (M2M), assigned_to, due_date |
+| AppSetting | key, value |
+
+## Разработка
 
 ```bash
-# Create project
-"Create project 001, Office Building on 2026-06-15"
+# Запустить Tailwind в режиме watch
+npm run dev
 
-# Add task
-"Add task Call client on 2026-06-10"
+# Или собрать production
+npm run build
 
-# Find contact
-"Find contact Ivan"
-
-# Add material
-"Add material Bolt 50 to project Test"
-
-# Upload document
-"Upload file drawing.pdf to project Test"
-
-# Show drawings
-"Show all drawings of project Test"
-
-# Show company
-"What is the company of project Test"
-
-# Create note
-"Create note Meeting for project Test"
-
-# Open website
-"Open bbc.com"
-
-# Download file
-"Download file from https://example.com/image.png"
+# Собрать статику Django
+python manage.py collectstatic
 ```
 
-## Models
+## Архитектурные решения
 
-<!-- Company — name, email, phone, website, address, logo -->
-<!-- Contact — company (FK), first_name, last_name, email, phone, position, avatar -->
-<!-- Project — name, number, description, status, company (FK), contacts (M2M), dates, budget, image -->
-<!-- Material — project (FK), category (FK), name, quantity, unit, unit_price, notes -->
-<!-- Task — title, description, status, priority, due_date, project (FK) -->
-<!-- Note — title, content, date, project (FK), company (FK), contact (FK) -->
-<!-- Document — project (FK), number, file, file_type, size -->
-<!-- Part — project (FK), category (FK), number, size, rev, file -->
-<!-- ChatSession — user, title, is_active, last_message_at -->
-<!-- ChatMessage — session (FK), role, kind, content, payload -->
-<!-- AIFile — owner (FK), file, original_name, source_url, size, category -->
-<!-- AILog — user, session (FK), action, status, description, request/response text, payload -->
-<!-- Activity — user, action, description, content_type, object_id (GenericFK) -->
-
-<!-- All models inherit TimeStampedModel (created_at, updated_at, created_by, is_active) -->
-
-## Structure
-
-```
-config/          Settings, root URLs
-accounts/        Auth
-core/            Dashboard, base models, activity logging
-companies/       Company management
-contacts/        Contact management
-projects/        Project management, export/import
-materials/       Materials / BOM
-tasks/           Task management
-notes/           Universal notes
-documents/       File management with preview
-parts/           Drawings and 3D models
-assistant/       AI chat, Ollama, browser, AI Files
-generator/       Template for new modules
-templates/       Base layout, includes
-static/          Tailwind CSS (src -> dist)
-media/           Uploaded files
-```
-
-<!-- Ollama: http://localhost:11434 (configurable in settings.py OLLAMA_BASE_URL) -->
+- **Slide-over формы** — большинство CRUD-операций выполняются в боковой панели через HTMX, без навигации
+- **Файловая система проектов** — файлы организованы в структуру `{number}_{name}_Project/{documents,drawings,models}/`
+- **Правила для AI** — intent detection через regex (не требует NLP-модели), все write-операции с двухшаговым подтверждением
+- **Версионирование** — версия приложения `1.2.{commit_count}` определяется по количеству коммитов git
