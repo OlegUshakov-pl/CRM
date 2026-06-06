@@ -19,7 +19,7 @@
                     class="px-2 py-1 text-[11px] font-medium bg-gray-100 dark:bg-[#1a1a1a] text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-[#222]">
                 <span x-text="lang.toUpperCase()"></span>
             </button>
-            <button @click="clear()" title="Clear"
+            <button @click="showClearModal = true" title="Clear"
                     class="p-1.5 hover:bg-gray-100 dark:hover:bg-[#1a1a1a] rounded">
                 <i data-lucide="trash-2" class="w-4 h-4 text-gray-500"></i>
             </button>
@@ -94,7 +94,7 @@
         </div>
     </div>
 
-    <!-- Browser panel (Module 3) -->
+    <!-- Browser panel -->
     <div x-show="browserOpen" class="border-t border-light dark:border-[#222] p-3 bg-gray-50 dark:bg-[#111]">
         <div class="flex items-center justify-between mb-2">
             <span class="text-[12px] text-gray-500" x-text="previewLabel + browserUrl"></span>
@@ -118,6 +118,31 @@
     <!-- Input -->
     <div class="border-t border-light dark:border-[#222] p-2 flex-shrink-0">
         <div class="flex items-end gap-2">
+            <!-- Model selector -->
+            <div class="relative flex-shrink-0" x-data="{ modelsOpen: false }">
+                <button @click="modelsOpen = !modelsOpen; if(modelsOpen) loadModels()"
+                        class="px-2 py-2 text-[11px] bg-gray-100 dark:bg-[#1a1a1a] border border-light dark:border-[#222] rounded hover:bg-gray-200 dark:hover:bg-[#222] text-gray-700 dark:text-gray-300 flex items-center gap-1 whitespace-nowrap">
+                    <i data-lucide="cpu" class="w-3.5 h-3.5"></i>
+                    <span x-text="currentModel || 'model'"></span>
+                    <i data-lucide="chevron-down" class="w-3 h-3"></i>
+                </button>
+                <div x-show="modelsOpen" @click.outside="modelsOpen = false"
+                     class="absolute bottom-full left-0 mb-1 w-56 bg-white dark:bg-black border border-light dark:border-[#222] rounded shadow-lg z-50 max-h-48 overflow-y-auto">
+                    <div x-show="modelsLoading" class="px-3 py-2 text-[12px] text-gray-400">Loading...</div>
+                    <template x-if="models.length === 0 && !modelsLoading">
+                        <div class="px-3 py-2 text-[12px] text-gray-400">No models found</div>
+                    </template>
+                    <template x-for="m in models" :key="m">
+                        <button @click="setModel(m); modelsOpen = false"
+                                :class="m === currentModel ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#1a1a1a]'"
+                                class="w-full text-left px-3 py-2 text-[12px] flex items-center gap-2 transition-colors">
+                            <i data-lucide="check" class="w-3 h-3" x-show="m === currentModel"></i>
+                            <span x-text="m"></span>
+                        </button>
+                    </template>
+                </div>
+            </div>
+
             <textarea x-ref="input" x-model="text" @keydown.enter.prevent="if(!$event.shiftKey) send()"
                       rows="1" :placeholder="placeholder"
                       class="flex-1 resize-none border border-light dark:border-[#222] dark:bg-[#111] dark:text-white text-[13px] px-3 py-2 rounded outline-none focus:border-indigo-400 max-h-32"></textarea>
@@ -131,15 +156,42 @@
             </button>
         </div>
     </div>
+
+    <!-- Clear chat modal -->
+    <div x-show="showClearModal" x-cloak class="fixed inset-0 z-[60] flex items-center justify-center">
+        <div @click="showClearModal = false" class="fixed inset-0 bg-black/50"></div>
+        <div class="bg-white dark:bg-black rounded-lg shadow-xl z-10 max-w-sm w-full mx-4 p-6 relative" @click.outside="showClearModal = false">
+            <div class="flex items-start gap-4">
+                <div class="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <i data-lucide="trash-2" class="w-5 h-5 text-red-600"></i>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Clear chat?</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1" x-text="clearConfirmText"></p>
+                </div>
+            </div>
+            <div class="flex justify-end gap-3 mt-6">
+                <button @click="showClearModal = false"
+                        class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-[#1a1a1a] hover:bg-gray-200 dark:hover:bg-[#222] transition-colors">
+                    <span x-text="cancelLabel"></span>
+                </button>
+                <button @click="doClear()"
+                        class="px-4 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600 transition-colors">
+                    <span x-text="clearLabel"></span>
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
-const I18N = {
+var I18N = {
     en: {
-        placeholder: 'What to do?',
+        placeholder: 'What are you looking for?',
         thinking: 'Thinking...',
         executing: 'Executing...',
         clearConfirm: 'Clear chat history?',
+        clearBtn: 'Clear',
         voiceTooltip: 'Voice control will be added in the next release (v2).',
         micTitle: 'Voice (coming soon)',
         previewLabel: 'Preview: ',
@@ -147,7 +199,7 @@ const I18N = {
         cancelLabel: 'Cancel',
         undoLabel: 'Undo',
         sUnit: 's',
-        storageInfo: (u, total, pct) => 'AI Files: ' + u + ' / ' + total + ' (' + pct + '%)',
+        storageInfo: function(u, total, pct) { return 'AI Files: ' + u + ' / ' + total + ' (' + pct + '%)'; },
         errorPrefix: 'Error: ',
         confirmMsg: 'Confirm',
         cancelled: 'Action cancelled.',
@@ -155,10 +207,11 @@ const I18N = {
         undoFailed: 'Could not undo.',
     },
     ru: {
-        placeholder: 'Что сделать?',
+        placeholder: 'Что ищете?',
         thinking: 'Думаю...',
         executing: 'Выполняю...',
         clearConfirm: 'Очистить историю чата?',
+        clearBtn: 'Очистить',
         voiceTooltip: 'Голосовое управление будет добавлено в следующем обновлении (v2).',
         micTitle: 'Голос скоро',
         previewLabel: 'Просмотр: ',
@@ -166,7 +219,7 @@ const I18N = {
         cancelLabel: 'Отмена',
         undoLabel: 'Отменить',
         sUnit: 'с',
-        storageInfo: (u, total, pct) => 'AI Files: ' + u + ' / ' + total + ' (' + pct + '%)',
+        storageInfo: function(u, total, pct) { return 'AI Files: ' + u + ' / ' + total + ' (' + pct + '%)'; },
         errorPrefix: 'Ошибка: ',
         confirmMsg: 'Подтверждаю',
         cancelled: 'Действие отменено.',
@@ -174,14 +227,6 @@ const I18N = {
         undoFailed: 'Не удалось.',
     }
 };
-function detectLang(text) {
-    if (!text) return 'en';
-    for (var i = 0; i < text.length; i++) {
-        var ch = text[i];
-        if (ch >= '\u0400' && ch <= '\u04FF') return 'ru';
-    }
-    return 'en';
-}
 function aiChat() {
     return {
         open: true,
@@ -195,11 +240,16 @@ function aiChat() {
         browserUrl: '',
         browserImage: '',
         undoTimers: {},
-        init() {
+        showClearModal: false,
+        models: [],
+        modelsLoading: false,
+        currentModel: localStorage.getItem('ollama_model') || '',
+        init: function() {
             this.refresh();
             this.recomputeLabels();
+            this.loadModels();
         },
-        recomputeLabels() {
+        recomputeLabels: function() {
             var L = I18N[this.lang];
             this.placeholder = L.placeholder;
             this.loadingText = L.thinking;
@@ -209,18 +259,20 @@ function aiChat() {
             this.cancelLabel = L.cancelLabel;
             this.undoLabel = L.undoLabel;
             this.sUnit = L.sUnit;
+            this.clearConfirmText = L.clearConfirm;
+            this.clearLabel = L.clearBtn;
         },
-        toggleLang() {
+        toggleLang: function() {
             this.lang = this.lang === 'en' ? 'ru' : 'en';
             localStorage.setItem('ai_lang', this.lang);
             this.recomputeLabels();
         },
-        getCSRFToken() {
+        getCSRFToken: function() {
             var c = document.cookie.split(';');
-            for (var i=0;i<c.length;i++){ var x=c[i].trim(); if (x.startsWith('csrftoken=')) return x.substring(10); }
+            for (var i=0;i<c.length;i++){ var x=c[i].trim(); if (x.indexOf('csrftoken=') === 0) return x.substring(10); }
             return '';
         },
-        refresh() {
+        refresh: function() {
             var self = this;
             fetch('{% url "assistant:panel_state" %}')
                 .then(function(r) { return r.json(); })
@@ -231,22 +283,54 @@ function aiChat() {
                 })
                 .catch(function() {});
         },
-        updateStorage(used, quota) {
+        updateStorage: function(used, quota) {
             if (typeof used !== 'number' || !quota) return;
             var pct = Math.round(used / quota * 100);
             this.storageInfo = I18N[this.lang].storageInfo(this.fmtSize(used), this.fmtSize(quota), pct);
         },
-        fmtSize(b) {
+        fmtSize: function(b) {
             if (b < 1024) return b + ' B';
             if (b < 1024*1024) return (b/1024).toFixed(1) + ' KB';
             if (b < 1024*1024*1024) return (b/1024/1024).toFixed(1) + ' MB';
             return (b/1024/1024/1024).toFixed(2) + ' GB';
         },
-        scrollDown() {
+        scrollDown: function() {
             var el = document.getElementById('ai-chat-messages');
             if (el) el.scrollTop = el.scrollHeight;
         },
-        send() {
+        loadModels: function() {
+            var self = this;
+            self.modelsLoading = true;
+            fetch('{% url "assistant:ollama_models" %}')
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    self.models = data.models || [];
+                    if (data.current) self.currentModel = data.current;
+                    self.modelsLoading = false;
+                    self.$nextTick(function() { if (window.lucide) lucide.createIcons(); });
+                })
+                .catch(function() {
+                    self.models = [];
+                    self.modelsLoading = false;
+                });
+        },
+        setModel: function(model) {
+            var self = this;
+            fetch('{% url "assistant:ollama_set_model" %}', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json', 'X-CSRFToken': this.getCSRFToken()},
+                body: JSON.stringify({model: model})
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.ok) {
+                    self.currentModel = data.model;
+                    localStorage.setItem('ollama_model', data.model);
+                }
+            })
+            .catch(function() {});
+        },
+        send: function() {
             var msg = this.text.trim();
             if (!msg) return;
             this.text = '';
@@ -258,7 +342,7 @@ function aiChat() {
             fetch('{% url "assistant:chat" %}', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json', 'X-CSRFToken': this.getCSRFToken()},
-                body: JSON.stringify({message: msg, lang: this.lang})
+                body: JSON.stringify({message: msg, lang: this.lang, model: this.currentModel})
             })
             .then(function(r) { return r.json(); })
             .then(function(data) { self.handleResponse(data); })
@@ -270,7 +354,7 @@ function aiChat() {
                 self.scrollDown();
             });
         },
-        confirm(msg) {
+        confirm: function(msg) {
             this.messages.push({id: 'tmp-conf-'+Date.now(), role: 'user', content: I18N[this.lang].confirmMsg, payload: {}, created_at: new Date().toISOString()});
             this.loading = true;
             this.loadingText = I18N[this.lang].executing;
@@ -290,10 +374,10 @@ function aiChat() {
                 self.scrollDown();
             });
         },
-        cancelConfirm() {
+        cancelConfirm: function() {
             this.messages.push({id: 'tmp-cancel-'+Date.now(), role: 'assistant', content: I18N[this.lang].cancelled, payload: {}});
         },
-        undo(token, msgId) {
+        undo: function(token, msgId) {
             var btn = document.getElementById('undo-' + msgId);
             if (btn) btn.disabled = true;
             var self = this;
@@ -311,7 +395,7 @@ function aiChat() {
             });
             this.scrollDown();
         },
-        handleResponse(data) {
+        handleResponse: function(data) {
             if (data.message) {
                 var payload = {
                     needs_confirmation: data.needs_confirmation,
@@ -338,7 +422,7 @@ function aiChat() {
             this.$nextTick(function() { if (window.lucide) lucide.createIcons(); });
             this.scrollDown();
         },
-        startUndoTimer(msgId) {
+        startUndoTimer: function(msgId) {
             var n = 10;
             var el = document.getElementById('undo-timer-' + msgId);
             var self = this;
@@ -352,14 +436,16 @@ function aiChat() {
                 }
             }, 1000);
         },
-        clear() {
-            if (!confirm(I18N[this.lang].clearConfirm)) return;
+        doClear: function() {
             var self = this;
             fetch('{% url "assistant:clear_chat" %}', {
                 method: 'POST', headers: {'X-CSRFToken': this.getCSRFToken()}
-            }).then(function() { self.messages = []; });
+            }).then(function() {
+                self.messages = [];
+                self.showClearModal = false;
+            });
         },
-        openBrowser(url) {
+        openBrowser: function(url) {
             this.wide = false;
             this.browserOpen = true;
             this.browserUrl = url;
@@ -369,7 +455,7 @@ function aiChat() {
                 .then(function(d) { if (d.ok) self.browserImage = d.image_url; })
                 .catch(function() { self.browserImage = ''; });
         },
-        micTooltip() {
+        micTooltip: function() {
             alert(I18N[this.lang].voiceTooltip);
         }
     }

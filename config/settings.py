@@ -99,6 +99,9 @@ AI_BROWSER_BLACKLIST = [
 ]
 AI_BROWSER_TIMEOUT = 20
 
+OLLAMA_BASE_URL = 'http://localhost:11434'
+OLLAMA_DEFAULT_MODEL = ''
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGIN_URL = 'accounts:login'

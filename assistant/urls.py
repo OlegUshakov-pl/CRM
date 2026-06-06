@@ -18,4 +18,7 @@ urlpatterns = [
     path('ai-files/<uuid:file_id>/attach/', views.ai_file_attach, name='ai_file_attach'),
 
     path('browser/preview/', views.browser_preview, name='browser_preview'),
+
+    path('ollama/models/', views.ollama_models, name='ollama_models'),
+    path('ollama/set-model/', views.ollama_set_model, name='ollama_set_model'),
 ]

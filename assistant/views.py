@@ -380,3 +380,34 @@ def browser_preview(request, url):
         return HttpResponseBadRequest('No url')
     rel = svc.screenshot_path(url)
     return JsonResponse({'ok': True, 'image_url': settings.MEDIA_URL + rel, 'url': url})
+
+
+@login_required
+@require_GET
+def ollama_models(request):
+    import urllib.request
+    import urllib.error
+    base = getattr(settings, 'OLLAMA_BASE_URL', 'http://localhost:11434')
+    try:
+        req = urllib.request.Request(f'{base}/api/tags', method='GET')
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            data = json.loads(resp.read().decode())
+            models = [m.get('name', '') for m in data.get('models', [])]
+    except (urllib.error.URLError, OSError, json.JSONDecodeError):
+        models = []
+    current = request.session.get('ollama_model', getattr(settings, 'OLLAMA_DEFAULT_MODEL', ''))
+    return JsonResponse({'ok': True, 'models': models, 'current': current})
+
+
+@login_required
+@require_POST
+def ollama_set_model(request):
+    try:
+        body = json.loads(request.body.decode('utf-8') or '{}')
+    except json.JSONDecodeError:
+        return JsonResponse({'ok': False, 'error': 'Invalid JSON.'}, status=400)
+    model = (body.get('model') or '').strip()
+    if not model:
+        return JsonResponse({'ok': False, 'error': 'No model specified.'}, status=400)
+    request.session['ollama_model'] = model
+    return JsonResponse({'ok': True, 'model': model})
