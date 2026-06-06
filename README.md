@@ -31,6 +31,20 @@ Django 6 + Tailwind CSS 4 + Alpine.js + HTMX + Ollama AI — a project managemen
 
 ### AI Assistant
 
+#### Ollama Setup
+
+For the AI chat to work, you need to install and run Ollama locally:
+
+1. **Download Ollama** from [ollama.com](https://ollama.com) and install it
+2. **Pull a model** (e.g., Llama 3.2, Mistral, or any supported model):
+   ```bash
+   ollama pull llama3.2
+   ```
+3. **Start Ollama** (it runs as a background service by default on port 11434)
+4. **Select the model** in the CRM chat interface — the dropdown will list all installed models automatically
+
+The model selector appears in the AI Assistant header once Ollama is running. You can switch between models at any time during a conversation.
+
 Built-in AI assistant powered by Ollama with two modes:
 
 - **CHAT** — free conversation with a selected Ollama model
