@@ -1,3 +1,4 @@
+![CRM](image.png)
 # CRM
 
 **Django 6 + Tailwind CSS 4 + Alpine.js + HTMX + Ollama AI** — a project management, contractor and task tracking system built for engineering and manufacturing businesses.
