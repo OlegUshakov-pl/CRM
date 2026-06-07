@@ -15,7 +15,6 @@ venv/
 *.sqlite3
 db.sqlite3
 media/
-documents/
 staticfiles/
 
 # Node
