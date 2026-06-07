@@ -1,56 +1,70 @@
-![image](image.png)
 # CRM
 
-Django 6 + Tailwind CSS 4 + Alpine.js + HTMX + Ollama AI — a project management, contractor and task tracking system for engineering and manufacturing.
+**Django 6 + Tailwind CSS 4 + Alpine.js + HTMX + Ollama AI** — a project management, contractor and task tracking system built for engineering and manufacturing businesses.
 
-## Stack
+---
 
-| Layer | Technologies |
-|-------|-------------|
-| Backend | Django 6.0, Python 3.14+, SQLite |
-| Frontend | Tailwind CSS 4, Alpine.js 3, HTMX 2.0, Lucide Icons |
-| AI | Ollama (local LLM), rule-based command processing |
-| Font | Montserrat |
+## Tech Stack
+
+| Layer         | Technology                                       |
+|---------------|--------------------------------------------------|
+| Backend       | Django 6.0.5, Python 3.14+, SQLite               |
+| Frontend      | Tailwind CSS 4, Alpine.js 3, HTMX 2.0, Lucide Icons |
+| AI            | Ollama (local LLM), rule-based command processing |
+| Font          | Montserrat (Google Fonts)                        |
+
+---
 
 ## Features
 
 ### Core Modules
 
-| Module | Description |
-|--------|-------------|
-| **Dashboard** | Home page with key metrics, recent projects, tasks and notes |
-| **Companies** | Company management (name, email, phone, website, address, logo) |
-| **Contacts** | Contacts linked to companies with avatars |
-| **Projects** | Projects (statuses, budget, dates, image gallery, ZIP export/import) |
-| **Materials / BOM** | Bill of materials per project (quantity, units, prices, categories) |
-| **Tasks** | Tasks (priorities, statuses, due dates, filtering) |
-| **Notes** | Universal notes linked to projects, companies, contacts |
-| **Documents** | File upload with preview (images, PDF, text), filter by type and project |
-| **Parts** | Drawings and 3D models (.stp, .ipt, .sldprt, .ics, etc.) |
-| **Generator** | Template for rapid module scaffolding (example: Deal pipeline) |
+| Module       | Description |
+|--------------|-------------|
+| **Dashboard**    | Home page with key metrics, recent projects, tasks and notes |
+| **Companies**    | Company directory (name, email, phone, website, address, logo) |
+| **Contacts**     | Contact management linked to companies, with avatars |
+| **Projects**     | Full project lifecycle (statuses, budget, dates, image gallery, ZIP export/import) |
+| **Materials/BOM**| Bill of Materials per project (quantity, units, prices, categories) |
+| **Tasks**        | Task management with priorities, statuses, due dates, and filtering |
+| **Notes**        | Universal notes linkable to projects, companies, or contacts |
+| **Documents**    | File upload with preview (images, PDF, text), filterable by type and project |
+| **Parts**        | Engineering drawings and 3D models (.stp, .ipt, .sldprt, .ics, .sldasm, .iam) |
+| **Generator**    | Module scaffolding template for rapid prototyping (example: Deal pipeline) |
 
-### AI Assistant
+### Cross-cutting Features
 
-#### Ollama Setup
+- **Slide-over forms** — CRUD operations via HTMX without page navigation
+- **Soft delete** — all entities use `is_active` flag for safe deletion
+- **Global search** — search across all entity types from a single page
+- **Activity logging** — all changes tracked via Generic Foreign Key (ContentType framework)
+- **Project export/import** — full project data packaged as ZIP archives
+- **Dark mode** — toggled via localStorage, persisted across sessions
+- **Responsive design** — works on desktop and mobile
+- **Collapsible sidebar** — expandable navigation panel
+- **Settings panel** — configurable project storage paths and subfolder naming
 
-For the AI chat to work, you need to install and run Ollama locally:
+---
 
-1. **Download Ollama** from [ollama.com](https://ollama.com) and install it
-2. **Pull a model** (e.g., Llama 3.2, Mistral, or any supported model):
+## AI Assistant
+
+The built-in AI assistant is powered by **Ollama** (local LLM) with two modes:
+
+- **CHAT** — free conversation with the selected Ollama model
+- **COMMANDS** — execute CRM actions via natural language (rule-based intent detection, no NLP model required)
+
+### Setup
+
+1. Download and install Ollama from [ollama.com](https://ollama.com)
+2. Pull a model (e.g., Llama 3.2, Mistral, or any supported model):
    ```bash
    ollama pull llama3.2
    ```
-3. **Start Ollama** (it runs as a background service by default on port 11434)
-4. **Select the model** in the CRM chat interface — the dropdown will list all installed models automatically
+3. Start Ollama (it runs as a background service by default on port 11434)
+4. Select the model in the CRM chat interface — the dropdown lists all installed models automatically
 
-The model selector appears in the AI Assistant header once Ollama is running. You can switch between models at any time during a conversation.
+### Example Commands
 
-Built-in AI assistant powered by Ollama with two modes:
-
-- **CHAT** — free conversation with a selected Ollama model
-- **COMMANDS** — execute CRM commands via natural language
-
-**Example commands:**
 ```
 Create project 001, Office Building on 2026-06-15
 Add task Call client on 2026-06-10
@@ -64,23 +78,17 @@ Open bbc.com
 Download file from https://example.com/image.png
 ```
 
-**Capabilities:**
-- Voice input (Web Speech API)
-- Browser agent: open URLs, take screenshots, extract titles and PDF links
-- AI Files: download files from the web, attach to projects, manage storage
-- Undo with a 10-second window for create/delete actions
-- All actions logged to AILog
-- Model selection from installed Ollama models
+### Capabilities
 
-### Cross-cutting Features
+- **Voice input** — Web Speech API for hands-free interaction
+- **Browser agent** — open URLs, take screenshots, extract titles and PDF links
+- **AI Files** — download files from the web, attach to projects, manage storage
+- **Undo** — 10-second window to revert create/delete actions
+- **Audit logging** — all AI actions logged to `AILog`
+- **Model selection** — switch between installed Ollama models at any time
+- **Confirmation flow** — write operations require a two-step confirmation
 
-- Slide-over forms — CRUD without page navigation via HTMX
-- Soft delete via `is_active` flag
-- Global search across all entity types
-- Activity logging with Generic Foreign Key
-- Project export/import as ZIP
-- Dark mode
-- Responsive design
+---
 
 ## Quick Start
 
@@ -107,77 +115,143 @@ python manage.py createsuperuser
 python manage.py runserver
 ```
 
-The server will be available at `http://127.0.0.1:8000`.
+The server will be available at **http://127.0.0.1:8000**.
 
-For the AI assistant, a running Ollama instance is required at `http://localhost:11434` (configurable in `settings.py`).
+For the AI assistant, a running Ollama instance is required at **http://localhost:11434** (configurable in `settings.py`).
+
+---
 
 ## Project Structure
 
 ```
 CRM/
-├── config/           # Settings, root URLs, WSGI/ASGI
-├── accounts/         # Authentication (login, profile, password reset)
-├── core/             # Dashboard, TimeStampedModel, Activity, AppSetting, search
-├── companies/        # Company management
-├── contacts/         # Contact management
-├── projects/         # Project management, export/import
-├── materials/        # Bill of materials (BOM), categories
-├── tasks/            # Task management
-├── notes/            # Universal notes
-├── documents/        # File management with preview
-├── parts/            # Drawings and 3D models
-├── assistant/        # AI chat, Ollama, browser, AI Files
-│   └── services/     # Command registry, handlers, browser, files, i18n
-├── generator/        # Module scaffolding template (Deal pipeline)
-├── templates/        # Base layout, includes
-│   ├── base.html
-│   └── includes/     # sidebar, topbar, chat_widget, pagination, slide_over
-├── static/           # Tailwind CSS (src → dist)
-│   └── src/styles.css
-└── media/            # User uploaded files
+  config/            Settings, root URL config, WSGI/ASGI entry points
+  accounts/          Authentication (login, logout, profile, password reset)
+  core/              Dashboard, TimeStampedModel, Activity log, AppSetting, search, help page
+  companies/         Company management
+  contacts/          Contact management (linked to companies)
+  projects/          Project management, ZIP export/import, image gallery
+  materials/         Bill of Materials (BOM) with categories
+  tasks/             Task management (priorities, statuses, due dates)
+  notes/             Universal notes (linked to projects, companies, contacts)
+  documents/         File upload with preview (images, PDF, text)
+  parts/             Drawings and 3D models (.stp, .ipt, .sldprt, .ics, etc.)
+  assistant/         AI chat (Ollama), browser agent, AI file management, logging
+    services/        Command registry, handlers, browser, files, i18n
+  generator/         Module scaffolding template (example: Deal pipeline)
+  templates/         Base layout and includes
+    base.html
+    includes/        sidebar, topbar, chat_widget, pagination, slide_over
+  static/            Tailwind CSS source (src -> dist)
+    src/styles.css
+  media/             User-uploaded files
+  ai_files/          AI-downloaded files
 ```
+
+---
 
 ## Data Models
 
-All models inherit `TimeStampedModel` (created_at, updated_at, created_by, is_active).
+All business models inherit from `TimeStampedModel` (abstract base), which provides:
 
-| Model | Key Fields |
-|-------|-----------|
-| Company | name, email, phone, website, address, logo |
-| Contact | company (FK), first_name, last_name, email, phone, position, avatar |
-| Project | name, number, description, status, company (FK), contacts (M2M), dates, budget, image |
-| ProjectImage | project (FK), image, uploaded_at |
-| Material | project (FK), category (FK), name, quantity, unit, unit_price, notes |
-| Category (materials) | name |
-| Task | title, description, status, priority, due_date, project (FK) |
-| Note | title, content, date, project (FK), company (FK), contact (FK) |
-| Document | project (FK), number, file, file_type, size |
-| Part | project (FK), category (FK), number, size, rev, file |
-| Category (parts) | name |
-| ChatSession | user, title, is_active, last_message_at |
-| ChatMessage | session (FK), role, kind, content, payload |
-| AIFile | owner (FK), file, original_name, source_url, size, category |
-| AILog | user, session (FK), action, status, description, request/response, payload |
-| Activity | user, action, description, content_type, object_id (GenericFK) |
-| Deal (example) | name, description, status, priority, value, company (FK), contacts (M2M), assigned_to, due_date |
-| AppSetting | key, value |
+| Field        | Description |
+|--------------|-------------|
+| `created_at` | Auto-set on creation |
+| `updated_at` | Auto-updated on save |
+| `created_by` | ForeignKey to User (nullable) |
+| `is_active`  | Boolean for soft-delete (default: True) |
+
+### Entity Models
+
+| Model         | Key Fields | Relationships |
+|---------------|------------|---------------|
+| **Company**   | `name`, `slug`, `email`, `phone`, `website`, `address`, `logo`, `notes` | Referenced by Contact, Project, Note, Deal |
+| **Contact**   | `first_name`, `last_name`, `slug`, `email`, `phone`, `position`, `avatar`, `notes` | FK → Company; M2M → Project, Deal |
+| **Project**   | `name`, `slug`, `number`, `description`, `status`, `dates`, `budget`, `image` | FK → Company; M2M → Contact |
+| **ProjectImage** | `image`, `uploaded_at` | FK → Project (CASCADE) |
+| **Material**  | `name`, `slug`, `quantity`, `unit`, `unit_price`, `notes` | FK → Project, Category (materials) |
+| **Category** (materials) | `name` | Referenced by Material |
+| **Task**      | `title`, `slug`, `description`, `status`, `priority`, `due_date` | FK → Project |
+| **Note**      | `title`, `slug`, `content`, `date` | FK → Project, Company, Contact (all nullable) |
+| **Document**  | `number`, `size`, `file`, `file_type` | FK → Project |
+| **Part**      | `number`, `size`, `rev`, `file` | FK → Project, Category (parts) |
+| **Category** (parts) | `name` | Referenced by Part |
+| **Deal**      | `name`, `slug`, `description`, `status`, `priority`, `value`, `due_date` | FK → Company; M2M → Contact; FK → User (assigned_to) |
+
+### AI & System Models
+
+| Model          | Key Fields | Purpose |
+|----------------|------------|---------|
+| **ChatSession**| `user`, `title`, `is_active`, `last_message_at` | Per-user AI chat sessions |
+| **ChatMessage**| `session`, `role`, `kind`, `content`, `payload` | Individual chat messages |
+| **AIFile**     | `owner`, `file`, `original_name`, `source_url`, `size`, `category` | Files downloaded by AI |
+| **AILog**      | `user`, `session`, `action`, `status`, `description`, `request_text`, `response_text`, `payload`, `duration_ms` | Full audit log of AI actions |
+| **Activity**   | `user`, `action`, `description`, `content_type`, `object_id` | Global activity log (GenericForeignKey) |
+| **AppSetting** | `key` (unique), `value` | Key-value settings store |
+
+---
+
+## File System Architecture
+
+Project files are organized on disk as:
+
+```
+{project_number}_{project_name}_Project/
+  documents/
+  drawings/
+  models/
+```
+
+Subfolder naming is configurable via `AppSetting` (`subfolder_documents`, `subfolder_drawings`, `subfolder_models`), using `{Number}` as a placeholder for the project number.
+
+---
 
 ## Development
 
+### Tailwind CSS
+
 ```bash
-# Watch mode for Tailwind CSS
+# Watch mode (auto-rebuild on changes)
 npm run dev
 
 # Production build
 npm run build
-
-# Collect Django static files
-python manage.py collectstatic
 ```
 
-## Architecture
+### Django
 
-- **Slide-over forms** — most CRUD operations use HTMX slide-over panels without page navigation
-- **Project file system** — files are organized as `{number}_{name}_Project/{documents,drawings,models}/`
-- **AI rules** — intent detection via regex (no NLP model required); all write operations require two-step confirmation
-- **Versioning** — app version `1.2.{commit_count}` derived from git commit count
+```bash
+# Collect static files for production
+python manage.py collectstatic
+
+# Run development server
+python manage.py runserver
+```
+
+---
+
+## Architecture Highlights
+
+- **Slide-over forms** — most CRUD operations use HTMX slide-over panels without page navigation; forms are loaded via AJAX into a sliding panel
+- **Project file system** — files stored in organized subdirectories per project
+- **AI rules** — intent detection via regex patterns (no NLP model required); all write operations require two-step confirmation before execution
+- **Versioning** — app version follows `1.2.{git_commit_count}` format, derived from the number of git commits
+- **URL structure** — clean RESTful URLs with slugs for all entities
+
+### URL Routing
+
+| Prefix         | App          |
+|----------------|--------------|
+| `/admin/`      | Django Admin |
+| `/`            | core (dashboard, search, help, settings) |
+| `/accounts/`   | accounts |
+| `/companies/`  | companies |
+| `/contacts/`   | contacts |
+| `/projects/`   | projects |
+| `/tasks/`      | tasks |
+| `/notes/`      | notes |
+| `/materials/`  | materials |
+| `/deals/`      | generator (Deal pipeline) |
+| `/documents/`  | documents |
+| `/parts/`      | parts |
+| `/assistant/`  | assistant (AI chat) |
