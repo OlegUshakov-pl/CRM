@@ -120,6 +120,8 @@ The server will be available at **http://127.0.0.1:8000**.
 
 For the AI assistant, a running Ollama instance is required at **http://localhost:11434** (configurable in `settings.py`).
 
+Alternatively, just run `install.bat` to set up the entire system automatically.
+
 ---
 
 ## Project Structure
