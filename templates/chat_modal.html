@@ -1,0 +1,389 @@
+{% load static %}
+<div id="chat-modal" class="fixed z-[9999] hidden" style="bottom: 20px; right: 20px; width: 500px; height: 220px; min-width: 350px; min-height: 200px;">
+    <div class="bg-white dark:bg-[#0a0a0a] border border-light dark:border-[#222] flex flex-col w-full h-full overflow-hidden relative"
+         style="border-radius: 0px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); resize: both;">
+        <style>
+            #chat-modal .ui-resizable-handle {
+                position: absolute;
+                width: 16px;
+                height: 16px;
+                bottom: 0;
+                right: 0;
+                cursor: se-resize;
+                background: linear-gradient(135deg, transparent 50%, #999 50%);
+                opacity: 0.5;
+            }
+            #chat-modal .ui-resizable-handle:hover {
+                opacity: 0.8;
+            }
+        </style>
+        <div class="ui-resizable-handle"></div>
+
+        <!-- Header - Drag handle -->
+        <div id="chat-modal-header" class="flex items-center justify-between px-4 py-2 border-b border-light dark:border-[#222] flex-shrink-0 cursor-move select-none">
+            <div class="flex items-center gap-2">
+                <div class="w-7 h-7 rounded-full bg-indigo-400 text-white flex items-center justify-center">
+                    <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-semibold text-gray-900 dark:text-white">AI Assistant</p>
+                    <p class="text-[11px] text-gray-500 dark:text-gray-400" x-text="chatStorageInfo"></p>
+                </div>
+            </div>
+            <div class="flex items-center gap-1">
+                <button onclick="minimizeChatModal()" title="Minimize"
+                        class="p-1.5 hover:bg-gray-100 dark:hover:bg-[#1a1a1a] rounded">
+                    <i data-lucide="minus" class="w-4 h-4 text-gray-500"></i>
+                </button>
+                <button onclick="closeChatModal()" title="Close"
+                        class="p-1.5 hover:bg-gray-100 dark:hover:bg-[#1a1a1a] rounded">
+                    <i data-lucide="x" class="w-4 h-4 text-gray-500"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Messages -->
+        <div class="flex-1 overflow-y-auto p-3 space-y-1" id="chat-modal-messages">
+            <template x-for="m in chatMessages" :key="m.id">
+                <div :class="m.role === 'user' ? 'flex justify-end' : 'flex justify-start'">
+                    <div :class="m.role === 'user'
+                                ? 'max-w-[85%] bg-indigo-600 text-white px-3 py-1 rounded-lg text-[13px] whitespace-pre-wrap'
+                                : 'max-w-[90%] bg-gray-100 dark:bg-[#1a1a1a] text-gray-900 dark:text-gray-100 px-3 py-1 rounded-lg text-[13px] whitespace-pre-wrap'">
+                        <p x-text="m.content"></p>
+                        <template x-if="m.payload && m.payload.needs_confirmation">
+                            <div class="mt-2 flex gap-2">
+                                <button @click="chatConfirm(m)"
+                                        class="px-3 py-1.5 text-[12px] bg-emerald-600 hover:bg-emerald-700 text-white rounded"
+                                        x-text="chatConfirmLabel"></button>
+                                <button @click="chatCancelConfirm()"
+                                        class="px-3 py-1.5 text-[12px] bg-gray-200 dark:bg-[#222] rounded"
+                                        x-text="chatCancelLabel"></button>
+                            </div>
+                        </template>
+                        <template x-if="m.payload && m.payload.actions && m.payload.actions.length">
+                            <div class="mt-2 flex flex-wrap gap-2">
+                                <template x-for="(a,i) in m.payload.actions" :key="i">
+                                    <a :href="a.url || '#'" target="_blank"
+                                       class="px-3 py-1.5 text-[12px] bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-200 rounded">
+                                        <span x-text="a.label"></span>
+                                    </a>
+                                </template>
+                            </div>
+                        </template>
+                        <template x-if="m.payload && m.payload.undoable && m.payload.undo_token">
+                            <div class="mt-2">
+                                <button @click="chatUndo(m.payload.undo_token, m.id)"
+                                        :id="'chat-undo-' + m.id"
+                                        class="px-3 py-1.5 text-[12px] bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 rounded">
+                                    <i data-lucide="rotate-ccw" class="w-3 h-3 inline"></i>
+                                    <span x-text="chatUndoLabel"></span> (<span :id="'chat-undo-timer-' + m.id">10</span><span x-text="chatSUnit"></span>)
+                                </button>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </template>
+            <div x-show="chatLoading" class="flex justify-start">
+                <div class="bg-gray-100 dark:bg-[#1a1a1a] px-3 py-2 rounded-lg text-[13px] text-gray-500">
+                    <span x-text="chatLoadingText"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input -->
+        <div class="border-t border-light dark:border-[#222] p-2 flex-shrink-0">
+            <div class="flex items-end gap-2">
+                <!-- Model selector -->
+                <div class="relative flex-shrink-0" x-data="{ modelsOpen: false }">
+                    <button @click="modelsOpen = !modelsOpen; if(modelsOpen) chatLoadModels()"
+                            class="px-2 py-2 text-[11px] bg-gray-100 dark:bg-[#1a1a1a] border border-light dark:border-[#222] rounded hover:bg-gray-200 dark:hover:bg-[#222] text-gray-700 dark:text-gray-300 flex items-center gap-1 whitespace-nowrap">
+                        <i data-lucide="cpu" class="w-3.5 h-3.5"></i>
+                        <span x-text="chatCurrentModel || 'model'"></span>
+                        <i data-lucide="chevron-down" class="w-3 h-3"></i>
+                    </button>
+                    <div x-show="modelsOpen" @click.outside="modelsOpen = false"
+                         class="absolute bottom-full left-0 mb-1 w-56 bg-white dark:bg-black border border-light dark:border-[#222] rounded shadow-lg z-50 max-h-48 overflow-y-auto">
+                        <div x-show="chatModelsLoading" class="px-3 py-2 text-[12px] text-gray-400">Loading...</div>
+                        <template x-if="chatModels.length === 0 && !chatModelsLoading">
+                            <div class="px-3 py-2 text-[12px] text-gray-400">No models found</div>
+                        </template>
+                        <template x-for="m in chatModels" :key="m">
+                            <button @click="chatSetModel(m); modelsOpen = false"
+                                    :class="m === chatCurrentModel ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#1a1a1a]'"
+                                    class="w-full text-left px-3 py-2 text-[12px] flex items-center gap-2 transition-colors">
+                                <i data-lucide="check" class="w-3 h-3" x-show="m === chatCurrentModel"></i>
+                                <span x-text="m"></span>
+                            </button>
+                        </template>
+                    </div>
+                </div>
+
+                <textarea x-ref="chatInput" x-model="chatText" @keydown.enter.prevent="if(!$event.shiftKey) chatSend()"
+                          rows="1" placeholder="What are you looking for?"
+                          class="flex-1 resize-none border border-light dark:border-[#222] dark:bg-[#111] dark:text-white text-[13px] px-3 py-2 rounded outline-none focus:border-indigo-400 max-h-32"></textarea>
+
+                <!-- Mode selector -->
+                <div class="relative flex-shrink-0" x-data="{ modeOpen: false }">
+                    <button @click="modeOpen = !modeOpen"
+                            class="px-2 py-2 text-[11px] bg-gray-100 dark:bg-[#1a1a1a] border border-light dark:border-[#222] rounded hover:bg-gray-200 dark:hover:bg-[#222] text-gray-700 dark:text-gray-300 flex items-center gap-1 whitespace-nowrap">
+                        <i data-lucide="message-square" class="w-3.5 h-3.5" x-show="chatMode === 'chat'"></i>
+                        <i data-lucide="terminal" class="w-3.5 h-3.5" x-show="chatMode === 'commands'"></i>
+                        <span x-text="chatMode === 'chat' ? 'CHAT' : 'COMMANDS'"></span>
+                        <i data-lucide="chevron-down" class="w-3 h-3"></i>
+                    </button>
+                    <div x-show="modeOpen" @click.outside="modeOpen = false"
+                         class="absolute bottom-full right-0 mb-1 w-36 bg-white dark:bg-black border border-light dark:border-[#222] rounded shadow-lg z-50">
+                        <button @click="chatSetMode('chat'); modeOpen = false"
+                                :class="chatMode === 'chat' ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#1a1a1a]'"
+                                class="w-full text-left px-3 py-2 text-[12px] flex items-center gap-2 transition-colors">
+                            <i data-lucide="message-square" class="w-3 h-3"></i> Chat
+                        </button>
+                        <button @click="chatSetMode('commands'); modeOpen = false"
+                                :class="chatMode === 'commands' ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#1a1a1a]'"
+                                class="w-full text-left px-3 py-2 text-[12px] flex items-center gap-2 transition-colors">
+                            <i data-lucide="terminal" class="w-3 h-3"></i> Commands
+                        </button>
+                    </div>
+                </div>
+
+                <button @click="chatSend()" :disabled="!chatText.trim() || chatLoading"
+                        class="p-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded disabled:opacity-50">
+                    <i data-lucide="send" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function chatModalDrag() {
+    var modal = document.getElementById('chat-modal');
+    var header = document.getElementById('chat-modal-header');
+    if (!modal || !header) return;
+
+    var isDragging = false;
+    var startX, startY, startLeft, startTop;
+
+    header.addEventListener('mousedown', function(e) {
+        if (e.target.tagName === 'BUTTON' || e.target.tagName === 'I') return;
+        isDragging = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        var rect = modal.getBoundingClientRect();
+        startLeft = rect.left;
+        startTop = rect.top;
+        e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', function(e) {
+        if (!isDragging) return;
+        var dx = e.clientX - startX;
+        var dy = e.clientY - startY;
+        modal.style.left = (startLeft + dx) + 'px';
+        modal.style.top = (startTop + dy) + 'px';
+        modal.style.right = 'auto';
+        modal.style.bottom = 'auto';
+    });
+
+    document.addEventListener('mouseup', function() {
+        isDragging = false;
+    });
+}
+
+function openChatModal() {
+    var modal = document.getElementById('chat-modal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        if (window.chatModalDragInitialized === undefined) {
+            chatModalDrag();
+            window.chatModalDragInitialized = true;
+        }
+        setTimeout(function() {
+            if (window.lucide) lucide.createIcons();
+            var input = document.querySelector('[x-ref="chatInput"]');
+            if (input) input.focus();
+        }, 100);
+    }
+}
+
+function closeChatModal() {
+    var modal = document.getElementById('chat-modal');
+    if (modal) modal.classList.add('hidden');
+}
+
+function minimizeChatModal() {
+    closeChatModal();
+}
+</script>
+
+<script>
+function chatApp() {
+    return {
+        chatText: '',
+        chatMessages: [],
+        chatLoading: false,
+        chatStorageInfo: '',
+        chatLoadingText: 'Thinking...',
+        chatModels: [],
+        chatModelsLoading: false,
+        chatCurrentModel: localStorage.getItem('ollama_model') || '',
+        chatMode: localStorage.getItem('ai_mode') || 'chat',
+        chatConfirmLabel: 'Confirm',
+        chatCancelLabel: 'Cancel',
+        chatUndoLabel: 'Undo',
+        chatSUnit: 's',
+        chatUndoTimers: {},
+        chatSetMode: function(m) {
+            this.chatMode = m;
+            localStorage.setItem('ai_mode', m);
+        },
+        chatLoadModels: function() {
+            var self = this;
+            self.chatModelsLoading = true;
+            fetch('{% url "assistant:ollama_models" %}')
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    self.chatModels = data.models || [];
+                    if (data.current) self.chatCurrentModel = data.current;
+                    self.chatModelsLoading = false;
+                    self.$nextTick(function() { if (window.lucide) lucide.createIcons(); });
+                })
+                .catch(function() {
+                    self.chatModels = [];
+                    self.chatModelsLoading = false;
+                });
+        },
+        chatSetModel: function(model) {
+            var self = this;
+            fetch('{% url "assistant:ollama_set_model" %}', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json', 'X-CSRFToken': self.chatGetCSRFToken()},
+                body: JSON.stringify({model: model})
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.ok) {
+                    self.chatCurrentModel = data.model;
+                    localStorage.setItem('ollama_model', data.model);
+                }
+            })
+            .catch(function() {});
+        },
+        chatGetCSRFToken: function() {
+            var c = document.cookie.split(';');
+            for (var i = 0; i < c.length; i++) {
+                var x = c[i].trim();
+                if (x.indexOf('csrftoken=') === 0) return x.substring(10);
+            }
+            return '';
+        },
+        chatScrollDown: function() {
+            var el = document.getElementById('chat-modal-messages');
+            if (el) el.scrollTop = el.scrollHeight;
+        },
+        chatSend: function() {
+            var msg = this.chatText.trim();
+            if (!msg) return;
+            this.chatText = '';
+            this.chatMessages.push({id: 'tmp-' + Date.now(), role: 'user', content: msg, payload: {}, created_at: new Date().toISOString()});
+            this.chatLoading = true;
+            this.chatLoadingText = 'Thinking...';
+            this.chatScrollDown();
+            var self = this;
+            fetch('{% url "assistant:chat" %}', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json', 'X-CSRFToken': this.chatGetCSRFToken()},
+                body: JSON.stringify({message: msg, model: this.chatCurrentModel, mode: this.chatMode})
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) { self.chatHandleResponse(data); })
+            .catch(function(e) {
+                self.chatMessages.push({id: 'err-' + Date.now(), role: 'assistant', content: 'Error: ' + e, payload: {}});
+            })
+            .finally(function() {
+                self.chatLoading = false;
+                self.chatScrollDown();
+            });
+        },
+        chatConfirm: function(msg) {
+            this.chatMessages.push({id: 'tmp-conf-' + Date.now(), role: 'user', content: 'Confirm', payload: {}, created_at: new Date().toISOString()});
+            this.chatLoading = true;
+            this.chatLoadingText = 'Executing...';
+            var self = this;
+            fetch('{% url "assistant:chat" %}', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json', 'X-CSRFToken': this.chatGetCSRFToken()},
+                body: JSON.stringify({message: 'confirm', confirm: true, confirm_token: msg.id})
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) { self.chatHandleResponse(data); })
+            .catch(function(e) {
+                self.chatMessages.push({id: 'err-' + Date.now(), role: 'assistant', content: 'Error: ' + e, payload: {}});
+            })
+            .finally(function() {
+                self.chatLoading = false;
+                self.chatScrollDown();
+            });
+        },
+        chatCancelConfirm: function() {
+            this.chatMessages.push({id: 'tmp-cancel-' + Date.now(), role: 'assistant', content: 'Action cancelled.', payload: {}});
+        },
+        chatUndo: function(token, msgId) {
+            var btn = document.getElementById('chat-undo-' + msgId);
+            if (btn) btn.disabled = true;
+            var self = this;
+            fetch('{% url "assistant:chat" %}', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json', 'X-CSRFToken': this.chatGetCSRFToken()},
+                body: JSON.stringify({undo_token: token})
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                self.chatMessages.push({id: 'undo-' + Date.now(), role: 'assistant', content: data.message || (data.ok ? 'Undone.' : 'Could not undo.'), payload: {}});
+            })
+            .catch(function(e) {
+                self.chatMessages.push({id: 'err-' + Date.now(), role: 'assistant', content: 'Error: ' + e, payload: {}});
+            });
+            this.chatScrollDown();
+        },
+        chatHandleResponse: function(data) {
+            if (data.message) {
+                var payload = {
+                    needs_confirmation: data.needs_confirmation,
+                    confirmation_text: data.confirmation_text,
+                    actions: data.actions || [],
+                    undoable: data.undoable,
+                    undo_token: data.undo_token,
+                    payload: data.payload || {}
+                };
+                this.chatMessages.push({
+                    id: data.message_id || ('srv-' + Date.now()),
+                    role: 'assistant',
+                    content: data.message,
+                    payload: payload,
+                    created_at: new Date().toISOString()
+                });
+                if (data.undoable && data.undo_token && data.message_id) {
+                    this.chatStartUndoTimer(data.message_id);
+                }
+            }
+            this.$nextTick(function() { if (window.lucide) lucide.createIcons(); });
+            this.chatScrollDown();
+        },
+        chatStartUndoTimer: function(msgId) {
+            var n = 10;
+            var el = document.getElementById('chat-undo-timer-' + msgId);
+            var self = this;
+            this.chatUndoTimers[msgId] = setInterval(function() {
+                n--;
+                if (el) el.textContent = n;
+                if (n <= 0) {
+                    clearInterval(self.chatUndoTimers[msgId]);
+                    var btn = document.getElementById('chat-undo-' + msgId);
+                    if (btn) btn.disabled = true;
+                }
+            }, 1000);
+        }
+    }
+}
+</script>
