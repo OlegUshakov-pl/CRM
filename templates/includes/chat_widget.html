@@ -1,6 +1,7 @@
 {% load static %}
 <div id="ai-chat-root" x-data="aiChat()" x-init="init()" x-cloak
-     style="height:200px; resize:vertical; overflow:hidden; min-height:120px; max-height:80vh;"
+     :class="collapsed ? 'h-auto' : ''"
+     :style="collapsed ? '' : 'height:200px; resize:vertical; overflow:hidden; min-height:120px; max-height:80vh;'"
      class="border border-light dark:border-[#222] bg-white dark:bg-[#0a0a0a] flex flex-col">
 
     <!-- Header -->
@@ -11,19 +12,28 @@
             </div>
             <div>
                 <p class="text-sm font-semibold text-gray-900 dark:text-white">AI Assistant</p>
-                <p class="text-[11px] text-gray-500 dark:text-gray-400" x-text="storageInfo"></p>
+                <p class="text-[11px] text-gray-500 dark:text-gray-400" x-show="!collapsed" x-text="storageInfo"></p>
             </div>
         </div>
         <div class="flex items-center gap-1">
-            <button @click="showClearModal = true" title="Clear"
-                    class="p-1.5 hover:bg-gray-100 dark:hover:bg-[#1a1a1a] rounded">
-                <i data-lucide="trash-2" class="w-4 h-4 text-gray-500"></i>
+            <button @click="showClearModal = true" title="Clear chat"
+                    class="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-red-500"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+            </button>
+            <button @click="collapsed = !collapsed" :title="collapsed ? 'Expand' : 'Collapse'"
+                    class="p-1.5 hover:bg-gray-100 dark:hover:bg-[#1a1a1a] rounded transition-colors">
+                <template x-if="!collapsed">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500"><path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M21 8h-3a2 2 0 0 1-2-2V3"/><path d="M3 16h3a2 2 0 0 1 2 2v3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/></svg>
+                </template>
+                <template x-if="collapsed">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+                </template>
             </button>
         </div>
     </div>
 
     <!-- Messages -->
-    <div class="flex-1 overflow-y-auto p-3 space-y-1" id="ai-chat-messages">
+    <div x-show="!collapsed" class="flex-1 overflow-y-auto p-3 space-y-1" id="ai-chat-messages">
         <template x-for="m in messages" :key="m.id">
             <div :class="m.role === 'user' ? 'flex justify-end' : 'flex justify-start'">
                 <div :class="m.role === 'user'
@@ -91,7 +101,7 @@
     </div>
 
     <!-- Browser panel -->
-    <div x-show="browserOpen" class="border-t border-light dark:border-[#222] p-3 bg-gray-50 dark:bg-[#111]">
+    <div x-show="!collapsed && browserOpen" class="border-t border-light dark:border-[#222] p-3 bg-gray-50 dark:bg-[#111]">
         <div class="flex items-center justify-between mb-2">
             <span class="text-[12px] text-gray-500" x-text="previewLabel + browserUrl"></span>
             <div class="flex items-center gap-1">
@@ -112,7 +122,7 @@
     </div>
 
     <!-- Input -->
-    <div class="border-t border-light dark:border-[#222] p-2 flex-shrink-0">
+    <div x-show="!collapsed" class="border-t border-light dark:border-[#222] p-2 flex-shrink-0">
         <div class="flex items-end gap-2">
             <!-- Model selector -->
             <div class="relative flex-shrink-0" x-data="{ modelsOpen: false }">
@@ -228,6 +238,7 @@ function aiChat() {
     return {
         open: true,
         wide: false,
+        collapsed: false,
         text: '',
         messages: [],
         loading: false,
