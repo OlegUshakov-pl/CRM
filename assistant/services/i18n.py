@@ -177,6 +177,23 @@ M = {
         'en': 'Attach to project',
     },
 
+    # Create file
+    'file_create_missing_name': {
+        'en': 'Specify a filename. Try: "Create file hello.py with content ...".',
+    },
+    'file_create_missing_content': {
+        'en': 'Provide content for the file, or a description so the AI can generate it.',
+    },
+    'file_create_rejected': {
+        'en': 'File type not allowed or content too large.',
+    },
+    'file_create_generation_failed': {
+        'en': 'AI content generation failed: {err}',
+    },
+    'file_create_done': {
+        'en': 'Done. File "{name}" created in AI Files ({size} bytes). Attach to project?',
+    },
+
     # QA
     'qa_tasks': {
         'en': 'Active tasks: {n}.',

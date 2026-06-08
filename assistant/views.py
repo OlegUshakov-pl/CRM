@@ -146,9 +146,40 @@ def chat(request):
     if not text:
         return JsonResponse({'ok': False, 'error': t('empty_message', lang)}, status=400)
 
-    # Ollama chat mode
+    # Check for file creation intent in chat mode
     if mode == 'chat' and not confirm:
         _save_message(session, 'user', text, kind='text')
+        from .services.handlers import FILE_CREATE_PATTERNS
+        import re as _re
+        _is_file_create = False
+        for _pat in FILE_CREATE_PATTERNS:
+            if _re.search(_pat, text, _re.IGNORECASE | _re.UNICODE):
+                _is_file_create = True
+                break
+        if _is_file_create:
+            llm = LLMService()
+            result = llm.process(text, request.user, session=session, model=model)
+            duration_ms = int((time.time() - start) * 1000)
+            msg_text = result.get('message') or result.get('confirmation_text') or ''
+            m = _save_message(session, 'assistant', msg_text,
+                              kind='result', payload={
+                                  'intent': result.get('intent'),
+                                  'actions': result.get('actions', []),
+                                  'payload': result.get('payload', {}),
+                                  'model': model, 'mode': 'chat',
+                              })
+            _log(request.user, 'chat', 'ok', f'File create via chat: {result.get("intent")}',
+                 request_text=text, response_text=msg_text,
+                 payload={'intent': result.get('intent')},
+                 duration_ms=duration_ms, session=session)
+            return JsonResponse({
+                'ok': result.get('ok', True),
+                'message': msg_text,
+                'actions': result.get('actions', []),
+                'payload': {**result.get('payload', {}), 'model': model, 'mode': 'chat'},
+                'message_id': m.id,
+            })
+
         ollama_result = _ollama_chat(text, model, request.user)
         duration_ms = int((time.time() - start) * 1000)
         m = _save_message(session, 'assistant', ollama_result['message'], kind='result',
@@ -169,7 +200,7 @@ def chat(request):
     llm = LLMService()
 
     if not confirm:
-        result = llm.process(text, request.user, session=session)
+        result = llm.process(text, request.user, session=session, model=model)
         duration_ms = int((time.time() - start) * 1000)
         kind = result.get('kind', 'text')
         _save_message(session, 'user', text, kind='text')

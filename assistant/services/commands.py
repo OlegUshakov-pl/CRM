@@ -10,6 +10,7 @@ class CommandContext:
     intent: str
     params: Dict[str, Any] = field(default_factory=dict)
     session: Any = None
+    model: str = ''
 
 
 @dataclass

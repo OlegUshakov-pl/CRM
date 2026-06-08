@@ -18,6 +18,14 @@ logger = logging.getLogger(__name__)
 ALLOWED_EXT = {'.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp',
                '.pdf', '.docx', '.xlsx', '.dwg'}
 FORBIDDEN_EXT = {'.exe', '.zip', '.bat', '.cmd', '.msi', '.js'}
+CREATE_ALLOWED_EXT = {
+    '.txt', '.md', '.csv', '.json', '.xml', '.yaml', '.yml', '.toml', '.ini', '.cfg',
+    '.py', '.js', '.ts', '.jsx', '.tsx', '.html', '.htm', '.css', '.scss', '.less',
+    '.sh', '.rb', '.go', '.rs', '.java', '.kt', '.swift', '.cpp', '.c', '.h',
+    '.hpp', '.sql', '.r', '.m', '.mm', '.lua', '.php', '.pl', '.pm', '.vue', '.svelte',
+    '.env', '.gitignore', '.dockerfile', '.makefile', '.gradle', '.sln', '.csproj',
+    '.drawio', '.svg', '.tex', '.bib', '.log', '.lst',
+}
 
 
 class AIFileService:
@@ -71,6 +79,30 @@ class AIFileService:
             size=fetch_result.size,
         )
         ai_file.file.save(fetch_result.file_name, ContentFile(fetch_result.content), save=True)
+        return ai_file
+
+    def save_content(self, filename: str, content: str) -> Optional['AIFile']:
+        from ..models import AIFile
+
+        ext = os.path.splitext(filename)[1].lower()
+        if ext in FORBIDDEN_EXT:
+            logger.warning('Rejected forbidden extension: %s', ext)
+            return None
+        if ext and ext not in CREATE_ALLOWED_EXT:
+            logger.warning('Rejected extension not in create allow-list: %s', ext)
+            return None
+
+        size = len(content.encode('utf-8'))
+        if size > settings.AI_FILES_MAX_SIZE:
+            logger.warning('Content too big: %s', size)
+            return None
+
+        ai_file = AIFile(
+            owner=self.user,
+            original_name=filename,
+            size=size,
+        )
+        ai_file.file.save(filename, ContentFile(content.encode('utf-8')), save=True)
         return ai_file
 
     def attach_to_project(self, file_id: str, project) -> Optional['Document']:

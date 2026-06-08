@@ -470,6 +470,65 @@ def _handle_download_file(ctx: CommandContext) -> CommandResult:
     )
 
 
+def _handle_create_file(ctx: CommandContext) -> CommandResult:
+    lang = detect_lang(ctx.text)
+    from .files import AIFileService
+
+    filename = ctx.params.get('filename') or ctx.params.get('name') or ''
+    content = ctx.params.get('content') or ''
+    description = ctx.params.get('description') or ''
+
+    if not filename:
+        return CommandResult(ok=False, error=t('file_create_missing_name', lang))
+
+    if not content and description:
+        try:
+            import urllib.request
+            import json
+            base = getattr(settings, 'OLLAMA_BASE_URL', 'http://localhost:11434')
+            model = ctx.model or ''
+            if model:
+                payload = {
+                    'model': model,
+                    'messages': [{'role': 'user', 'content': f'Generate content for {description}. Return only the raw content, no explanations.'}],
+                    'stream': False,
+                }
+                data = json.dumps(payload).encode('utf-8')
+                req = urllib.request.Request(
+                    f'{base}/api/chat', data=data,
+                    headers={'Content-Type': 'application/json'}, method='POST',
+                )
+                with urllib.request.urlopen(req, timeout=120) as resp:
+                    result = json.loads(resp.read().decode())
+                    content = result.get('message', {}).get('content', '')
+        except Exception as e:
+            logger.warning('Ollama generation failed: %s', e)
+            return CommandResult(ok=False, error=t('file_create_generation_failed', lang, err=e))
+
+    if not content:
+        return CommandResult(ok=False, error=t('file_create_missing_content', lang))
+
+    fs = AIFileService(ctx.user)
+    saved = fs.save_content(filename, content)
+    if not saved:
+        return CommandResult(ok=False, error=t('file_create_rejected', lang))
+
+    return CommandResult(
+        ok=True,
+        message=t('file_create_done', lang, name=filename, size=saved.size),
+        payload={
+            'object': 'ai_file',
+            'id': str(saved.id),
+            'name': saved.original_name,
+            'size': saved.size,
+            'category': saved.category,
+        },
+        actions=[
+            {'type': 'attach_to_project', 'label': t('download_attach_action', lang), 'file_id': str(saved.id)},
+        ],
+    )
+
+
 # === Patterns (English only) ===
 
 PROJECT_CREATE_PATTERNS = [
@@ -526,6 +585,16 @@ DOWNLOAD_FILE_PATTERNS = [
     r'get\s+(?:file|image|pdf)\s+from\s+(?P<url>(?:https?://)?[\S]+)',
 ]
 
+FILE_CREATE_PATTERNS = [
+    r'create\s+file\s+(?P<filename>\S+)\s+with\s+content\s+(?P<content>.+?)$',
+    r'make\s+file\s+(?P<filename>\S+)\s+with\s+content\s+(?P<content>.+?)$',
+    r'generate\s+(?:file\s+)?(?P<filename>\S+)\s+(?:with\s+content\s+)?(?P<content>.+?)$',
+    r'create\s+file\s+(?P<filename>\S+?)(?:\s+for\s+(?P<description>.+?))?$',
+    r'make\s+file\s+(?P<filename>\S+?)(?:\s+for\s+(?P<description>.+?))?$',
+    r'create\s+(?P<filename>\S+\.\w+)(?:\s+with\s+content\s+(?P<content>.+?))?$',
+    r'write\s+file\s+(?P<filename>\S+)(?:\s+with\s+content\s+(?P<content>.+?))?$',
+]
+
 
 def register_all(registry):
     registry.register('create_project', PROJECT_CREATE_PATTERNS, _confirm_create_project,
@@ -548,6 +617,8 @@ def register_all(registry):
                       description='Open a website')
     registry.register('download_file', DOWNLOAD_FILE_PATTERNS, _handle_download_file,
                       description='Download a file from the internet')
+    registry.register('create_file', FILE_CREATE_PATTERNS, _handle_create_file,
+                      description='Create a file with content')
 
 
 CONFIRMATION_HANDLERS = {

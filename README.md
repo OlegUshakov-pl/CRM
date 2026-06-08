@@ -51,7 +51,7 @@
 
 The built-in AI assistant is powered by **Ollama** (local LLM) with two modes:
 
-- **CHAT** — free conversation with the selected Ollama model
+- **CHAT** — free conversation with the selected Ollama model; also supports file creation via natural language
 - **COMMANDS** — execute CRM actions via natural language (rule-based intent detection, no NLP model required)
 
 ### Setup
@@ -77,13 +77,15 @@ What is the company of project Test
 Create note Meeting for project Test
 Open bbc.com
 Download file from https://example.com/image.png
+Create file hello.py with content print("Hello, World!")
+Create file styles.css for a dark theme stylesheet (AI generates content)
 ```
 
 ### Capabilities
 
 - **Voice input** — Web Speech API for hands-free interaction
 - **Browser agent** — open URLs, take screenshots, extract titles and PDF links
-- **AI Files** — download files from the web, attach to projects, manage storage
+- **AI Files** — download files from the web, create files with AI-generated content, attach to projects, manage storage
 - **Undo** — 10-second window to revert create/delete actions
 - **Audit logging** — all AI actions logged to `AILog`
 - **Model selection** — switch between installed Ollama models at any time
@@ -240,6 +242,7 @@ python manage.py runserver
 - **Slide-over forms** — most CRUD operations use HTMX slide-over panels without page navigation; forms are loaded via AJAX into a sliding panel
 - **Project file system** — files stored in organized subdirectories per project
 - **AI rules** — intent detection via regex patterns (no NLP model required); all write operations require two-step confirmation before execution
+- **AI file creation** — generate and save files in any supported format (code, text, markup, etc.) via natural language in both CHAT and COMMANDS modes; supports inline content or AI-generated content via Ollama
 - **Versioning** — app version follows `1.2.{git_commit_count}` format, derived from the number of git commits
 - **URL structure** — clean RESTful URLs with slugs for all entities
 

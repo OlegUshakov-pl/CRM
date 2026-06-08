@@ -28,7 +28,7 @@ class LLMService:
         if not self.registry._handlers:  # noqa: SLF001
             _handlers.register_all(self.registry)
 
-    def process(self, text: str, user: Any, session: Any = None) -> Dict[str, Any]:
+    def process(self, text: str, user: Any, session: Any = None, model: str = '') -> Dict[str, Any]:
         start = time.time()
         text = (text or '').strip()
         lang = detect_lang(text)
@@ -45,6 +45,7 @@ class LLMService:
                 intent=intent,
                 params=params,
                 session=session,
+                model=model,
             )
             result = self.registry.handle(intent, ctx)
             duration_ms = int((time.time() - start) * 1000)
