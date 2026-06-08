@@ -122,6 +122,8 @@ For the AI assistant, a running Ollama instance is required at **http://localhos
 
 Alternatively, just run `install.bat` to set up the entire system automatically.
 
+To update CRM to the latest version, simply run `update.bat` — it will pull changes, install dependencies, run migrations, and rebuild the frontend.
+
 ---
 
 ## Project Structure
