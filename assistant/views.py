@@ -149,14 +149,26 @@ def chat(request):
     # Check for file creation intent in chat mode
     if mode == 'chat' and not confirm:
         _save_message(session, 'user', text, kind='text')
-        from .services.handlers import FILE_CREATE_PATTERNS
+        from .services.handlers import FILE_CREATE_PATTERNS, WEB_SEARCH_PATTERNS, FIND_ON_SITE_PATTERNS
         import re as _re
         _is_file_create = False
+        _is_search = False
+        _is_find_on_site = False
         for _pat in FILE_CREATE_PATTERNS:
             if _re.search(_pat, text, _re.IGNORECASE | _re.UNICODE):
                 _is_file_create = True
                 break
-        if _is_file_create:
+        if not _is_file_create:
+            for _pat in WEB_SEARCH_PATTERNS:
+                if _re.search(_pat, text, _re.IGNORECASE | _re.UNICODE):
+                    _is_search = True
+                    break
+        if not _is_file_create and not _is_search:
+            for _pat in FIND_ON_SITE_PATTERNS:
+                if _re.search(_pat, text, _re.IGNORECASE | _re.UNICODE):
+                    _is_find_on_site = True
+                    break
+        if _is_file_create or _is_search or _is_find_on_site:
             llm = LLMService()
             result = llm.process(text, request.user, session=session, model=model)
             duration_ms = int((time.time() - start) * 1000)
@@ -168,7 +180,7 @@ def chat(request):
                                   'payload': result.get('payload', {}),
                                   'model': model, 'mode': 'chat',
                               })
-            _log(request.user, 'chat', 'ok', f'File create via chat: {result.get("intent")}',
+            _log(request.user, 'chat', 'ok', f'Intent via chat: {result.get("intent")}',
                  request_text=text, response_text=msg_text,
                  payload={'intent': result.get('intent')},
                  duration_ms=duration_ms, session=session)

@@ -79,12 +79,21 @@ Open bbc.com
 Download file from https://example.com/image.png
 Create file hello.py with content print("Hello, World!")
 Create file styles.css for a dark theme stylesheet (AI generates content)
+Search for latest Python 3.14 features
+Find information about Django 6.0 on the internet
+What is the capital of France?
+Who is Nikola Tesla?
+Find pdf on site https://example.com
+Find picture with name logo on site https://example.com
+Find pdf report on site https://example.com/documents
 ```
 
 ### Capabilities
 
 - **Voice input** — Web Speech API for hands-free interaction
 - **Browser agent** — open URLs, take screenshots, extract titles and PDF links
+- **Web search** — search the internet via DuckDuckGo directly from chat
+- **Find files on site** — locate PDFs or images on any website by URL and optional name filter
 - **AI Files** — download files from the web, create files with AI-generated content, attach to projects, manage storage
 - **Undo** — 10-second window to revert create/delete actions
 - **Audit logging** — all AI actions logged to `AILog`

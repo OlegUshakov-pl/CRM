@@ -177,6 +177,37 @@ M = {
         'en': 'Attach to project',
     },
 
+    # Web search
+    'search_missing_query': {
+        'en': 'Specify what to search for. Example: "Search for latest Python news".',
+    },
+    'search_failed': {
+        'en': 'Web search failed: {err}',
+    },
+    'search_no_results': {
+        'en': 'No results found for "{query}".',
+    },
+    'search_done': {
+        'en': 'Found {count} result(s) for "{query}":',
+    },
+
+    # Find on site
+    'find_on_site_missing_params': {
+        'en': 'Specify file type (pdf/picture) and site URL. Example: "Find pdf on site https://example.com".',
+    },
+    'find_on_site_fetch_error': {
+        'en': 'Failed to open site: {err}',
+    },
+    'find_on_site_not_html': {
+        'en': 'The URL does not contain HTML content.',
+    },
+    'find_on_site_none': {
+        'en': 'No {type} found on {site}.',
+    },
+    'find_on_site_done': {
+        'en': 'Found {count} {type} on {site}:',
+    },
+
     # Create file
     'file_create_missing_name': {
         'en': 'Specify a filename. Try: "Create file hello.py with content ...".',

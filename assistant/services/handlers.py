@@ -8,6 +8,7 @@ Each handler:
 - Marks the result as undoable when possible (per spec 1.2).
 """
 import logging
+import os
 import re
 import uuid
 from datetime import date, datetime, timedelta
@@ -470,6 +471,118 @@ def _handle_download_file(ctx: CommandContext) -> CommandResult:
     )
 
 
+def _handle_web_search(ctx: CommandContext) -> CommandResult:
+    lang = detect_lang(ctx.text)
+    from .browser import BrowserService
+
+    query = ctx.params.get('query') or ctx.params.get('q') or ''
+    if not query:
+        return CommandResult(ok=False, error=t('search_missing_query', lang))
+
+    bs = BrowserService()
+    try:
+        results = bs.search_web(query)
+    except Exception as e:  # noqa: BLE001
+        logger.warning('Web search failed: %s', e)
+        return CommandResult(ok=False, error=t('search_failed', lang, err=e))
+
+    if not results:
+        return CommandResult(ok=True, message=t('search_no_results', lang, query=query))
+
+    msg = t('search_done', lang, query=query, count=len(results))
+    actions = []
+    for r in results[:5]:
+        actions.append({'type': 'open_url', 'label': r['title'][:60], 'url': r['url']})
+
+    return CommandResult(
+        ok=True,
+        message=msg,
+        payload={
+            'object': 'search',
+            'query': query,
+            'results': results,
+        },
+        actions=actions,
+    )
+
+
+def _handle_find_on_site(ctx: CommandContext) -> CommandResult:
+    from .browser import BrowserService
+    lang = detect_lang(ctx.text)
+
+    file_type = (ctx.params.get('type') or '').lower()
+    site_url = ctx.params.get('site') or ctx.params.get('url') or ''
+    name_filter = (ctx.params.get('name') or '').lower()
+
+    if not file_type or not site_url:
+        return CommandResult(ok=False, error=t('find_on_site_missing_params', lang))
+
+    file_type = 'pdf' if file_type in ('pdf',) else 'image' if file_type in ('picture', 'image', 'photo', 'pic') else 'other'
+
+    bs = BrowserService()
+    try:
+        result = bs.fetch(site_url)
+    except Exception as e:
+        return CommandResult(ok=False, error=t('find_on_site_fetch_error', lang, err=e))
+
+    if not result.ok or not result.is_html:
+        return CommandResult(ok=False, error=t('find_on_site_not_html', lang))
+
+    try:
+        html = result.content.decode('utf-8', errors='ignore')
+    except Exception:
+        html = result.content.decode('utf-8', errors='ignore')
+
+    import urllib.parse
+
+    if file_type == 'pdf':
+        all_links = re.findall(r'href=["\']([^"\']+)["\']', html, re.IGNORECASE)
+        matches = []
+        for href in all_links:
+            if '.pdf' not in href.lower():
+                continue
+            full_url = urllib.parse.urljoin(result.final_url, href)
+            fname = urllib.parse.urlparse(full_url).path.split('/')[-1] or full_url
+            if name_filter and name_filter not in fname.lower() and name_filter not in full_url.lower():
+                continue
+            matches.append({'title': fname, 'url': full_url})
+    else:
+        all_links = re.findall(r'<a[^>]+href=["\']([^"\']+)["\'][^>]*>.*?</a>', html, re.DOTALL)
+        img_tags = re.findall(r'<img[^>]+src=["\']([^"\']+)["\'][^>]*>', html, re.IGNORECASE)
+        all_srcs = []
+        for src in img_tags:
+            full_url = urllib.parse.urljoin(result.final_url, src)
+            fname = urllib.parse.urlparse(full_url).path.split('/')[-1] or full_url
+            if name_filter and name_filter not in fname.lower() and name_filter not in full_url.lower():
+                continue
+            ext = os.path.splitext(fname)[1].lower()
+            if ext in ('.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.svg'):
+                all_srcs.append({'title': fname, 'url': full_url})
+        matches = all_srcs[:20]
+
+    if not matches:
+        return CommandResult(ok=True, message=t('find_on_site_none', lang, type=file_type, site=site_url))
+
+    type_label = 'PDF' if file_type == 'pdf' else 'images'
+    msg = t('find_on_site_done', lang, type=type_label, site=site_url, count=len(matches))
+    actions = []
+    for m in matches[:10]:
+        label = m['title'][:60]
+        actions.append({'type': 'open_url', 'label': label, 'url': m['url']})
+
+    return CommandResult(
+        ok=True,
+        message=msg,
+        payload={
+            'object': 'site_files',
+            'type': file_type,
+            'site': site_url,
+            'results': matches[:20],
+        },
+        actions=actions,
+    )
+
+
 def _handle_create_file(ctx: CommandContext) -> CommandResult:
     lang = detect_lang(ctx.text)
     from .files import AIFileService
@@ -595,6 +708,23 @@ FILE_CREATE_PATTERNS = [
     r'write\s+file\s+(?P<filename>\S+)(?:\s+with\s+content\s+(?P<content>.+?))?$',
 ]
 
+WEB_SEARCH_PATTERNS = [
+    r'search\s+(?:for\s+)?(?P<query>.+?)$',
+    r'search\s+internet\s+(?:for\s+)?(?P<query>.+?)$',
+    r'find\s+(?:information\s+)?(?:about\s+)?(?P<query>.+?)\s+on\s+the\s+internet$',
+    r'find\s+(?:information\s+)?(?:about\s+)?(?P<query>.+?)$',
+    r'look\s+up\s+(?P<query>.+?)$',
+    r'what\s+is\s+(?P<query>.+?)\?*$',
+    r'who\s+is\s+(?P<query>.+?)\?*$',
+]
+
+FIND_ON_SITE_PATTERNS = [
+    r'find\s+(?P<type>pdf|picture|image|photo|pic)\s+on\s+(?:site|website)\s+(?P<site>\S+)$',
+    r'find\s+(?P<type>pdf|picture|image|photo|pic)\s+with\s+name\s+(?P<name>\S+)\s+on\s+(?:site|website)\s+(?P<site>\S+)$',
+    r'find\s+(?P<type>pdf|picture|image|photo|pic)\s+(?P<name>\S+)\s+on\s+(?:site|website)\s+(?P<site>\S+)$',
+    r'find\s+(?P<type>pdf|picture|image|photo|pic)s?\s+on\s+(?:site|website)\s+(?P<site>\S+)$',
+]
+
 
 def register_all(registry):
     registry.register('create_project', PROJECT_CREATE_PATTERNS, _confirm_create_project,
@@ -619,6 +749,10 @@ def register_all(registry):
                       description='Download a file from the internet')
     registry.register('create_file', FILE_CREATE_PATTERNS, _handle_create_file,
                       description='Create a file with content')
+    registry.register('web_search', WEB_SEARCH_PATTERNS, _handle_web_search,
+                      description='Search the internet')
+    registry.register('find_on_site', FIND_ON_SITE_PATTERNS, _handle_find_on_site,
+                      description='Find PDFs or images on a website')
 
 
 CONFIRMATION_HANDLERS = {

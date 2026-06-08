@@ -158,6 +158,50 @@ class BrowserService:
             b'\xff?\x00\x05\xfe\x02\xfe\xa3\xee\x9c\xee\x00\x00\x00\x00IEND\xaeB`\x82'
         )
 
+    def search_web(self, query: str, max_results: int = 8) -> list:
+        """Search DuckDuckGo and return list of {title, url, snippet}."""
+        import urllib.parse
+        encoded = urllib.parse.quote(query)
+        search_url = f'https://html.duckduckgo.com/html/?q={encoded}'
+        result = self.fetch(search_url)
+        if not result.ok:
+            return []
+        try:
+            html = result.content.decode('utf-8', errors='ignore')
+        except Exception:
+            html = result.content.decode('utf-8', errors='ignore')
+
+        items = []
+        # Parse result blocks: <a class="result__a" href="...">title</a>
+        # followed by <a class="result__snippet" ...>snippet</a>
+        blocks = re.split(r'<div[^>]*class="[^"]*result[^"]*"[^>]*>', html)
+        for block in blocks[1:]:
+            if len(items) >= max_results:
+                break
+            title_match = re.search(r'<a[^>]*class="[^"]*result__a[^"]*"[^>]*href="([^"]*)"[^>]*>(.*?)</a>', block, re.DOTALL)
+            snippet_match = re.search(r'<a[^>]*class="[^"]*result__snippet[^"]*"[^>]*>(.*?)</a>', block, re.DOTALL)
+            if not title_match:
+                continue
+            url_raw = title_match.group(1)
+            title = re.sub(r'<[^>]+>', '', title_match.group(2)).strip()
+            snippet = ''
+            if snippet_match:
+                snippet = re.sub(r'<[^>]+>', '', snippet_match.group(1)).strip()
+            # DuckDuckGo wraps redirect URLs
+            if url_raw.startswith('//'):
+                url_raw = 'https:' + url_raw
+            elif url_raw.startswith('/'):
+                url_raw = 'https://duckduckgo.com' + url_raw
+            # Decode redirect URL if present
+            parsed = urllib.parse.urlparse(url_raw)
+            if parsed.hostname and 'duckduckgo' in parsed.hostname:
+                qs = urllib.parse.parse_qs(parsed.query)
+                actual = qs.get('uddg', [None])[0] or qs.get('ru', [None])[0] or url_raw
+            else:
+                actual = url_raw
+            items.append({'title': title, 'url': actual, 'snippet': snippet})
+        return items
+
     def screenshot_path(self, url: str) -> str:
         from django.conf import settings
         h = hashlib.md5(url.encode('utf-8')).hexdigest()[:10]
