@@ -37,4 +37,11 @@ Thumbs.db
 *.env.local
 *.env
 
+#Images
+*.jpg
+*.jpeg
+*.jfif
+*.png
+*.webp
+
 VERSION
