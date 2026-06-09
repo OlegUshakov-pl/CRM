@@ -335,12 +335,6 @@ M = {
     'confirm_cleanup': {
         'en': 'Delete all AI Files older than 30 days?',
     },
-    'voice_tooltip': {
-        'en': 'Voice control will be added in the next release (v2).',
-    },
-    'mic_title': {
-        'en': 'Voice (coming soon)',
-    },
     'undo_label': {
         'en': 'Undo',
     },
@@ -364,9 +358,6 @@ M = {
     },
     'chat_placeholder': {
         'en': 'What are you looking for?',
-    },
-    'voice_note': {
-        'en': 'Voice control will be added in the next release.',
     },
     'assistant_title': {
         'en': 'AI Assistant',

@@ -91,7 +91,6 @@ Find pdf report on site https://example.com/documents
 
 ### Capabilities
 
-- **Voice input** — Web Speech API for hands-free interaction
 - **Browser agent** — open URLs, take screenshots, extract titles and PDF links
 - **Web search** — search the internet via DuckDuckGo directly from chat
 - **Find files on site** — locate PDFs or images on any website by URL and optional name filter
