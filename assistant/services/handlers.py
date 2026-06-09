@@ -583,6 +583,43 @@ def _handle_find_on_site(ctx: CommandContext) -> CommandResult:
     )
 
 
+def _handle_news_search(ctx: CommandContext) -> CommandResult:
+    lang = detect_lang(ctx.text)
+    from .browser import BrowserService
+
+    query = ctx.params.get('query') or ctx.params.get('q') or ''
+    site = ctx.params.get('site') or ''
+    if not query:
+        return CommandResult(ok=False, error=t('news_search_missing_query', lang))
+
+    bs = BrowserService()
+    try:
+        results = bs.search_news(query, site=site)
+    except Exception as e:
+        logger.warning('News search failed: %s', e)
+        return CommandResult(ok=False, error=t('news_search_failed', lang, err=e))
+
+    if not results:
+        return CommandResult(ok=True, message=t('news_search_no_results', lang, query=query, site_part=' on ' + site if site else ''))
+
+    msg = t('news_search_done', lang, query=query, count=len(results), site_part=' on ' + site if site else '')
+    actions = []
+    for r in results[:5]:
+        actions.append({'type': 'open_url', 'label': r['title'][:60], 'url': r['url']})
+
+    return CommandResult(
+        ok=True,
+        message=msg,
+        payload={
+            'object': 'news_search',
+            'query': query,
+            'site': site,
+            'results': results,
+        },
+        actions=actions,
+    )
+
+
 def _handle_create_file(ctx: CommandContext) -> CommandResult:
     lang = detect_lang(ctx.text)
     from .files import AIFileService
@@ -725,6 +762,18 @@ FIND_ON_SITE_PATTERNS = [
     r'find\s+(?P<type>pdf|picture|image|photo|pic)s?\s+on\s+(?:site|website)\s+(?P<site>\S+)$',
 ]
 
+NEWS_SEARCH_PATTERNS = [
+    r'search\s+news\s+about\s+(?P<query>.+?)(?:\s+on\s+site\s+(?P<site>\S+))?$',
+    r'search\s+info\s+about\s+(?P<query>.+?)$',
+    r'news\s+about\s+(?P<query>.+?)(?:\s+on\s+site\s+(?P<site>\S+))?$',
+    r'посмотри\s+новости\s+о\s+(?P<query>.+?)$',
+    r'посмотри\s+информацию\s+о\s+(?P<query>.+?)\s+на\s+сайте\s+(?P<site>\S+)$',
+    r'посмотри\s+информацию\s+о\s+(?P<query>.+?)$',
+    r'найди\s+новости\s+(?P<query>.+?)$',
+    r'найди\s+информацию\s+о\s+(?P<query>.+?)\s+на\s+сайте\s+(?P<site>\S+)$',
+    r'найди\s+информацию\s+о\s+(?P<query>.+?)$',
+]
+
 
 def register_all(registry):
     registry.register('create_project', PROJECT_CREATE_PATTERNS, _confirm_create_project,
@@ -753,6 +802,8 @@ def register_all(registry):
                       description='Search the internet')
     registry.register('find_on_site', FIND_ON_SITE_PATTERNS, _handle_find_on_site,
                       description='Find PDFs or images on a website')
+    registry.register('news_search', NEWS_SEARCH_PATTERNS, _handle_news_search,
+                      description='Search news or information on the internet')
 
 
 CONFIRMATION_HANDLERS = {

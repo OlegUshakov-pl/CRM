@@ -149,11 +149,12 @@ def chat(request):
     # Check for file creation intent in chat mode
     if mode == 'chat' and not confirm:
         _save_message(session, 'user', text, kind='text')
-        from .services.handlers import FILE_CREATE_PATTERNS, WEB_SEARCH_PATTERNS, FIND_ON_SITE_PATTERNS
+        from .services.handlers import FILE_CREATE_PATTERNS, WEB_SEARCH_PATTERNS, FIND_ON_SITE_PATTERNS, NEWS_SEARCH_PATTERNS
         import re as _re
         _is_file_create = False
         _is_search = False
         _is_find_on_site = False
+        _is_news_search = False
         for _pat in FILE_CREATE_PATTERNS:
             if _re.search(_pat, text, _re.IGNORECASE | _re.UNICODE):
                 _is_file_create = True
@@ -168,7 +169,12 @@ def chat(request):
                 if _re.search(_pat, text, _re.IGNORECASE | _re.UNICODE):
                     _is_find_on_site = True
                     break
-        if _is_file_create or _is_search or _is_find_on_site:
+        if not _is_file_create and not _is_search and not _is_find_on_site:
+            for _pat in NEWS_SEARCH_PATTERNS:
+                if _re.search(_pat, text, _re.IGNORECASE | _re.UNICODE):
+                    _is_news_search = True
+                    break
+        if _is_file_create or _is_search or _is_find_on_site or _is_news_search:
             llm = LLMService()
             result = llm.process(text, request.user, session=session, model=model)
             duration_ms = int((time.time() - start) * 1000)

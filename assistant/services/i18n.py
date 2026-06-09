@@ -208,6 +208,20 @@ M = {
         'en': 'Found {count} {type} on {site}:',
     },
 
+    # News search
+    'news_search_missing_query': {
+        'en': 'Specify what to search for. Example: "Search news about Python".',
+    },
+    'news_search_failed': {
+        'en': 'News search failed: {err}',
+    },
+    'news_search_no_results': {
+        'en': 'No news found for "{query}"{site_part}.',
+    },
+    'news_search_done': {
+        'en': 'Found {count} result(s) for "{query}"{site_part}:',
+    },
+
     # Create file
     'file_create_missing_name': {
         'en': 'Specify a filename. Try: "Create file hello.py with content ...".',
