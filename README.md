@@ -9,7 +9,7 @@
 
 | Layer         | Technology                                       |
 |---------------|--------------------------------------------------|
-| Backend       | Django 6.0.5, Python 3.14+, SQLite               |
+| Backend       | Django 6.0.6, Python 3.14+, SQLite               |
 | Frontend      | Tailwind CSS 4, Alpine.js 3, HTMX 2.0, Lucide Icons |
 | AI            | Ollama (local LLM), rule-based command processing |
 | Font          | Montserrat (Google Fonts)                        |
