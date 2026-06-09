@@ -6,16 +6,18 @@
 {% block breadcrumb %}Calendar{% endblock %}
 
 {% block content %}
-<div class="max-w-2xl mx-auto py-6 px-4">
+<div class="max-w-4xl mx-auto py-6 px-4">
     <div class="border border-light dark:border-[#222]">
         <div class="flex items-center justify-between px-6 py-4 border-b border-light dark:border-[#222]">
             <div class="flex items-center gap-3">
-                <a href="?month={{ prev_month.month }}&year={{ prev_month.year }}"
+                <a href="?month={{ prev_month }}&year={{ prev_year }}"
                    class="p-1.5 hover:bg-gray-100 dark:hover:bg-[#1a1a1a] rounded transition-colors">
                     <i data-lucide="chevron-left" class="w-5 h-5 text-gray-500"></i>
                 </a>
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ month_name }} {{ year }}</h2>
-                <a href="?month={{ next_month.month }}&year={{ next_month.year }}"
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+                    {{ months_data.0.month_name }} – {{ months_data.2.month_name }} {{ months_data.0.year }}
+                </h2>
+                <a href="?month={{ next_month }}&year={{ next_year }}"
                    class="p-1.5 hover:bg-gray-100 dark:hover:bg-[#1a1a1a] rounded transition-colors">
                     <i data-lucide="chevron-right" class="w-5 h-5 text-gray-500"></i>
                 </a>
@@ -25,50 +27,57 @@
                         onchange="this.form.submit()"
                         class="px-3 py-1.5 border border-[#e8e8e8] dark:border-[#222] dark:bg-[#111] dark:text-white text-[13px] outline-none focus:border-violet-300 transition-colors">
                     {% for m_num, m_name in months %}
-                    <option value="{{ m_num }}" {% if m_num == month %}selected{% endif %}>{{ m_name }}</option>
+                    <option value="{{ m_num }}" {% if m_num == base_month %}selected{% endif %}>{{ m_name }}</option>
                     {% endfor %}
                 </select>
                 <select name="year"
                         onchange="this.form.submit()"
                         class="px-3 py-1.5 border border-[#e8e8e8] dark:border-[#222] dark:bg-[#111] dark:text-white text-[13px] outline-none focus:border-violet-300 transition-colors">
                     {% for y in years %}
-                    <option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>
+                    <option value="{{ y }}" {% if y == base_year %}selected{% endif %}>{{ y }}</option>
                     {% endfor %}
                 </select>
             </form>
         </div>
 
-        <table class="w-full table-fixed">
-            <thead>
-                <tr class="border-b border-light dark:border-[#222]">
-                    <th class="py-2 text-[11px] uppercase tracking-wider text-gray-400 dark:text-gray-500 font-medium">Sun</th>
-                    <th class="py-2 text-[11px] uppercase tracking-wider text-gray-400 dark:text-gray-500 font-medium">Mon</th>
-                    <th class="py-2 text-[11px] uppercase tracking-wider text-gray-400 dark:text-gray-500 font-medium">Tue</th>
-                    <th class="py-2 text-[11px] uppercase tracking-wider text-gray-400 dark:text-gray-500 font-medium">Wed</th>
-                    <th class="py-2 text-[11px] uppercase tracking-wider text-gray-400 dark:text-gray-500 font-medium">Thu</th>
-                    <th class="py-2 text-[11px] uppercase tracking-wider text-gray-400 dark:text-gray-500 font-medium">Fri</th>
-                    <th class="py-2 text-[11px] uppercase tracking-wider text-gray-400 dark:text-gray-500 font-medium">Sat</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for week in weeks %}
-                <tr class="border-b border-light dark:border-[#222] last:border-b-0">
-                    {% for d in week %}
-                    <td class="py-1 text-center align-top">
-                        {% if d.day %}
-                        <div class="inline-flex items-center justify-center w-10 h-10 rounded text-[14px]
-                            {% if d.is_today %}bg-indigo-600 text-white font-semibold
-                            {% else %}text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-[#1a1a1a]{% endif %}
-                            transition-colors cursor-default">
-                            {{ d.day }}
-                        </div>
-                        {% endif %}
-                    </td>
-                    {% endfor %}
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div class="grid grid-cols-3 divide-x divide-light dark:divide-[#222]">
+            {% for m in months_data %}
+            <div class="p-3">
+                <h3 class="text-sm font-semibold text-gray-900 dark:text-white text-center mb-3">{{ m.month_name }} {{ m.year }}</h3>
+                <table class="w-full table-fixed">
+                    <thead>
+                        <tr>
+                            <th class="py-1 text-[10px] uppercase tracking-wider text-gray-400 dark:text-gray-500 font-medium">Sun</th>
+                            <th class="py-1 text-[10px] uppercase tracking-wider text-gray-400 dark:text-gray-500 font-medium">Mon</th>
+                            <th class="py-1 text-[10px] uppercase tracking-wider text-gray-400 dark:text-gray-500 font-medium">Tue</th>
+                            <th class="py-1 text-[10px] uppercase tracking-wider text-gray-400 dark:text-gray-500 font-medium">Wed</th>
+                            <th class="py-1 text-[10px] uppercase tracking-wider text-gray-400 dark:text-gray-500 font-medium">Thu</th>
+                            <th class="py-1 text-[10px] uppercase tracking-wider text-gray-400 dark:text-gray-500 font-medium">Fri</th>
+                            <th class="py-1 text-[10px] uppercase tracking-wider text-gray-400 dark:text-gray-500 font-medium">Sat</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for week in m.weeks %}
+                        <tr>
+                            {% for d in week %}
+                            <td class="py-0.5 text-center">
+                                {% if d.day %}
+                                <div class="inline-flex items-center justify-center w-8 h-8 rounded text-[12px]
+                                    {% if d.is_today %}bg-indigo-600 text-white font-semibold
+                                    {% else %}text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-[#1a1a1a]{% endif %}
+                                    transition-colors cursor-default">
+                                    {{ d.day }}
+                                </div>
+                                {% endif %}
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endfor %}
+        </div>
     </div>
 </div>
 {% endblock %}

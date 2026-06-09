@@ -31,6 +31,7 @@
 | **Notes**        | Universal notes linkable to projects, companies, or contacts |
 | **Documents**    | File upload with preview (images, PDF, text), filterable by type and project |
 | **Parts**        | Engineering drawings and 3D models (.stp, .ipt, .sldprt, .ics, .sldasm, .iam) |
+| **Calendar**     | Three-month calendar view with month/year dropdowns and navigation |
 | **Generator**    | Module scaffolding template for rapid prototyping (example: Deal pipeline) |
 
 ### Cross-cutting Features
@@ -154,6 +155,7 @@ CRM/
   parts/             Drawings and 3D models (.stp, .ipt, .sldprt, .ics, etc.)
   assistant/         AI chat (Ollama), browser agent, AI file management, logging
     services/        Command registry, handlers, browser, files, i18n
+  calendar_app/      Three-month calendar view with navigation
   generator/         Module scaffolding template (example: Deal pipeline)
   templates/         Base layout and includes
     base.html
@@ -272,3 +274,4 @@ python manage.py runserver
 | `/documents/`  | documents |
 | `/parts/`      | parts |
 | `/assistant/`  | assistant (AI chat) |
+| `/calendar/`   | calendar_app (Calendar) |
