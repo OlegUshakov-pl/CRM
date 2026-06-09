@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     'documents',
     'parts',
     'assistant',
+    'calendar_app',
 ]
 
 MIDDLEWARE = [

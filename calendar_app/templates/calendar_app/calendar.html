@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Calendar{% endblock %}
+
+{% block breadcrumb %}Calendar{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto py-6 px-4">
+    <div class="border border-light dark:border-[#222]">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-light dark:border-[#222]">
+            <div class="flex items-center gap-3">
+                <a href="?month={{ prev_month.month }}&year={{ prev_month.year }}"
+                   class="p-1.5 hover:bg-gray-100 dark:hover:bg-[#1a1a1a] rounded transition-colors">
+                    <i data-lucide="chevron-left" class="w-5 h-5 text-gray-500"></i>
+                </a>
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ month_name }} {{ year }}</h2>
+                <a href="?month={{ next_month.month }}&year={{ next_month.year }}"
+                   class="p-1.5 hover:bg-gray-100 dark:hover:bg-[#1a1a1a] rounded transition-colors">
+                    <i data-lucide="chevron-right" class="w-5 h-5 text-gray-500"></i>
+                </a>
+            </div>
+            <form method="get" class="flex items-center gap-2">
+                <select name="month"
+                        onchange="this.form.submit()"
+                        class="px-3 py-1.5 border border-[#e8e8e8] dark:border-[#222] dark:bg-[#111] dark:text-white text-[13px] outline-none focus:border-violet-300 transition-colors">
+                    {% for m_num, m_name in months %}
+                    <option value="{{ m_num }}" {% if m_num == month %}selected{% endif %}>{{ m_name }}</option>
+                    {% endfor %}
+                </select>
+                <select name="year"
+                        onchange="this.form.submit()"
+                        class="px-3 py-1.5 border border-[#e8e8e8] dark:border-[#222] dark:bg-[#111] dark:text-white text-[13px] outline-none focus:border-violet-300 transition-colors">
+                    {% for y in years %}
+                    <option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
+
+        <table class="w-full table-fixed">
+            <thead>
+                <tr class="border-b border-light dark:border-[#222]">
+                    <th class="py-2 text-[11px] uppercase tracking-wider text-gray-400 dark:text-gray-500 font-medium">Sun</th>
+                    <th class="py-2 text-[11px] uppercase tracking-wider text-gray-400 dark:text-gray-500 font-medium">Mon</th>
+                    <th class="py-2 text-[11px] uppercase tracking-wider text-gray-400 dark:text-gray-500 font-medium">Tue</th>
+                    <th class="py-2 text-[11px] uppercase tracking-wider text-gray-400 dark:text-gray-500 font-medium">Wed</th>
+                    <th class="py-2 text-[11px] uppercase tracking-wider text-gray-400 dark:text-gray-500 font-medium">Thu</th>
+                    <th class="py-2 text-[11px] uppercase tracking-wider text-gray-400 dark:text-gray-500 font-medium">Fri</th>
+                    <th class="py-2 text-[11px] uppercase tracking-wider text-gray-400 dark:text-gray-500 font-medium">Sat</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for week in weeks %}
+                <tr class="border-b border-light dark:border-[#222] last:border-b-0">
+                    {% for d in week %}
+                    <td class="py-1 text-center align-top">
+                        {% if d.day %}
+                        <div class="inline-flex items-center justify-center w-10 h-10 rounded text-[14px]
+                            {% if d.is_today %}bg-indigo-600 text-white font-semibold
+                            {% else %}text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-[#1a1a1a]{% endif %}
+                            transition-colors cursor-default">
+                            {{ d.day }}
+                        </div>
+                        {% endif %}
+                    </td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
