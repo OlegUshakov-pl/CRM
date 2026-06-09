@@ -76,7 +76,7 @@ class BrowserService:
             return FetchResult(ok=False, error='Сайт в чёрном списке.')
         try:
             socket.setdefaulttimeout(self.timeout)
-            req = urllib.request.Request(url, headers={'User-Agent': 'CRM-Assistant/1.0'})
+            req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36'})
             with urllib.request.urlopen(req, timeout=self.timeout, context=self._ctx) as resp:
                 content = resp.read()
                 ct = resp.headers.get_content_type()
@@ -158,10 +158,46 @@ class BrowserService:
             b'\xff?\x00\x05\xfe\x02\xfe\xa3\xee\x9c\xee\x00\x00\x00\x00IEND\xaeB`\x82'
         )
 
+    def _parse_ddg_results(self, html: str, max_results: int) -> list:
+        items = []
+        blocks = re.split(r'<div[^>]*class="[^"]*result[^"]*"[^>]*>', html)
+        for block in blocks[1:]:
+            if len(items) >= max_results:
+                break
+            title_match = re.search(r'<a[^>]*class="[^"]*result__a[^"]*"[^>]*href="([^"]*)"[^>]*>(.*?)</a>', block, re.DOTALL)
+            snippet_match = re.search(r'<a[^>]*class="[^"]*result__snippet[^"]*"[^>]*>(.*?)</a>', block, re.DOTALL)
+            if not title_match:
+                continue
+            url_raw = title_match.group(1)
+            title = re.sub(r'<[^>]+>', '', title_match.group(2)).strip()
+            snippet = ''
+            if snippet_match:
+                snippet = re.sub(r'<[^>]+>', '', snippet_match.group(1)).strip()
+            if url_raw.startswith('//'):
+                url_raw = 'https:' + url_raw
+            elif url_raw.startswith('/'):
+                url_raw = 'https://duckduckgo.com' + url_raw
+            import urllib.parse as _up
+            parsed = _up.urlparse(url_raw)
+            if parsed.hostname and 'duckduckgo' in parsed.hostname:
+                qs = _up.parse_qs(parsed.query)
+                actual = qs.get('uddg', [None])[0] or qs.get('ru', [None])[0] or url_raw
+            else:
+                actual = url_raw
+            items.append({'title': title, 'url': actual, 'snippet': snippet})
+        return items
+
     def search_web(self, query: str, max_results: int = 8) -> list:
         """Search DuckDuckGo and return list of {title, url, snippet}."""
-        import urllib.parse
-        encoded = urllib.parse.quote(query)
+        try:
+            from duckduckgo_search import DDGS
+            ddgs = DDGS()
+            raw = list(ddgs.text(query, max_results=max_results))
+            return [{'title': r.get('title', ''), 'url': r.get('href', ''), 'snippet': r.get('body', '')} for r in raw]
+        except Exception as exc:
+            logger.warning('DDGS text search failed, falling back to HTML: %s', exc)
+        import urllib.parse as _up
+        encoded = _up.quote(query)
         search_url = f'https://html.duckduckgo.com/html/?q={encoded}'
         result = self.fetch(search_url)
         if not result.ok:
@@ -170,45 +206,21 @@ class BrowserService:
             html = result.content.decode('utf-8', errors='ignore')
         except Exception:
             html = result.content.decode('utf-8', errors='ignore')
-
-        items = []
-        # Parse result blocks: <a class="result__a" href="...">title</a>
-        # followed by <a class="result__snippet" ...>snippet</a>
-        blocks = re.split(r'<div[^>]*class="[^"]*result[^"]*"[^>]*>', html)
-        for block in blocks[1:]:
-            if len(items) >= max_results:
-                break
-            title_match = re.search(r'<a[^>]*class="[^"]*result__a[^"]*"[^>]*href="([^"]*)"[^>]*>(.*?)</a>', block, re.DOTALL)
-            snippet_match = re.search(r'<a[^>]*class="[^"]*result__snippet[^"]*"[^>]*>(.*?)</a>', block, re.DOTALL)
-            if not title_match:
-                continue
-            url_raw = title_match.group(1)
-            title = re.sub(r'<[^>]+>', '', title_match.group(2)).strip()
-            snippet = ''
-            if snippet_match:
-                snippet = re.sub(r'<[^>]+>', '', snippet_match.group(1)).strip()
-            # DuckDuckGo wraps redirect URLs
-            if url_raw.startswith('//'):
-                url_raw = 'https:' + url_raw
-            elif url_raw.startswith('/'):
-                url_raw = 'https://duckduckgo.com' + url_raw
-            # Decode redirect URL if present
-            parsed = urllib.parse.urlparse(url_raw)
-            if parsed.hostname and 'duckduckgo' in parsed.hostname:
-                qs = urllib.parse.parse_qs(parsed.query)
-                actual = qs.get('uddg', [None])[0] or qs.get('ru', [None])[0] or url_raw
-            else:
-                actual = url_raw
-            items.append({'title': title, 'url': actual, 'snippet': snippet})
-        return items
+        return self._parse_ddg_results(html, max_results)
 
     def search_news(self, query: str, max_results: int = 8, site: str = '') -> list:
         """Search DuckDuckGo news and return list of {title, url, snippet}."""
-        import urllib.parse
-        q = query
-        if site:
-            q = f'{query} site:{site}'
-        encoded = urllib.parse.quote(q)
+        q = f'{query} site:{site}' if site else query
+        try:
+            from duckduckgo_search import DDGS
+            ddgs = DDGS()
+            raw = list(ddgs.news(q, max_results=max_results))
+            key = 'url' if 'url' in (raw[0] if raw else {}) else 'link'
+            return [{'title': r.get('title', ''), 'url': r.get(key, ''), 'snippet': r.get('body', '')} for r in raw]
+        except Exception as exc:
+            logger.warning('DDGS news search failed, falling back to HTML: %s', exc)
+        import urllib.parse as _up
+        encoded = _up.quote(q)
         search_url = f'https://html.duckduckgo.com/html/?q={encoded}&iar=news'
         result = self.fetch(search_url)
         if not result.ok:
@@ -217,33 +229,7 @@ class BrowserService:
             html = result.content.decode('utf-8', errors='ignore')
         except Exception:
             html = result.content.decode('utf-8', errors='ignore')
-
-        items = []
-        blocks = re.split(r'<div[^>]*class="[^"]*result[^"]*"[^>]*>', html)
-        for block in blocks[1:]:
-            if len(items) >= max_results:
-                break
-            title_match = re.search(r'<a[^>]*class="[^"]*result__a[^"]*"[^>]*href="([^"]*)"[^>]*>(.*?)</a>', block, re.DOTALL)
-            snippet_match = re.search(r'<a[^>]*class="[^"]*result__snippet[^"]*"[^>]*>(.*?)</a>', block, re.DOTALL)
-            if not title_match:
-                continue
-            url_raw = title_match.group(1)
-            title = re.sub(r'<[^>]+>', '', title_match.group(2)).strip()
-            snippet = ''
-            if snippet_match:
-                snippet = re.sub(r'<[^>]+>', '', snippet_match.group(1)).strip()
-            if url_raw.startswith('//'):
-                url_raw = 'https:' + url_raw
-            elif url_raw.startswith('/'):
-                url_raw = 'https://duckduckgo.com' + url_raw
-            parsed = urllib.parse.urlparse(url_raw)
-            if parsed.hostname and 'duckduckgo' in parsed.hostname:
-                qs = urllib.parse.parse_qs(parsed.query)
-                actual = qs.get('uddg', [None])[0] or qs.get('ru', [None])[0] or url_raw
-            else:
-                actual = url_raw
-            items.append({'title': title, 'url': actual, 'snippet': snippet})
-        return items
+        return self._parse_ddg_results(html, max_results)
 
     def screenshot_path(self, url: str) -> str:
         from django.conf import settings
