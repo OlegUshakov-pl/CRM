@@ -56,6 +56,11 @@ class ProjectFileSystemStorage(FileSystemStorage):
         if root:
             os.makedirs(root, exist_ok=True)
             return root
+        from django.conf import settings as dj_settings
+        if hasattr(dj_settings, 'PROJECT_ROOT_PATH') and dj_settings.PROJECT_ROOT_PATH:
+            root = dj_settings.PROJECT_ROOT_PATH
+            os.makedirs(root, exist_ok=True)
+            return root
         return self._fallback or super().location
 
     def path(self, name):
