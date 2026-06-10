@@ -53,6 +53,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'core.context_processors.app_version',
+                'core.context_processors.sidebar_projects',
             ],
         },
     },
