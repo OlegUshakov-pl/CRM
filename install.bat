@@ -1,36 +1,96 @@
 @echo off
-echo Starting Django CRM installation...
+chcp 65001 >nul
+echo ==================================================
+echo     Django CRM — Installation
+echo ==================================================
+echo.
 
-echo Cloning the repository...
-git clone https://github.com/OlegUhakov/CRM.git
-cd CRM
+:: Detect if we're inside CRM folder
+if exist "manage.py" (
+    echo [*] Already inside CRM project folder.
+    set "PROJECT_DIR=%CD%"
+) else (
+    if exist "CRM\manage.py" (
+        echo [*] Found CRM subfolder, switching...
+        cd CRM
+        set "PROJECT_DIR=%CD%"
+    ) else (
+        echo [*] Cloning repository...
+        git clone https://github.com/OlegUhakov/CRM.git
+        if errorlevel 1 (
+            echo [!] Git clone failed. Aborting.
+            pause
+            exit /b 1
+        )
+        cd CRM
+        set "PROJECT_DIR=%CD%"
+    )
+)
 
-echo Creating virtual environment...
-python -m venv venv
+echo [*] Project directory: %PROJECT_DIR%
 
-echo Activating venv and upgrading pip...
-cmd /c "venv\Scripts\activate && python -m pip install --upgrade pip"
+:: Virtual environment
+if exist "venv\Scripts\python.exe" (
+    echo [*] Virtual environment already exists.
+) else (
+    echo [*] Creating virtual environment...
+    python -m venv venv
+    if errorlevel 1 (
+        echo [!] Failed to create venv. Aborting.
+        pause
+        exit /b 1
+    )
+)
 
-echo Installing Python dependencies...
-cmd /c "venv\Scripts\activate && python -m pip install -r requirements.txt"
+set "PYTHON=%PROJECT_DIR%\venv\Scripts\python.exe"
+set "PIP=%PROJECT_DIR%\venv\Scripts\pip.exe"
 
-echo Installing Node dependencies...
-cmd /c "npm install"
+echo [*] Upgrading pip...
+"%PYTHON%" -m pip install --upgrade pip
 
-echo Building Tailwind CSS styles...
-cmd /c "npm run build"
+echo [*] Installing Python dependencies...
+"%PIP%" install -r requirements.txt
+if errorlevel 1 (
+    echo [!] pip install failed.
+    pause
+    exit /b 1
+)
 
-echo Running database migrations...
-cmd /c "venv\Scripts\activate && python manage.py migrate"
+echo [*] Installing Node dependencies...
+call npm install
+if errorlevel 1 (
+    echo [!] npm install failed.
+    pause
+    exit /b 1
+)
 
-echo Creating superuser...
-cmd /c "venv\Scripts\activate && python manage.py createsuperuser"
+echo [*] Building Tailwind CSS styles...
+call npm run build
+if errorlevel 1 (
+    echo [!] Tailwind build failed.
+    pause
+    exit /b 1
+)
 
-echo --------------------------------------------------
-echo Installation completed successfully!
-echo To start the server, run:
-echo cd CRM
-echo venv\Scripts\activate
-echo python manage.py runserver
-echo --------------------------------------------------
+echo [*] Running database migrations...
+"%PYTHON%" manage.py migrate
+if errorlevel 1 (
+    echo [!] Migrations failed.
+    pause
+    exit /b 1
+)
+
+echo [*] Creating superuser...
+"%PYTHON%" manage.py createsuperuser
+
+echo.
+echo ==================================================
+echo     Installation completed!
+echo ==================================================
+echo.
+echo To start the development server:
+echo     cd %PROJECT_DIR%
+echo     venv\Scripts\activate
+echo     python manage.py runserver
+echo.
 pause
