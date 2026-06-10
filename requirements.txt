@@ -1,5 +1,5 @@
 asgiref==3.11.1
-django==6.0.5
+django==6.0.6
 Pillow==12.2.0
 sqlparse==0.5.5
 tzdata==2026.2
