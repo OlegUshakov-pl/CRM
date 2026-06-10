@@ -509,11 +509,7 @@
 
         document.addEventListener('contactSaved', function() {
             closeSlideOver();
-            var contactList = document.getElementById('contact-list');
-            if (contactList) {
-                htmx.ajax('GET', '{% url "contacts:contact_list" %}', {target: '#contact-list', swap: 'innerHTML'});
-            }
-            refreshSection("contacts");
+            window.location.href = '{% url "contacts:contact_list" %}';
         });
     </script>
     {% block extra_scripts %}{% endblock %}
