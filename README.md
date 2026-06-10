@@ -28,6 +28,7 @@
 | **Projects**     | Full project lifecycle (statuses, budget, dates, image gallery, ZIP export/import) |
 | **Materials/BOM**| Bill of Materials per project (quantity, units, prices, categories) |
 | **Tasks**        | Task management with priorities, statuses, due dates, and filtering |
+| **Library**      | Personal knowledge base: rich text editor (Quill.js), file upload (PDF, images, DOCX, TXT, MD), categories, tags, favorites, attachments, grid/list views, full-text search |
 | **Notes**        | Universal notes linkable to projects, companies, or contacts |
 | **Documents**    | File upload with preview (images, PDF, text), filterable by type and project |
 | **Parts**        | Engineering drawings and 3D models (.stp, .ipt, .sldprt, .ics, .sldasm, .iam) |
@@ -151,6 +152,7 @@ CRM/
   tasks/             Task management (priorities, statuses, due dates)
   notes/             Universal notes (linked to projects, companies, contacts)
   documents/         File upload with preview (images, PDF, text)
+  library/           Knowledge base: rich text, file upload, categories, tags, Quill editor
   parts/             Drawings and 3D models (.stp, .ipt, .sldprt, .ics, etc.)
   assistant/         AI chat (Ollama), browser agent, AI file management, logging
     services/        Command registry, handlers, browser, files, i18n
@@ -191,6 +193,9 @@ All business models inherit from `TimeStampedModel` (abstract base), which provi
 | **Task**      | `title`, `slug`, `description`, `status`, `priority`, `due_date` | FK → Project |
 | **Note**      | `title`, `slug`, `content`, `date` | FK → Project, Company, Contact (all nullable) |
 | **Document**  | `number`, `size`, `file`, `file_type` | FK → Project |
+| **LibraryItem** | `title`, `slug`, `content`, `description`, `file`, `file_type`, `is_favorite` | FK → Category (library); M2M → Tag |
+| **Category** (library) | `name`, `color`, `icon` | FK → self (parent) |
+| **Tag**       | `name`, `slug` | Referenced by LibraryItem |
 | **Part**      | `number`, `size`, `rev`, `file` | FK → Project, Category (parts) |
 | **Category** (parts) | `name` | Referenced by Part |
 | **Deal**      | `name`, `slug`, `description`, `status`, `priority`, `value`, `due_date` | FK → Company; M2M → Contact; FK → User (assigned_to) |
@@ -271,6 +276,7 @@ python manage.py runserver
 | `/materials/`  | materials |
 | `/deals/`      | generator (Deal pipeline) |
 | `/documents/`  | documents |
+| `/library/`    | library (knowledge base) |
 | `/parts/`      | parts |
 | `/assistant/`  | assistant (AI chat) |
 | `/calendar/`   | calendar_app (Calendar) |
