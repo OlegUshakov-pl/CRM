@@ -45,7 +45,10 @@ def contact_create(request):
             contact = form.save(commit=False)
             contact.created_by = request.user
             contact.save()
-            if project_slug:
+            selected_project = form.cleaned_data.get('projects')
+            if selected_project:
+                selected_project.contacts.add(contact)
+            elif project_slug:
                 from projects.models import Project
                 project = Project.objects.filter(slug=project_slug).first()
                 if project:
@@ -68,6 +71,9 @@ def contact_edit(request, slug):
         form = ContactForm(request.POST, request.FILES, instance=contact)
         if form.is_valid():
             form.save()
+            selected_project = form.cleaned_data.get('projects')
+            if selected_project:
+                selected_project.contacts.add(contact)
             log_activity(request.user, 'updated', f'Contact "{contact.get_full_name()}"', contact)
             messages.success(request, 'Contact updated successfully.')
             if request.headers.get('HX-Request'):
