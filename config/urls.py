@@ -18,6 +18,7 @@ urlpatterns = [
     path('parts/', include('parts.urls')),
     path('assistant/', include('assistant.urls')),
     path('calendar/', include('calendar_app.urls')),
+    path('library/', include('library.urls')),
 ]
 
 if settings.DEBUG:

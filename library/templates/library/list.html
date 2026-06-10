@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+{% block title %}Library - CRM{% endblock %}
+{% block breadcrumb %}Library / All Documents{% endblock %}
+{% block content %}
+<div class="space-y-6">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">All Documents</h1>
+            <p class="text-gray-500 dark:text-gray-400 mt-1">Browse your knowledge base</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <div class="flex border border-gray-300 dark:border-gray-600 rounded overflow-hidden">
+                <a href="?{% if query %}q={{ query }}&{% endif %}{% if current_category %}category={{ current_category }}&{% endif %}{% if current_type %}type={{ current_type }}&{% endif %}{% if favorites_only %}favorites=1&{% endif %}view=list" class="px-3 py-1.5 text-sm {% if view_mode == 'list' %}bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white{% else %}bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700{% endif %} transition-colors">
+                    <i data-lucide="list" class="w-4 h-4"></i>
+                </a>
+                <a href="?{% if query %}q={{ query }}&{% endif %}{% if current_category %}category={{ current_category }}&{% endif %}{% if current_type %}type={{ current_type }}&{% endif %}{% if favorites_only %}favorites=1&{% endif %}view=grid" class="px-3 py-1.5 text-sm {% if view_mode == 'grid' %}bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white{% else %}bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700{% endif %} transition-colors">
+                    <i data-lucide="grid-3x3" class="w-4 h-4"></i>
+                </a>
+            </div>
+            <a href="{% url 'library:create' %}" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white text-[14px] font-medium rounded-[20px] shadow-[0_2px_2px_rgba(0,0,0,0.25)] transition-colors">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                New Document
+            </a>
+        </div>
+    </div>
+
+    <div class="flex flex-col sm:flex-row gap-4">
+        <div class="w-full sm:w-56 flex-shrink-0 space-y-4">
+            <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-4">
+                <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-3">Filters</h3>
+                <div class="space-y-3">
+                    <div>
+                        <label class="text-xs text-gray-500 dark:text-gray-400 block mb-1">Category</label>
+                        <select onchange="window.location.href=this.value" class="w-full px-3 py-1.5 text-sm border border-[#e8e8e8] dark:border-gray-600 dark:bg-gray-800 dark:text-white outline-none focus:border-violet-300 transition-colors">
+                            <option value="?{% if query %}q={{ query }}&{% endif %}{% if current_type %}type={{ current_type }}&{% endif %}{% if favorites_only %}favorites=1&{% endif %}view={{ view_mode }}">All Categories</option>
+                            {% for cat in categories %}
+                            <option value="?{% if query %}q={{ query }}&{% endif %}category={{ cat.slug }}{% if current_type %}&type={{ current_type }}{% endif %}{% if favorites_only %}&favorites=1{% endif %}&view={{ view_mode }}" {% if current_category == cat.slug %}selected{% endif %}>{{ cat.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-500 dark:text-gray-400 block mb-1">File Type</label>
+                        <select onchange="window.location.href=this.value" class="w-full px-3 py-1.5 text-sm border border-[#e8e8e8] dark:border-gray-600 dark:bg-gray-800 dark:text-white outline-none focus:border-violet-300 transition-colors">
+                            <option value="?{% if query %}q={{ query }}&{% endif %}{% if current_category %}category={{ current_category }}&{% endif %}{% if favorites_only %}favorites=1&{% endif %}view={{ view_mode }}">All Types</option>
+                            {% for key, label in file_types %}
+                            <option value="?{% if query %}q={{ query }}&{% endif %}{% if current_category %}category={{ current_category }}&{% endif %}type={{ key }}{% if favorites_only %}&favorites=1{% endif %}&view={{ view_mode }}" {% if current_type == key %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
+                            <input type="checkbox" onchange="window.location.href=this.checked?'?{% if query %}q={{ query }}&{% endif %}{% if current_category %}category={{ current_category }}&{% endif %}{% if current_type %}type={{ current_type }}&{% endif %}favorites=1&view={{ view_mode }}':'?{% if query %}q={{ query }}&{% endif %}{% if current_category %}category={{ current_category }}&{% endif %}{% if current_type %}type={{ current_type }}&{% endif %}view={{ view_mode }}'" {% if favorites_only %}checked{% endif %} class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                            Favorites only
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex-1 min-w-0">
+            <div class="relative mb-4">
+                <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"></i>
+                <input type="text" placeholder="Search documents..." value="{{ query }}" hx-get="{% url 'library:list' %}" hx-trigger="keyup changed delay:300ms" hx-target="#library-items" hx-swap="innerHTML" name="q" onkeydown="if(event.key==='Enter')event.preventDefault()" class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-[14px] outline-none focus:border-violet-300 transition-colors">
+            </div>
+
+            <div id="library-items">
+                {% if items %}
+                    {% if view_mode == 'grid' %}
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {% for item in items %}
+                        <a href="{% url 'library:detail' item.slug %}" class="block bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow p-4">
+                            <div class="flex items-start justify-between mb-3">
+                                {% if item.file_type == 'pdf' %}
+                                    <i data-lucide="file-text" class="w-8 h-8 text-red-500"></i>
+                                {% elif item.file_type == 'image' %}
+                                    {% if item.file %}<img src="{{ item.file.url }}" alt="{{ item.title }}" class="w-8 h-8 object-cover rounded">{% else %}<i data-lucide="image" class="w-8 h-8 text-blue-500"></i>{% endif %}
+                                {% elif item.content %}
+                                    <i data-lucide="sticky-note" class="w-8 h-8 text-amber-500"></i>
+                                {% else %}
+                                    <i data-lucide="file" class="w-8 h-8 text-gray-400"></i>
+                                {% endif %}
+                                {% if item.is_favorite %}
+                                <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
+                                {% endif %}
+                            </div>
+                            <h3 class="font-medium text-gray-900 dark:text-white truncate">{{ item.title }}</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">{{ item.description|default:item.content|striptags|truncatewords:20|default:'No description' }}</p>
+                            <div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+                                {% if item.category %}
+                                <span class="text-xs px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400">{{ item.category.name }}</span>
+                                {% else %}
+                                <span></span>
+                                {% endif %}
+                                <span class="text-xs text-gray-400">{{ item.created_at|date:'M d, Y' }}</span>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="space-y-2">
+                        {% for item in items %}
+                        <a href="{% url 'library:detail' item.slug %}" class="block bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow p-4">
+                            <div class="flex items-center justify-between gap-4">
+                                <div class="flex items-center gap-3 min-w-0">
+                                    {% if item.file_type == 'pdf' %}
+                                        <i data-lucide="file-text" class="w-5 h-5 text-red-500 flex-shrink-0"></i>
+                                    {% elif item.file_type == 'image' %}
+                                        <i data-lucide="image" class="w-5 h-5 text-blue-500 flex-shrink-0"></i>
+                                    {% elif item.file_type == 'md' or item.file_type == 'txt' %}
+                                        <i data-lucide="file-type" class="w-5 h-5 text-gray-500 flex-shrink-0"></i>
+                                    {% elif item.content %}
+                                        <i data-lucide="sticky-note" class="w-5 h-5 text-amber-500 flex-shrink-0"></i>
+                                    {% else %}
+                                        <i data-lucide="file" class="w-5 h-5 text-gray-500 flex-shrink-0"></i>
+                                    {% endif %}
+                                    <div class="min-w-0">
+                                        <p class="font-medium text-gray-900 dark:text-white truncate">{{ item.title }}</p>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400 truncate">{{ item.description|default:item.content|striptags|truncatewords:15|default:'No description' }}</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-3 flex-shrink-0">
+                                    {% if item.category %}
+                                    <span class="text-xs px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400">{{ item.category.name }}</span>
+                                    {% endif %}
+                                    <span class="text-xs text-gray-400">{{ item.created_at|date:'M d, Y' }}</span>
+                                    {% if item.is_favorite %}
+                                    <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    {% include 'includes/pagination.html' with page_obj=items %}
+                {% else %}
+                <div class="text-center py-16 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                    <i data-lucide="book-open" class="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4"></i>
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">No documents found</h3>
+                    <p class="text-gray-500 dark:text-gray-400 mb-4">{% if query %}No results for "{{ query }}"{% else %}Your library is empty{% endif %}</p>
+                    <a href="{% url 'library:create' %}" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white text-[14px] font-medium rounded-[20px] shadow-[0_2px_2px_rgba(0,0,0,0.25)] transition-colors">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                        Create Document
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,104 @@
+from django.db import models
+from django.utils.text import slugify
+from core.models import TimeStampedModel, generate_unique_slug
+
+
+class Category(TimeStampedModel):
+    name = models.CharField(max_length=255)
+    slug = models.SlugField(max_length=255, unique=True, blank=True, null=True)
+    color = models.CharField(max_length=7, blank=True, null=True)
+    icon = models.CharField(max_length=50, blank=True, null=True)
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='children')
+
+    class Meta:
+        verbose_name_plural = 'Categories'
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = generate_unique_slug(self, 'name', Category)
+        super().save(*args, **kwargs)
+
+
+class Tag(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    slug = models.SlugField(max_length=100, unique=True, blank=True, null=True)
+
+    class Meta:
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
+
+
+class LibraryItem(TimeStampedModel):
+    FILE_TYPE_CHOICES = [
+        ('pdf', 'PDF'),
+        ('djvu', 'DJVU'),
+        ('docx', 'DOCX'),
+        ('txt', 'TXT'),
+        ('rtf', 'RTF'),
+        ('md', 'MD'),
+        ('image', 'Image'),
+        ('other', 'Other'),
+    ]
+
+    title = models.CharField(max_length=500)
+    slug = models.SlugField(max_length=255, unique=True, blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
+    content = models.TextField(blank=True, null=True)
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, related_name='items')
+    tags = models.ManyToManyField(Tag, blank=True, related_name='items')
+    file = models.FileField(upload_to='library/files/', blank=True, null=True)
+    file_type = models.CharField(max_length=10, choices=FILE_TYPE_CHOICES, blank=True, null=True)
+    preview_image = models.ImageField(upload_to='library/previews/', blank=True, null=True)
+    is_favorite = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return self.title
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = generate_unique_slug(self, 'title', LibraryItem)
+        if self.file and not self.file_type:
+            self.file_type = self._detect_file_type()
+        super().save(*args, **kwargs)
+
+    def _detect_file_type(self):
+        ext = self.file.name.split('.')[-1].lower() if '.' in self.file.name else ''
+        mapping = {
+            'pdf': 'pdf', 'djvu': 'djvu', 'docx': 'docx',
+            'txt': 'txt', 'rtf': 'rtf', 'md': 'md',
+            'jpg': 'image', 'jpeg': 'image', 'png': 'image',
+            'webp': 'image', 'gif': 'image',
+        }
+        return mapping.get(ext, 'other')
+
+
+class LibraryAttachment(models.Model):
+    item = models.ForeignKey(LibraryItem, on_delete=models.CASCADE, related_name='attachments')
+    file = models.FileField(upload_to='library/attachments/')
+    name = models.CharField(max_length=500, blank=True)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['uploaded_at']
+
+    def __str__(self):
+        return self.name or self.file.name
+
+    def save(self, *args, **kwargs):
+        if not self.name:
+            self.name = self.file.name.split('/')[-1] if '/' in self.file.name else self.file.name
+        super().save(*args, **kwargs)
