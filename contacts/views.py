@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
+from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
@@ -52,7 +53,14 @@ def contact_create(request):
             log_activity(request.user, 'created', f'Contact "{contact.get_full_name()}"', contact)
             messages.success(request, 'Contact created successfully.')
             if request.headers.get('HX-Request'):
-                return HttpResponse('<script>closeSlideOver(); refreshSection("contacts")</script>')
+                list_url = reverse('contacts:contact_list')
+                return HttpResponse(
+                    f'<script>'
+                    f'closeSlideOver(); '
+                    f'if(document.getElementById("contact-list")) htmx.ajax("GET","{list_url}",{{target:"#contact-list",swap:"innerHTML"}}); '
+                    f'refreshSection("contacts")'
+                    f'</script>'
+                )
             return redirect('contacts:contact_list')
     return render(request, 'contacts/contact_form.html', {'form': form, 'title': 'Add Contact', 'project_slug': project_slug})
 
@@ -68,7 +76,14 @@ def contact_edit(request, slug):
             log_activity(request.user, 'updated', f'Contact "{contact.get_full_name()}"', contact)
             messages.success(request, 'Contact updated successfully.')
             if request.headers.get('HX-Request'):
-                return HttpResponse('<script>closeSlideOver(); refreshSection("contacts")</script>')
+                list_url = reverse('contacts:contact_list')
+                return HttpResponse(
+                    f'<script>'
+                    f'closeSlideOver(); '
+                    f'if(document.getElementById("contact-list")) htmx.ajax("GET","{list_url}",{{target:"#contact-list",swap:"innerHTML"}}); '
+                    f'refreshSection("contacts")'
+                    f'</script>'
+                )
             return redirect('contacts:contact_list')
     return render(request, 'contacts/contact_form.html', {'form': form, 'title': 'Edit Contact', 'contact': contact})
 
