@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils.text import slugify
 from core.models import TimeStampedModel, generate_unique_slug
+from .storage import library_file_storage
 
 
 class Category(TimeStampedModel):
@@ -57,9 +58,9 @@ class LibraryItem(TimeStampedModel):
     content = models.TextField(blank=True, null=True)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, related_name='items')
     tags = models.ManyToManyField(Tag, blank=True, related_name='items')
-    file = models.FileField(upload_to='library/files/', blank=True, null=True)
+    file = models.FileField(upload_to='library/files/', blank=True, null=True, storage=library_file_storage)
     file_type = models.CharField(max_length=10, choices=FILE_TYPE_CHOICES, blank=True, null=True)
-    preview_image = models.ImageField(upload_to='library/previews/', blank=True, null=True)
+    preview_image = models.ImageField(upload_to='library/previews/', blank=True, null=True, storage=library_file_storage)
     is_favorite = models.BooleanField(default=False)
 
     class Meta:
@@ -88,7 +89,7 @@ class LibraryItem(TimeStampedModel):
 
 class LibraryAttachment(models.Model):
     item = models.ForeignKey(LibraryItem, on_delete=models.CASCADE, related_name='attachments')
-    file = models.FileField(upload_to='library/attachments/')
+    file = models.FileField(upload_to='library/attachments/', storage=library_file_storage)
     name = models.CharField(max_length=500, blank=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
