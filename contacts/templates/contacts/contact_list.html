@@ -16,7 +16,7 @@
 
     <div class="relative">
         <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"></i>
-        <input type="text" placeholder="Search contacts..." value="{{ query }}" hx-get="{% url 'contacts:contact_list' %}" hx-trigger="keyup changed delay:300ms" hx-target="#contact-list" name="q" class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-[14px] outline-none focus:border-violet-300 transition-colors">
+        <input type="text" placeholder="Search contacts..." value="{{ query }}" hx-get="{% url 'contacts:contact_list' %}" hx-trigger="keyup changed delay:300ms" hx-target="#contact-list" hx-swap="innerHTML" name="q" onkeydown="if(event.key==='Enter') event.preventDefault()" class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-[14px] outline-none focus:border-violet-300 transition-colors">
     </div>
 
     <div id="contact-list" class="space-y-3">
