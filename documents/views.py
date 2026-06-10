@@ -146,7 +146,9 @@ def document_save(request, project_slug):
         else:
             Document.objects.create(project=project, number=form.cleaned_data.get('number', ''), file_type=file_type)
         if request.headers.get('HX-Request'):
-            return HttpResponse('<script>closeSlideOver(); location.reload();</script>')
+            response = HttpResponse()
+            response['HX-Refresh'] = 'true'
+            return response
         messages.success(request, 'Document(s) added successfully.')
         return redirect('documents:project', project_slug=project_slug)
     return render(request, 'documents/document_form.html', {'form': form, 'project': project, 'title': 'Add Document'})
@@ -186,7 +188,9 @@ def document_common_save(request):
         else:
             Document.objects.create(project=project, number=form.cleaned_data.get('number', ''), file_type=file_type)
         if request.headers.get('HX-Request'):
-            return HttpResponse('<script>closeSlideOver(); refreshSection("documents")</script>')
+            response = HttpResponse()
+            response['HX-Refresh'] = 'true'
+            return response
         messages.success(request, 'Document added successfully.')
         return redirect('documents:list')
     return render(request, 'documents/document_common_form.html', {'form': form, 'title': 'Add Document'})
@@ -209,7 +213,9 @@ def document_update(request, pk):
             doc.file = old_file
         doc.save()
         if request.headers.get('HX-Request'):
-            return HttpResponse('<script>closeSlideOver(); location.reload();</script>')
+            response = HttpResponse()
+            response['HX-Refresh'] = 'true'
+            return response
         messages.success(request, 'Document updated successfully.')
         if doc.project:
             return redirect('documents:project', project_slug=doc.project.slug)
