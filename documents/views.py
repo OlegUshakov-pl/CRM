@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
 from projects.models import Project
-from projects.utils import ensure_project_subfolder, sanitize_folder_name, get_subfolder_name
+from projects.utils import ensure_project_subfolder, sanitize_folder_name, get_subfolder_name, get_project_root_path
 from .models import Document
 from .forms import DocumentForm, CommonDocumentForm
 
@@ -136,8 +136,7 @@ def document_save(request, project_slug):
                 'other': get_subfolder_name(project.number, 'subfolder_documents', 'documents'),
             }
             subfolder = subfolder_map.get(file_type, get_subfolder_name(project.number, 'subfolder_documents', 'documents'))
-            from core.models import AppSetting
-            root_path = AppSetting.get_value('project_root_path', '')
+            root_path = get_project_root_path()
             if root_path:
                 os.makedirs(os.path.join(root_path, project_folder, subfolder), exist_ok=True)
         if up_files:
@@ -177,8 +176,7 @@ def document_common_save(request):
                 'other': get_subfolder_name(project.number, 'subfolder_documents', 'documents'),
             }
             subfolder = subfolder_map.get(file_type, get_subfolder_name(project.number, 'subfolder_documents', 'documents'))
-            from core.models import AppSetting
-            root_path = AppSetting.get_value('project_root_path', '')
+            root_path = get_project_root_path()
             if root_path:
                 os.makedirs(os.path.join(root_path, project_folder, subfolder), exist_ok=True)
         if up_files:

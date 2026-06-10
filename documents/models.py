@@ -68,8 +68,8 @@ class Document(models.Model):
 
     @property
     def filepath(self):
-        from core.models import AppSetting
-        root_path = AppSetting.get_value('project_root_path', '')
+        from projects.utils import get_project_root_path
+        root_path = get_project_root_path()
         if root_path and self.file:
             return os.path.join(root_path, self.file.name)
         return os.path.join(settings.MEDIA_ROOT, self.file.name) if self.file else ''

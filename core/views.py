@@ -13,6 +13,7 @@ from materials.models import Material
 from parts.models import Part
 from generator.models import Deal
 from .models import AppSetting
+from projects.utils import get_project_root_path
 
 
 @login_required
@@ -93,7 +94,7 @@ def get_setting(request, key):
 
 @login_required
 def serve_project_file(request, file_path):
-    root_path = AppSetting.get_value('project_root_path', '')
+    root_path = get_project_root_path()
     if root_path:
         full_path = os.path.normpath(os.path.join(root_path, file_path))
         if full_path.startswith(os.path.normpath(root_path)) and os.path.exists(full_path):

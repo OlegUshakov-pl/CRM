@@ -4,6 +4,15 @@ from django.core.files.storage import FileSystemStorage
 from core.models import AppSetting
 
 
+def get_project_root_path():
+    root = AppSetting.get_value('project_root_path', '')
+    if root:
+        return root
+    if hasattr(settings, 'PROJECT_ROOT_PATH') and settings.PROJECT_ROOT_PATH:
+        return settings.PROJECT_ROOT_PATH
+    return ''
+
+
 def sanitize_folder_name(name):
     invalid_chars = '<>:"/\\|?*'
     for c in invalid_chars:
@@ -21,7 +30,7 @@ def get_subfolder_name(project_number, setting_key, default_suffix):
 
 
 def get_project_folder_path(project):
-    root_path = AppSetting.get_value('project_root_path', '')
+    root_path = get_project_root_path()
     if not root_path:
         return None
     safe_number = sanitize_folder_name(project.number or '')
@@ -52,13 +61,8 @@ class ProjectFileSystemStorage(FileSystemStorage):
         super().__init__(location=settings.MEDIA_ROOT)
 
     def _get_location(self):
-        root = AppSetting.get_value('project_root_path', '')
+        root = get_project_root_path()
         if root:
-            os.makedirs(root, exist_ok=True)
-            return root
-        from django.conf import settings as dj_settings
-        if hasattr(dj_settings, 'PROJECT_ROOT_PATH') and dj_settings.PROJECT_ROOT_PATH:
-            root = dj_settings.PROJECT_ROOT_PATH
             os.makedirs(root, exist_ok=True)
             return root
         return self._fallback or super().location
