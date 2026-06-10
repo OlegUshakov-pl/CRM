@@ -1,27 +1,45 @@
 @echo off
-echo 🔄 Checking for CRM updates...
+chcp 65001 >nul
+echo ==================================================
+echo     CRM — Update
+echo ==================================================
+echo.
 
-:: 1. Go into the project directory where Git is initialized
-cd CRM
+:: Auto-detect project folder
+if exist "manage.py" (
+    set "PROJECT_DIR=%CD%"
+) else if exist "CRM\manage.py" (
+    cd CRM
+    set "PROJECT_DIR=%CD%"
+) else (
+    echo [!] manage.py not found. Run this script from the CRM folder.
+    pause
+    exit /b 1
+)
 
-:: 2. Pull the latest changes anonymously
-echo Pulling latest code from GitHub...
-git clone --help >nul 2>&1
+set "PYTHON=%PROJECT_DIR%\venv\Scripts\python.exe"
+
+echo [*] Pulling latest code from GitHub...
 git pull origin main
+if errorlevel 1 (
+    echo [!] Git pull failed.
+    pause
+    exit /b 1
+)
 
-:: 3. Update Python dependencies inside venv
-echo 📥 Updating Python dependencies...
-cmd /c "venv\Scripts\activate && python -m pip install -r requirements.txt"
+echo [*] Running database migrations...
+"%PYTHON%" manage.py migrate
+if errorlevel 1 (
+    echo [!] Migrations failed.
+    pause
+    exit /b 1
+)
 
-:: 4. Rebuild Tailwind CSS
-echo 🎨 Updating Frontend and rebuilding Tailwind...
-cmd /c "npm install && npm run build"
+echo [*] Rebuilding Tailwind CSS...
+call npm run build
 
-:: 5. Run any new database migrations
-echo 🗄️ Running new migrations...
-cmd /c "venv\Scripts\activate && python manage.py migrate"
-
-echo --------------------------------------------------
-echo 🎉 CRM successfully updated to the latest version!
-echo --------------------------------------------------
+echo.
+echo ==================================================
+echo     Update completed!
+echo ==================================================
 pause
