@@ -81,6 +81,7 @@ def library_create(request):
             item = form.save(commit=False)
             item.created_by = request.user
             item.save()
+            form._save_tags(item)
             log_activity(request.user, 'created', f'Library item "{item.title}"', item)
             messages.success(request, 'Document created successfully.')
             return redirect('library:detail', slug=item.slug)

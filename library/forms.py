@@ -55,7 +55,7 @@ class LibraryItemForm(forms.ModelForm):
         instance = super().save(commit=False)
         if commit:
             instance.save()
-        self._save_tags(instance)
+            self._save_tags(instance)
         return instance
 
     def _save_tags(self, instance):
