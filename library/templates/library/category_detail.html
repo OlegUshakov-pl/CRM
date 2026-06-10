@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% block title %}{{ category.name }} - Library{% endblock %}
+{% block breadcrumb %}Library / Categories / {{ category.name }}{% endblock %}
+{% block content %}
+<div class="space-y-6">
+    <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            {% if category.color %}<span class="w-4 h-4 rounded-full inline-block flex-shrink-0" style="background-color:{{ category.color }}"></span>{% endif %}
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ category.name }}</h1>
+                {% if category.parent %}
+                <p class="text-sm text-gray-500">Subcategory of {{ category.parent.name }}</p>
+                {% endif %}
+            </div>
+        </div>
+        <div class="flex gap-2">
+            <a href="{% url 'library:category_edit' category.slug %}" class="px-4 py-2 text-sm bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-[20px] transition-colors">Edit</a>
+            <a href="{% url 'library:create' %}" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white text-[14px] font-medium rounded-[20px] shadow-[0_2px_2px_rgba(0,0,0,0.25)] transition-colors">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                New Document
+            </a>
+        </div>
+    </div>
+
+    {% if items %}
+    <div class="space-y-2">
+        {% for item in items %}
+        <a href="{% url 'library:detail' item.slug %}" class="block bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow p-4">
+            <div class="flex items-center justify-between gap-4">
+                <div class="flex items-center gap-3 min-w-0">
+                    {% if item.file_type == 'pdf' %}
+                        <i data-lucide="file-text" class="w-5 h-5 text-red-500 flex-shrink-0"></i>
+                    {% elif item.file_type == 'image' %}
+                        <i data-lucide="image" class="w-5 h-5 text-blue-500 flex-shrink-0"></i>
+                    {% elif item.content %}
+                        <i data-lucide="sticky-note" class="w-5 h-5 text-amber-500 flex-shrink-0"></i>
+                    {% else %}
+                        <i data-lucide="file" class="w-5 h-5 text-gray-500 flex-shrink-0"></i>
+                    {% endif %}
+                    <div class="min-w-0">
+                        <p class="font-medium text-gray-900 dark:text-white truncate">{{ item.title }}</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 truncate">{{ item.description|default:item.content|striptags|truncatewords:15|default:'No description' }}</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3 flex-shrink-0">
+                    <span class="text-xs text-gray-400">{{ item.created_at|date:'M d, Y' }}</span>
+                    {% if item.is_favorite %}
+                    <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
+                    {% endif %}
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% include 'includes/pagination.html' with page_obj=items %}
+    {% else %}
+    <div class="text-center py-16 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+        <i data-lucide="file" class="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3"></i>
+        <p class="text-gray-500 dark:text-gray-400 mb-4">No documents in this category</p>
+        <a href="{% url 'library:create' %}" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white text-[14px] font-medium rounded-[20px] shadow-[0_2px_2px_rgba(0,0,0,0.25)] transition-colors">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            Add Document
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

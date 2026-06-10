@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}Categories - Library{% endblock %}
+{% block breadcrumb %}Library / Categories{% endblock %}
+{% block content %}
+<div class="space-y-6">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Categories</h1>
+            <p class="text-gray-500 dark:text-gray-400 mt-1">Organize your documents</p>
+        </div>
+        <a href="{% url 'library:category_create' %}" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white text-[14px] font-medium rounded-[20px] shadow-[0_2px_2px_rgba(0,0,0,0.25)] transition-colors">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            New Category
+        </a>
+    </div>
+
+    {% if categories %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {% for cat in categories %}
+        <a href="{% url 'library:category_detail' cat.slug %}" class="block bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow p-5">
+            <div class="flex items-center gap-3 mb-3">
+                {% if cat.color %}<span class="w-3 h-3 rounded-full inline-block flex-shrink-0" style="background-color:{{ cat.color }}"></span>{% endif %}
+                {% if cat.icon %}<i data-lucide="{{ cat.icon }}" class="w-5 h-5 text-gray-500 flex-shrink-0"></i>{% endif %}
+                <h3 class="font-medium text-gray-900 dark:text-white">{{ cat.name }}</h3>
+            </div>
+            {% if cat.parent %}
+            <p class="text-xs text-gray-400 mb-2">Parent: {{ cat.parent.name }}</p>
+            {% endif %}
+            <div class="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700">
+                <span class="text-sm text-gray-500">{{ cat.item_count }} document{{ cat.item_count|pluralize }}</span>
+                <div class="flex gap-2">
+                    <a href="{% url 'library:category_edit' cat.slug %}" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline" onclick="event.stopPropagation()">Edit</a>
+                    <a href="{% url 'library:category_delete' cat.slug %}" class="text-xs text-red-600 dark:text-red-400 hover:underline" onclick="event.stopPropagation()">Delete</a>
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-16 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+        <i data-lucide="folder-open" class="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4"></i>
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">No categories yet</h3>
+        <p class="text-gray-500 dark:text-gray-400 mb-4">Create categories to organize your documents</p>
+        <a href="{% url 'library:category_create' %}" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white text-[14px] font-medium rounded-[20px] shadow-[0_2px_2px_rgba(0,0,0,0.25)] transition-colors">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            Create Category
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -14,7 +14,7 @@ class LibraryItemForm(forms.ModelForm):
 
     class Meta:
         model = LibraryItem
-        fields = ['title', 'description', 'content', 'category', 'file', 'preview_image', 'is_favorite']
+        fields = ['title', 'description', 'content', 'category', 'file', 'is_favorite']
         widgets = {
             'title': forms.TextInput(attrs={
                 'class': 'w-full px-4 py-2.5 border border-[#e8e8e8] text-[14px] outline-none focus:border-violet-300 transition-colors',
@@ -31,9 +31,6 @@ class LibraryItemForm(forms.ModelForm):
             'file': forms.FileInput(attrs={
                 'class': 'w-full px-4 py-2.5 border border-[#e8e8e8] text-[14px] outline-none focus:border-violet-300 transition-colors',
             }),
-            'preview_image': forms.FileInput(attrs={
-                'class': 'w-full px-4 py-2.5 border border-[#e8e8e8] text-[14px] outline-none focus:border-violet-300 transition-colors',
-            }),
             'is_favorite': forms.CheckboxInput(attrs={
                 'class': 'rounded border-gray-300 text-indigo-600 focus:ring-indigo-500',
             }),
@@ -46,6 +43,7 @@ class LibraryItemForm(forms.ModelForm):
         self.fields['content'].required = False
         self.fields['content'].widget = forms.HiddenInput()
         self.fields['description'].required = False
+        self.fields['file'].required = False
 
         if self.instance.pk:
             tags_str = ', '.join(self.instance.tags.all().values_list('name', flat=True))
@@ -69,3 +67,33 @@ class LibraryItemForm(forms.ModelForm):
             instance.tags.set(tags)
         else:
             instance.tags.clear()
+
+
+class CategoryForm(forms.ModelForm):
+    class Meta:
+        model = Category
+        fields = ['name', 'color', 'icon', 'parent']
+        widgets = {
+            'name': forms.TextInput(attrs={
+                'class': 'w-full px-4 py-2.5 border border-[#e8e8e8] text-[14px] outline-none focus:border-violet-300 transition-colors',
+                'placeholder': 'Category name',
+            }),
+            'color': forms.TextInput(attrs={
+                'class': 'w-full px-4 py-2.5 border border-[#e8e8e8] text-[14px] outline-none focus:border-violet-300 transition-colors',
+                'placeholder': 'e.g. #8B5CF6',
+            }),
+            'icon': forms.TextInput(attrs={
+                'class': 'w-full px-4 py-2.5 border border-[#e8e8e8] text-[14px] outline-none focus:border-violet-300 transition-colors',
+                'placeholder': 'lucide icon name',
+            }),
+            'parent': forms.Select(attrs={
+                'class': 'w-full px-4 py-2.5 border border-[#e8e8e8] text-[14px] outline-none focus:border-violet-300 transition-colors',
+            }),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['parent'].queryset = Category.objects.filter(is_active=True)
+        self.fields['parent'].required = False
+        self.fields['color'].required = False
+        self.fields['icon'].required = False

@@ -36,18 +36,31 @@
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ form.file.label }}</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Main File</label>
                 {{ form.file }}
                 {% if form.file.errors %}<p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.file.errors.0 }}</p>{% endif %}
                 {% if item and item.file %}
-                <p class="mt-1 text-xs text-gray-500">Current file: {{ item.file.name }}</p>
+                <p class="mt-1 text-xs text-gray-500">Current: {{ item.file.name }}</p>
                 {% endif %}
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ form.preview_image.label }}</label>
-                {{ form.preview_image }}
-                {% if form.preview_image.errors %}<p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.preview_image.errors.0 }}</p>{% endif %}
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Additional Files</label>
+                <div id="drop-zone" class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded p-6 text-center cursor-pointer hover:border-indigo-400 transition-colors" onclick="document.getElementById('file-input').click()">
+                    <i data-lucide="upload" class="w-8 h-8 text-gray-400 mx-auto mb-2"></i>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Drop files here or click to upload</p>
+                </div>
+                <input type="file" id="file-input" multiple class="hidden" onchange="uploadFiles(this.files)">
+                <div id="attachment-list" class="mt-2 space-y-1">
+                    {% if item %}
+                    {% for att in item.attachments.all %}
+                    <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                        <i data-lucide="paperclip" class="w-4 h-4"></i>
+                        <span>{{ att.name }}</span>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                </div>
             </div>
 
             <div>
@@ -104,5 +117,39 @@
         hiddenInput.value = quill.root.innerHTML;
     });
 })();
+
+var itemSlug = '{% if item %}{{ item.slug }}{% endif %}';
+
+function uploadFiles(files) {
+    for (var i = 0; i < files.length; i++) {
+        var formData = new FormData();
+        formData.append('file', files[i]);
+        var url = itemSlug ? '/library/' + itemSlug + '/upload-attachment/' : '';
+        if (!url) {
+            alert('Save the document first, then add additional files.');
+            continue;
+        }
+        fetch(url, { method: 'POST', body: formData, headers: { 'X-CSRFToken': getCSRFToken() } })
+            .then(r => r.json())
+            .then(data => {
+                var list = document.getElementById('attachment-list');
+                var div = document.createElement('div');
+                div.className = 'flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400';
+                div.innerHTML = '<i data-lucide="paperclip" class="w-4 h-4"></i><span>' + data.name + '</span>';
+                list.appendChild(div);
+                lucide.createIcons();
+            });
+    }
+    document.getElementById('file-input').value = '';
+}
+
+function getCSRFToken() {
+    var cookies = document.cookie.split(';');
+    for (var i = 0; i < cookies.length; i++) {
+        var c = cookies[i].trim();
+        if (c.startsWith('csrftoken=')) return c.substring(10);
+    }
+    return '';
+}
 </script>
 {% endblock %}

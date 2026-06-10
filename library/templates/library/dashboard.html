@@ -89,7 +89,7 @@
                 {% if categories %}
                 <div class="space-y-1">
                     {% for cat in categories %}
-                    <a href="{% url 'library:list' %}?category={{ cat.slug }}" class="flex items-center justify-between text-sm text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors py-1">
+                    <a href="{% url 'library:category_detail' cat.slug %}" class="flex items-center justify-between text-sm text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors py-1">
                         <span class="flex items-center gap-2">
                             {% if cat.color %}<span class="w-2 h-2 rounded-full inline-block" style="background-color:{{ cat.color }}"></span>{% endif %}
                             {{ cat.name }}

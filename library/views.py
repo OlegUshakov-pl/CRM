@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db.models import Q, Count
 from .models import LibraryItem, Category, Tag, LibraryAttachment
-from .forms import LibraryItemForm
+from .forms import LibraryItemForm, CategoryForm
 from core.models import log_activity
 
 
@@ -146,3 +146,62 @@ def library_upload_attachment(request, slug):
         )
         return JsonResponse({'id': attachment.pk, 'name': attachment.name})
     return JsonResponse({'error': 'No file provided'}, status=400)
+
+
+@login_required
+def category_list(request):
+    categories = Category.objects.filter(is_active=True).annotate(item_count=Count('items')).order_by('name')
+    return render(request, 'library/category_list.html', {'categories': categories})
+
+
+@login_required
+def category_detail(request, slug):
+    category = get_object_or_404(Category, slug=slug, is_active=True)
+    items = LibraryItem.objects.filter(is_active=True, category=category).order_by('-created_at')
+    paginator = Paginator(items, 24)
+    page = request.GET.get('page', 1)
+    items_page = paginator.get_page(page)
+    return render(request, 'library/category_detail.html', {
+        'category': category,
+        'items': items_page,
+    })
+
+
+@login_required
+def category_create(request):
+    if request.method == 'POST':
+        form = CategoryForm(request.POST)
+        if form.is_valid():
+            category = form.save(commit=False)
+            category.created_by = request.user
+            category.save()
+            messages.success(request, f'Category "{category.name}" created.')
+            return redirect('library:category_list')
+    else:
+        form = CategoryForm()
+    return render(request, 'library/category_form.html', {'form': form, 'title': 'Create Category'})
+
+
+@login_required
+def category_edit(request, slug):
+    category = get_object_or_404(Category, slug=slug, is_active=True)
+    if request.method == 'POST':
+        form = CategoryForm(request.POST, instance=category)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Category "{category.name}" updated.')
+            return redirect('library:category_list')
+    else:
+        form = CategoryForm(instance=category)
+    return render(request, 'library/category_form.html', {'form': form, 'title': 'Edit Category', 'category': category})
+
+
+@login_required
+def category_delete(request, slug):
+    category = get_object_or_404(Category, slug=slug, is_active=True)
+    if request.method == 'POST':
+        category.is_active = False
+        category.save()
+        messages.success(request, f'Category "{category.name}" deleted.')
+        return redirect('library:category_list')
+    return render(request, 'library/category_confirm_delete.html', {'category': category})
