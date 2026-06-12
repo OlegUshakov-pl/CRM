@@ -57,6 +57,7 @@ class Document(models.Model):
     size = models.IntegerField(blank=True, null=True, help_text='File size in bytes')
     file = models.FileField(upload_to=document_upload_to, storage=ProjectFileSystemStorage())
     file_type = models.CharField(max_length=50, choices=FILE_TYPE_CHOICES, default='other')
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, related_name='documents')
 
     class Meta:
         ordering = ['-created_at']
