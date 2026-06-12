@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block title %}{{ category_label }} - CRM{% endblock %}
+{% block breadcrumb %}{{ category_label }}{% endblock %}
+{% block content %}
+<div class="space-y-6">
+    <div class="flex items-center gap-4">
+        <a href="{% url 'documents:category_list' %}" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+            <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        </a>
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ category_label }}</h1>
+            <p class="text-gray-500 dark:text-gray-400">{{ documents|length }} document{{ documents|length|pluralize }}</p>
+        </div>
+    </div>
+
+    {% if documents %}
+    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-6">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="text-left text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
+                        <th class="pb-2 font-medium">Number</th>
+                        <th class="pb-2 font-medium">Project</th>
+                        <th class="pb-2 font-medium">Size</th>
+                        <th class="pb-2 font-medium">Created</th>
+                        <th class="pb-2 font-medium">Show</th>
+                        <th class="pb-2 font-medium">Download</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for doc in documents %}
+                    <tr class="border-b border-gray-100 dark:border-gray-700/50">
+                        <td class="py-2 text-gray-900 dark:text-white">{{ doc.number|default:'—' }}</td>
+                        <td class="py-2 text-gray-600 dark:text-gray-400">{{ doc.project.name|default:'—' }}</td>
+                        <td class="py-2 text-gray-600 dark:text-gray-400">{% if doc.size %}{{ doc.size|filesizeformat }}{% else %}—{% endif %}</td>
+                        <td class="py-2 text-gray-600 dark:text-gray-400">{{ doc.created_at|date:'M d, Y' }}</td>
+                        <td class="py-2">
+                            {% if doc.file %}
+                            <a href="{% url 'documents:view' doc.pk %}" class="inline-flex items-center"><i data-lucide="eye" class="w-4 h-4 text-red-500"></i></a>
+                            {% endif %}
+                        </td>
+                        <td class="py-2">
+                            {% if doc.file %}
+                            <a href="{% url 'documents:download' doc.pk %}" class="inline-flex items-center"><i data-lucide="download" class="w-4 h-4 text-red-500"></i></a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% else %}
+    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-12 text-center">
+        <p class="text-gray-500 dark:text-gray-400">No documents in this category.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
