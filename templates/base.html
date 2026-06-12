@@ -440,7 +440,10 @@
                 .then(r => r.json())
                 .then(data => {
                     var input = document.getElementById('root-path-input');
-                    if (input) input.value = data.value || '';
+                    if (input) {
+                        input.value = data.value || '';
+                        if (!data.value && data.default) input.placeholder = data.default + ' (from settings.py)';
+                    }
                 })
                 .catch(() => {});
             fetch('/settings/subfolder_documents/')

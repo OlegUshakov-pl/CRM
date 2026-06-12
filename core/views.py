@@ -89,7 +89,10 @@ def save_setting(request):
 @login_required
 def get_setting(request, key):
     value = AppSetting.get_value(key, '')
-    return JsonResponse({'key': key, 'value': value})
+    default = ''
+    if not value and key == 'project_root_path':
+        default = getattr(settings, 'PROJECT_ROOT_PATH', '')
+    return JsonResponse({'key': key, 'value': value, 'default': default})
 
 
 @login_required
