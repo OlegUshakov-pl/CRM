@@ -441,8 +441,7 @@
                 .then(data => {
                     var input = document.getElementById('root-path-input');
                     if (input) {
-                        input.value = data.value || '';
-                        if (!data.value && data.default) input.placeholder = data.default + ' (from settings.py)';
+                        input.value = data.value || data.default || '';
                     }
                 })
                 .catch(() => {});
@@ -471,7 +470,6 @@
 
         function saveSettings() {
             var path = document.getElementById('root-path-input').value.trim();
-            if (!path) return;
             var subDocs = document.getElementById('subfolder-documents').value.trim() || '{Number}_documents';
             var subDraw = document.getElementById('subfolder-drawings').value.trim() || '{Number}_drawings';
             var subModels = document.getElementById('subfolder-models').value.trim() || '{Number}_models';
@@ -486,7 +484,7 @@
                 form.append('key', s.key);
                 form.append('value', s.value);
                 return fetch('/settings/save/', { method: 'POST', body: form, headers: { 'X-CSRFToken': getCSRFToken() } });
-            })).then(() => closeSettings()).catch(() => {});
+            })).then(function() { closeSettings(); }).catch(function(e) { console.error('Save failed', e); });
         }
 
         function getCSRFToken() {
@@ -495,7 +493,8 @@
                 var c = cookies[i].trim();
                 if (c.startsWith('csrftoken=')) return c.substring(10);
             }
-            return '';
+            var input = document.querySelector('[name=csrfmiddlewaretoken]');
+            return input ? input.value : '';
         }
 
         function closeSettings() {
