@@ -23,7 +23,8 @@ def company_list(request):
 @login_required
 def company_detail(request, slug):
     company = get_object_or_404(Company.objects.prefetch_related('contacts'), slug=slug)
-    return render(request, 'companies/company_detail.html', {'company': company})
+    linked_projects = company.projects.filter(is_active=True)
+    return render(request, 'companies/company_detail.html', {'company': company, 'linked_projects': linked_projects})
 
 
 @login_required
