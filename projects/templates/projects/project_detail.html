@@ -244,7 +244,8 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for part in project.parts.all|slice:":4" %}
+                        {% for part in project.parts.all %}
+                        {% if not part.is_model %}
                         <tr class="border-b border-gray-100 dark:border-gray-700/50">
                             <td class="py-2 text-gray-900 dark:text-white">{{ part.number }}</td>
                             <td class="py-2 text-gray-600 dark:text-gray-400">{{ part.category.name|default:'—' }}</td>
@@ -253,6 +254,7 @@
                             <td class="py-2 text-gray-600 dark:text-gray-400">{{ part.created|date:"Y-m-d"|default:'—' }}</td>
                             <td class="py-2 text-gray-600 dark:text-gray-400">{{ part.updated|date:"Y-m-d"|default:'—' }}</td>
                         </tr>
+                        {% endif %}
                         {% endfor %}
                     </tbody>
                 </table>
@@ -262,6 +264,40 @@
                 <a href="{% url 'parts:page' project.slug %}" class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white transition-colors text-[12px]">Page of drawings</a>
             </div>
             {% endif %}
+        </div>
+        {% endif %}
+
+        {% if project.parts.all %}
+        <div id="models-section" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-6">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Models</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="text-left text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
+                            <th class="pb-2 font-medium">Number</th>
+                            <th class="pb-2 font-medium">Category</th>
+                            <th class="pb-2 font-medium">Size</th>
+                            <th class="pb-2 font-medium">Rev</th>
+                            <th class="pb-2 font-medium">Created</th>
+                            <th class="pb-2 font-medium">Updated</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for part in project.parts.all %}
+                        {% if part.is_model %}
+                        <tr class="border-b border-gray-100 dark:border-gray-700/50">
+                            <td class="py-2 text-gray-900 dark:text-white">{{ part.number }}</td>
+                            <td class="py-2 text-gray-600 dark:text-gray-400">{{ part.category.name|default:'—' }}</td>
+                            <td class="py-2 text-gray-600 dark:text-gray-400">{{ part.size|default:'—' }}</td>
+                            <td class="py-2 text-gray-600 dark:text-gray-400">{{ part.rev|default:'—' }}</td>
+                            <td class="py-2 text-gray-600 dark:text-gray-400">{{ part.created|date:"Y-m-d"|default:'—' }}</td>
+                            <td class="py-2 text-gray-600 dark:text-gray-400">{{ part.updated|date:"Y-m-d"|default:'—' }}</td>
+                        </tr>
+                        {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
         {% endif %}
 
@@ -379,6 +415,16 @@
             document.addEventListener("DOMContentLoaded", init);
         } else {
             init();
+        }
+    })();
+
+    (function () {
+        var section = document.getElementById('models-section');
+        if (section) {
+            var rows = section.querySelectorAll('tbody tr');
+            if (rows.length === 0) {
+                section.style.display = 'none';
+            }
         }
     })();
 

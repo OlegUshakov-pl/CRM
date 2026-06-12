@@ -121,5 +121,16 @@ document.addEventListener('DOMContentLoaded', function() {
         if (e.target === this) hideContactRemoveModal();
     });
 });
+
+document.addEventListener('DOMContentLoaded', function() {
+    var section = document.getElementById('edit-models-section');
+    if (section) {
+        var rows = section.querySelectorAll('tbody tr');
+        var noModels = document.getElementById('no-models-text');
+        if (rows.length > 0 && noModels) {
+            noModels.style.display = 'none';
+        }
+    }
+});
 </script>
 {% endblock %}
