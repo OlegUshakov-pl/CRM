@@ -30,6 +30,17 @@ def document_upload_to(instance, filename):
     return os.path.join('_no_project', filename)
 
 
+class Category(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+
+    class Meta:
+        ordering = ['name']
+        verbose_name_plural = 'Categories'
+
+    def __str__(self):
+        return self.name
+
+
 class Document(models.Model):
     FILE_TYPE_CHOICES = [
         ('drawings', 'Drawings'),

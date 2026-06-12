@@ -2,26 +2,43 @@
 {% block title %}Document Categories - CRM{% endblock %}
 {% block breadcrumb %}Document Categories{% endblock %}
 {% block content %}
-<div class="space-y-6">
-    <div>
-        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Document Categories</h1>
-        <p class="text-gray-500 dark:text-gray-400 mt-1">Browse documents by type</p>
-    </div>
+<div class="flex items-center justify-between mb-6">
+    <h1 class="text-xl font-semibold">Categories</h1>
+    <button onclick="openSlideOver('{% url 'documents:category_create_slide' %}')" class="px-4 py-2 bg-violet-400 hover:opacity-90 text-white font-medium text-[13px] transition-opacity rounded-[20px] shadow">+ Add Category</button>
+</div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {% for category in categories %}
-        <a href="{% url 'documents:category_detail' category.value %}" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md transition-shadow">
-            <div class="flex items-center justify-between mb-2">
-                <h3 class="font-semibold text-gray-900 dark:text-white">{{ category.label }}</h3>
-                <span class="text-sm text-gray-500 dark:text-gray-400">{{ category.count }}</span>
-            </div>
-            <p class="text-sm text-gray-500 dark:text-gray-400">{{ category.count }} document{{ category.count|pluralize }}</p>
-        </a>
-        {% empty %}
-        <div class="col-span-full text-center py-16">
-            <p class="text-gray-500 dark:text-gray-400">No categories available.</p>
-        </div>
-        {% endfor %}
-    </div>
+<div class="overflow-x-auto">
+    <table class="w-full text-sm">
+        <thead>
+            <tr class="border-b border-[#e8e8e8] text-left">
+                <th class="py-3 px-4 font-medium text-[#8d8d8d]">Name</th>
+                <th class="py-3 px-4 font-medium text-[#8d8d8d]">Documents</th>
+                <th class="py-3 px-4 font-medium text-[#8d8d8d]"></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for category in categories %}
+            <tr class="border-b border-[#e8e8e8] hover:bg-[#f8f8f8]">
+                <td class="py-3 px-4"><a href="{% url 'documents:category_detail' category.value %}" class="text-indigo-600 hover:underline">{{ category.label }}</a></td>
+                <td class="py-3 px-4">{{ category.count }}</td>
+                <td class="py-3 px-4"></td>
+            </tr>
+            {% endfor %}
+            {% for category in custom_categories %}
+            <tr class="border-b border-[#e8e8e8] hover:bg-[#f8f8f8]">
+                <td class="py-3 px-4"><span class="text-gray-900">{{ category.name }}</span></td>
+                <td class="py-3 px-4">—</td>
+                <td class="py-3 px-4">
+                    <button @click="$store.deleteModal.open('{% url 'documents:category_delete' category.pk %}', '{{ category.name }}')" class="text-red-500 hover:underline text-sm">Delete</button>
+                </td>
+            </tr>
+            {% endfor %}
+            {% if not categories and not custom_categories %}
+            <tr>
+                <td colspan="3" class="py-10 text-center text-[#8d8d8d]">No categories yet.</td>
+            </tr>
+            {% endif %}
+        </tbody>
+    </table>
 </div>
 {% endblock %}

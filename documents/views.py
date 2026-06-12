@@ -8,8 +8,9 @@ from django.contrib import messages
 from django.core.paginator import Paginator
 from projects.models import Project
 from projects.utils import ensure_project_subfolder, sanitize_folder_name, get_subfolder_name, get_project_root_path
-from .models import Document
-from .forms import DocumentForm, CommonDocumentForm
+from core.models import log_activity
+from .models import Document, Category
+from .forms import DocumentForm, CommonDocumentForm, CategoryForm
 
 
 @login_required
@@ -18,7 +19,8 @@ def document_category_list(request):
     for choice_value, choice_label in Document.FILE_TYPE_CHOICES:
         count = Document.objects.filter(file_type=choice_value).count()
         categories.append({'value': choice_value, 'label': choice_label, 'count': count})
-    return render(request, 'documents/documents_category.html', {'categories': categories})
+    custom_categories = Category.objects.all()
+    return render(request, 'documents/documents_category.html', {'categories': categories, 'custom_categories': custom_categories})
 
 
 @login_required
@@ -298,3 +300,37 @@ def document_delete(request, pk):
         document.delete()
         messages.success(request, 'Document deleted.')
     return redirect(request.META.get('HTTP_REFERER', reverse('documents:list')))
+
+
+@login_required
+def category_create_slide(request):
+    form = CategoryForm()
+    return render(request, 'documents/category_form.html', {'form': form, 'title': 'Add Category'})
+
+
+@login_required
+def category_save(request):
+    form = CategoryForm(request.POST)
+    if form.is_valid():
+        category = form.save()
+        log_activity(request.user, 'created', f'Category {category.name} created', category)
+        if request.headers.get('HX-Request'):
+            response = HttpResponse('<script>closeSlideOver()</script>')
+            response['HX-Refresh'] = 'true'
+            return response
+        messages.success(request, 'Category created.')
+        return redirect('documents:category_list')
+    return render(request, 'documents/category_form.html', {'form': form, 'title': 'Add Category'})
+
+
+@login_required
+def category_delete(request, pk):
+    category = get_object_or_404(Category, pk=pk)
+    log_activity(request.user, 'deleted', f'Category {category.name} deleted', category)
+    category.delete()
+    if request.headers.get('HX-Request'):
+        response = HttpResponse('<script>closeSlideOver()</script>')
+        response['HX-Refresh'] = 'true'
+        return response
+    messages.success(request, 'Category deleted.')
+    return redirect('documents:category_list')
