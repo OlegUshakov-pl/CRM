@@ -23,7 +23,8 @@ def company_list(request):
 @login_required
 def company_detail(request, slug):
     company = get_object_or_404(Company.objects.prefetch_related('contacts'), slug=slug)
-    return render(request, 'companies/company_detail.html', {'company': company})
+    linked_projects = company.projects.filter(is_active=True)
+    return render(request, 'companies/company_detail.html', {'company': company, 'linked_projects': linked_projects})
 
 
 @login_required
@@ -35,6 +36,10 @@ def company_create(request):
             company = form.save(commit=False)
             company.created_by = request.user
             company.save()
+            project = form.cleaned_data.get('project')
+            if project:
+                project.company = company
+                project.save()
             log_activity(request.user, 'created', f'Company "{company.name}"', company)
             messages.success(request, 'Company created successfully.')
             if request.headers.get('HX-Request'):
@@ -48,11 +53,18 @@ def company_create(request):
 @login_required
 def company_edit(request, slug):
     company = get_object_or_404(Company, slug=slug)
-    form = CompanyForm(instance=company)
+    form = CompanyForm(instance=company, company=company)
     if request.method == 'POST':
-        form = CompanyForm(request.POST, request.FILES, instance=company)
+        form = CompanyForm(request.POST, request.FILES, instance=company, company=company)
         if form.is_valid():
             form.save()
+            project = form.cleaned_data.get('project')
+            from projects.models import Project
+            if project:
+                project.company = company
+                project.save()
+            else:
+                Project.objects.filter(company=company).update(company=None)
             log_activity(request.user, 'updated', f'Company "{company.name}"', company)
             messages.success(request, 'Company updated successfully.')
             if request.headers.get('HX-Request'):
@@ -83,5 +95,9 @@ def company_create_slide(request):
 @login_required
 def company_edit_slide(request, slug):
     company = get_object_or_404(Company, slug=slug)
-    form = CompanyForm(instance=company)
-    return render(request, 'companies/company_form.html', {'form': form, 'title': 'Edit Company', 'company': company})
+    form = CompanyForm(instance=company, company=company)
+    return render(request, 'companies/company_form.html', {
+        'form': form,
+        'title': 'Edit Company',
+        'company': company,
+    })

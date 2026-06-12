@@ -39,7 +39,7 @@ class Part(TimeStampedModel):
     updated = models.DateField(blank=True, null=True)
     file = models.FileField(upload_to=part_upload_to, storage=ProjectFileSystemStorage(), blank=True, null=True)
 
-    MODEL_EXTENSIONS = ['.stp', '.ipt', '.iam', '.sldprt', '.sldasm', '.ics']
+    MODEL_EXTENSIONS = ['.stp', '.ipt', '.iam', '.sldprt', '.sldasm', '.ics', '.stl', '.3mf']
 
     @property
     def is_model(self):

@@ -244,7 +244,8 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for part in project.parts.all|slice:":4" %}
+                        {% for part in project.parts.all %}
+                        {% if not part.is_model %}
                         <tr class="border-b border-gray-100 dark:border-gray-700/50">
                             <td class="py-2 text-gray-900 dark:text-white">{{ part.number }}</td>
                             <td class="py-2 text-gray-600 dark:text-gray-400">{{ part.category.name|default:'—' }}</td>
@@ -253,6 +254,7 @@
                             <td class="py-2 text-gray-600 dark:text-gray-400">{{ part.created|date:"Y-m-d"|default:'—' }}</td>
                             <td class="py-2 text-gray-600 dark:text-gray-400">{{ part.updated|date:"Y-m-d"|default:'—' }}</td>
                         </tr>
+                        {% endif %}
                         {% endfor %}
                     </tbody>
                 </table>
@@ -262,6 +264,40 @@
                 <a href="{% url 'parts:page' project.slug %}" class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white transition-colors text-[12px]">Page of drawings</a>
             </div>
             {% endif %}
+        </div>
+        {% endif %}
+
+        {% if project.parts.all %}
+        <div id="models-section" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-6">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Models</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="text-left text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
+                            <th class="pb-2 font-medium">Number</th>
+                            <th class="pb-2 font-medium">Category</th>
+                            <th class="pb-2 font-medium">Size</th>
+                            <th class="pb-2 font-medium">Rev</th>
+                            <th class="pb-2 font-medium">Created</th>
+                            <th class="pb-2 font-medium">Updated</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for part in project.parts.all %}
+                        {% if part.is_model %}
+                        <tr class="border-b border-gray-100 dark:border-gray-700/50">
+                            <td class="py-2 text-gray-900 dark:text-white">{{ part.number }}</td>
+                            <td class="py-2 text-gray-600 dark:text-gray-400">{{ part.category.name|default:'—' }}</td>
+                            <td class="py-2 text-gray-600 dark:text-gray-400">{{ part.size|default:'—' }}</td>
+                            <td class="py-2 text-gray-600 dark:text-gray-400">{{ part.rev|default:'—' }}</td>
+                            <td class="py-2 text-gray-600 dark:text-gray-400">{{ part.created|date:"Y-m-d"|default:'—' }}</td>
+                            <td class="py-2 text-gray-600 dark:text-gray-400">{{ part.updated|date:"Y-m-d"|default:'—' }}</td>
+                        </tr>
+                        {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
         {% endif %}
 
@@ -282,6 +318,25 @@
                     </a>
                 </div>
                 {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if project.company %}
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-6">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Companies</h2>
+            <div class="space-y-3">
+                <div class="flex items-center gap-3">
+                    <a href="{% url 'companies:company_detail' project.company.slug %}" class="flex items-center gap-3 flex-1 hover:bg-gray-50 transition-colors -mx-2 px-2 py-1 rounded">
+                        <div class="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/50 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span class="text-xs font-semibold text-indigo-700 dark:text-indigo-300">{{ project.company.name|first }}</span>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-900 dark:text-white">{{ project.company.name }}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ project.company.email|default:project.company.phone|default:'' }}</p>
+                        </div>
+                    </a>
+                </div>
             </div>
         </div>
         {% endif %}
@@ -379,6 +434,16 @@
             document.addEventListener("DOMContentLoaded", init);
         } else {
             init();
+        }
+    })();
+
+    (function () {
+        var section = document.getElementById('models-section');
+        if (section) {
+            var rows = section.querySelectorAll('tbody tr');
+            if (rows.length === 0) {
+                section.style.display = 'none';
+            }
         }
     })();
 

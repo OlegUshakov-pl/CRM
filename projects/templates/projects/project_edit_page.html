@@ -25,6 +25,10 @@
 <form method="post" action="" id="remove-contact-form-{{ project.slug }}" style="display:none">
     {% csrf_token %}
 </form>
+<form method="post" action="{% url 'projects:add_company' project.slug %}" id="company-form-{{ project.slug }}" style="display:none">
+    {% csrf_token %}
+    <input type="hidden" name="company_id" value="">
+</form>
 
 <div id="delete-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 opacity-0 pointer-events-none transition-opacity duration-200">
     <div class="bg-white dark:bg-gray-800 shadow-2xl border border-gray-200 dark:border-gray-700 p-6 max-w-md w-full mx-4">
@@ -61,6 +65,20 @@
         <div class="flex justify-end gap-3">
             <button type="button" onclick="hideContactRemoveModal()" class="px-4 py-2.5 text-[#666] bg-gray-100 hover:bg-gray-200 transition-colors text-[14px]">Cancel</button>
             <form method="post" action="" id="contact-remove-form">
+                {% csrf_token %}
+                <button type="submit" class="px-4 py-2.5 bg-red-400 hover:bg-red-500 text-white text-[14px] transition-colors">Remove</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div id="company-remove-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 opacity-0 pointer-events-none transition-opacity duration-200">
+    <div class="bg-white dark:bg-gray-800 shadow-2xl border border-gray-200 dark:border-gray-700 p-6 max-w-md w-full mx-4">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Remove Company</h3>
+        <p class="text-gray-600 dark:text-gray-400 mb-6">Are you sure you want to remove <strong id="company-remove-name"></strong> from this project?</p>
+        <div class="flex justify-end gap-3">
+            <button type="button" onclick="hideCompanyRemoveModal()" class="px-4 py-2.5 text-[#666] bg-gray-100 hover:bg-gray-200 transition-colors text-[14px]">Cancel</button>
+            <form method="post" action="" id="company-remove-form">
                 {% csrf_token %}
                 <button type="submit" class="px-4 py-2.5 bg-red-400 hover:bg-red-500 text-white text-[14px] transition-colors">Remove</button>
             </form>
@@ -120,6 +138,35 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('contact-remove-modal').addEventListener('click', function(e) {
         if (e.target === this) hideContactRemoveModal();
     });
+});
+
+function showCompanyRemoveModal(url, name) {
+    document.getElementById('company-remove-form').action = url;
+    document.getElementById('company-remove-name').textContent = name;
+    var m = document.getElementById('company-remove-modal');
+    m.classList.remove('opacity-0', 'pointer-events-none');
+    m.classList.add('opacity-100');
+}
+function hideCompanyRemoveModal() {
+    var m = document.getElementById('company-remove-modal');
+    m.classList.remove('opacity-100');
+    m.classList.add('opacity-0', 'pointer-events-none');
+}
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('company-remove-modal').addEventListener('click', function(e) {
+        if (e.target === this) hideCompanyRemoveModal();
+    });
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    var section = document.getElementById('edit-models-section');
+    if (section) {
+        var rows = section.querySelectorAll('tbody tr');
+        var noModels = document.getElementById('no-models-text');
+        if (rows.length > 0 && noModels) {
+            noModels.style.display = 'none';
+        }
+    }
 });
 </script>
 {% endblock %}

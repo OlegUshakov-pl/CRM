@@ -185,7 +185,8 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for part in project.parts.all|slice:":4" %}
+                        {% for part in project.parts.all %}
+                        {% if not part.is_model %}
                         <tr class="border-b border-gray-100 dark:border-gray-700/50">
                             <td class="py-2 text-gray-900 dark:text-white">{{ part.number }}</td>
                             <td class="py-2 text-gray-600 dark:text-gray-400">{{ part.category.name|default:'—' }}</td>
@@ -198,18 +199,55 @@
                                 <button type="button" @click="$store.deleteModal.open('{% url 'parts:delete' part.pk %}', '{{ part.number|escapejs }}')" class="text-red-600 dark:text-red-400 hover:underline">Delete</button>
                             </td>
                         </tr>
+                        {% endif %}
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
-            {% if project.parts.all|length > 4 %}
-            <div class="mt-4 text-right">
-                <a href="{% url 'parts:page' project.slug %}" class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white transition-colors text-[12px]">Page of drawings</a>
-            </div>
-            {% endif %}
             {% else %}
             <p class="text-gray-500 dark:text-gray-400 text-center py-6">No drawings yet.</p>
             {% endif %}
+        </div>
+
+        <div id="edit-models-section" class="bg-white border border-[#e8e8e8] p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Models</h2>
+                <button type="button" onclick="openSlideOver('{% url 'parts:create_slide' project.slug %}')" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">+ Add model</button>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="text-left text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
+                            <th class="pb-2 font-medium">Number</th>
+                            <th class="pb-2 font-medium">Category</th>
+                            <th class="pb-2 font-medium">Size</th>
+                            <th class="pb-2 font-medium">Rev</th>
+                            <th class="pb-2 font-medium">Created</th>
+                            <th class="pb-2 font-medium">Updated</th>
+                            <th class="pb-2 font-medium"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for part in project.parts.all %}
+                        {% if part.is_model %}
+                        <tr class="border-b border-gray-100 dark:border-gray-700/50">
+                            <td class="py-2 text-gray-900 dark:text-white">{{ part.number }}</td>
+                            <td class="py-2 text-gray-600 dark:text-gray-400">{{ part.category.name|default:'—' }}</td>
+                            <td class="py-2 text-gray-600 dark:text-gray-400">{{ part.size|default:'—' }}</td>
+                            <td class="py-2 text-gray-600 dark:text-gray-400">{{ part.rev|default:'—' }}</td>
+                            <td class="py-2 text-gray-600 dark:text-gray-400">{{ part.created|date:"Y-m-d"|default:'—' }}</td>
+                            <td class="py-2 text-gray-600 dark:text-gray-400">{{ part.updated|date:"Y-m-d"|default:'—' }}</td>
+                            <td class="py-2">
+                                <button type="button" onclick="openSlideOver('{% url 'parts:edit_slide' part.pk %}')" class="text-indigo-600 dark:text-indigo-400 hover:underline mr-2">Edit</button>
+                                <button type="button" @click="$store.deleteModal.open('{% url 'parts:delete' part.pk %}', '{{ part.number|escapejs }}')" class="text-red-600 dark:text-red-400 hover:underline">Delete</button>
+                            </td>
+                        </tr>
+                        {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <p class="text-gray-500 dark:text-gray-400 text-center py-6" id="no-models-text">No models yet.</p>
         </div>
 
         <div class="bg-white border border-[#e8e8e8] p-6">
@@ -246,6 +284,42 @@
                     {% endfor %}
                 </select>
                 <button type="button" onclick="var s=document.getElementById('contact-select-{{ project.slug }}');if(s.value){document.getElementById('contact-form-{{ project.slug }}').querySelector('[name=contact_id]').value=s.value;document.getElementById('contact-form-{{ project.slug }}').submit()}" class="px-3 py-2 bg-indigo-500 hover:bg-indigo-600 text-white text-[13px] transition-colors whitespace-nowrap">Add</button>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="bg-white border border-[#e8e8e8] p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Companies</h2>
+                <button type="button" onclick="openSlideOver('{% url 'companies:company_create_slide' %}')" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">+ Add Company</button>
+            </div>
+            {% if project.company %}
+            <div class="space-y-3">
+                <div class="flex items-center gap-3 group">
+                    <a href="{% url 'companies:company_detail' project.company.slug %}" class="flex items-center gap-3 flex-1 hover:bg-gray-50 transition-colors -mx-2 px-2 py-1 rounded">
+                        <div class="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/50 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span class="text-xs font-semibold text-indigo-700 dark:text-indigo-300">{{ project.company.name|first }}</span>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-900 dark:text-white">{{ project.company.name }}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ project.company.email|default:project.company.phone|default:'' }}</p>
+                        </div>
+                    </a>
+                    <button type="button" class="text-xs text-red-500 hover:text-red-700 opacity-0 group-hover:opacity-100 transition-opacity" onclick="showCompanyRemoveModal('{% url 'projects:remove_company' project.slug %}', '{{ project.company.name|escapejs }}')">Delete</button>
+                </div>
+            </div>
+            {% else %}
+            <p class="text-gray-500 dark:text-gray-400 text-center py-4">No company linked.</p>
+            {% endif %}
+            {% if available_companies %}
+            <div class="flex items-center gap-2 mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+                <select id="company-select-{{ project.slug }}" class="flex-1 px-3 py-2 border border-[#e8e8e8] text-[13px] outline-none focus:border-violet-300 transition-colors bg-white dark:bg-gray-800">
+                    <option value="">Add existing company...</option>
+                    {% for c in available_companies %}
+                    <option value="{{ c.id }}">{{ c.name }}</option>
+                    {% endfor %}
+                </select>
+                <button type="button" onclick="var s=document.getElementById('company-select-{{ project.slug }}');if(s.value){document.getElementById('company-form-{{ project.slug }}').querySelector('[name=company_id]').value=s.value;document.getElementById('company-form-{{ project.slug }}').submit()}" class="px-3 py-2 bg-indigo-500 hover:bg-indigo-600 text-white text-[13px] transition-colors whitespace-nowrap">Add</button>
             </div>
             {% endif %}
         </div>

@@ -51,6 +51,18 @@
                 <p class="text-sm text-gray-500 dark:text-gray-400">Address</p>
                 <p class="font-medium text-gray-900 dark:text-white">{{ company.address|default:'—' }}</p>
             </div>
+            {% if linked_projects %}
+            <div class="md:col-span-2">
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">Projects</p>
+                <div class="flex flex-wrap gap-2">
+                    {% for project in linked_projects %}
+                    <a href="{% url 'projects:detail' project.slug %}" class="inline-flex items-center gap-1 px-3 py-1 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-sm text-gray-900 dark:text-white transition-colors rounded">
+                        {{ project.name }}
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
             <div>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Created by</p>
                 <p class="font-medium text-gray-900 dark:text-white">{{ company.created_by|default:'System' }}</p>
