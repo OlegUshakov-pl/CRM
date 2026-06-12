@@ -11,6 +11,7 @@ from .models import Project, ProjectImage
 from .forms import ProjectForm
 from .services import ExportService, ImportService
 from contacts.models import Contact
+from companies.models import Company
 from notes.forms import NoteForm
 from materials.models import Material
 from core.models import log_activity
@@ -68,6 +69,7 @@ def project_edit(request, slug):
     form = ProjectForm(instance=project)
     note_form = NoteForm()
     available_contacts = Contact.objects.filter(is_active=True).exclude(projects=project)
+    available_companies = Company.objects.filter(is_active=True).exclude(pk=project.company_id) if project.company_id else Company.objects.filter(is_active=True)
 
     if request.method == 'POST':
         if 'note_submit' in request.POST:
@@ -100,6 +102,7 @@ def project_edit(request, slug):
         'is_page': True,
         'note_form': note_form,
         'available_contacts': available_contacts,
+        'available_companies': available_companies,
     })
 
 
@@ -125,6 +128,32 @@ def add_contact(request, slug):
             log_activity(request.user, 'updated', f'Added contact "{contact.get_full_name()}" to "{project.name}"', project)
             messages.success(request, 'Contact added.')
     return redirect(request.META.get('HTTP_REFERER') or reverse('projects:edit', kwargs={'slug': slug}))
+
+
+@login_required
+def add_company(request, slug):
+    project = get_object_or_404(Project, slug=slug)
+    if request.method == 'POST':
+        company_id = request.POST.get('company_id')
+        if company_id:
+            from companies.models import Company
+            company = get_object_or_404(Company, id=company_id)
+            project.company = company
+            project.save()
+            log_activity(request.user, 'updated', f'Added company "{company.name}" to "{project.name}"', project)
+            messages.success(request, 'Company added.')
+    return redirect(request.META.get('HTTP_REFERER') or reverse('projects:edit', kwargs={'slug': slug}))
+
+
+@login_required
+def remove_company(request, slug):
+    project = get_object_or_404(Project, slug=slug)
+    if request.method == 'POST':
+        project.company = None
+        project.save()
+        log_activity(request.user, 'updated', f'Removed company from "{project.name}"', project)
+        messages.success(request, 'Company removed.')
+    return redirect(request.META.get('HTTP_REFERER') or reverse('projects:detail', kwargs={'slug': slug}))
 
 
 @login_required
