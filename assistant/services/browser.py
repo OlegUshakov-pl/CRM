@@ -60,6 +60,35 @@ def _is_blacklisted(url: str) -> bool:
     return False
 
 
+def _is_private_ip(url: str) -> bool:
+    """Check if URL resolves to a private/reserved IP address (SSRF protection)."""
+    host = urllib.parse.urlparse(url).hostname or ''
+    if not host:
+        return True
+    try:
+        addr = socket.getaddrinfo(host, None)
+        for family, _, _, _, sockaddr in addr:
+            ip = sockaddr[0]
+            parts = ip.split('.')
+            if len(parts) == 4:
+                a, b = int(parts[0]), int(parts[1])
+                if a == 10:
+                    return True
+                if a == 172 and 16 <= b <= 31:
+                    return True
+                if a == 192 and b == 168:
+                    return True
+                if a == 127:
+                    return True
+                if a == 0:
+                    return True
+                if a == 169 and b == 254:
+                    return True
+    except (socket.gaierror, ValueError):
+        return True
+    return False
+
+
 class BrowserService:
     ALLOWED_DOWNLOAD_EXT = {'.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp',
                             '.pdf', '.docx', '.xlsx', '.dwg'}
@@ -72,6 +101,8 @@ class BrowserService:
         url = _ensure_scheme(url.strip())
         if _is_blacklisted(url):
             return FetchResult(ok=False, error='Сайт в чёрном списке.')
+        if _is_private_ip(url):
+            return FetchResult(ok=False, error='Доступ к внутренним ресурсам запрещён.')
         try:
             socket.setdefaulttimeout(self.timeout)
             req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36'})

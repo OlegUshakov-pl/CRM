@@ -7,6 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db.models import Prefetch
+from django.utils.http import url_has_allowed_host_and_scheme
 from .models import Project, ProjectImage
 from .forms import ProjectForm
 from .services import ExportService, ImportService
@@ -15,6 +16,13 @@ from companies.models import Company
 from notes.forms import NoteForm
 from materials.models import Material
 from core.models import log_activity
+
+
+def _safe_redirect(request, fallback_url):
+    referer = request.META.get('HTTP_REFERER', '')
+    if referer and url_has_allowed_host_and_scheme(referer, allowed_hosts={request.get_host()}):
+        return redirect(referer)
+    return redirect(fallback_url)
 
 
 @login_required
@@ -114,7 +122,7 @@ def remove_contact(request, slug, contact_id):
         project.contacts.remove(contact)
         log_activity(request.user, 'updated', f'Removed contact "{contact.get_full_name()}" from "{project.name}"', project)
         messages.success(request, 'Contact removed.')
-    return redirect(request.META.get('HTTP_REFERER') or reverse('projects:detail', kwargs={'slug': slug}))
+    return _safe_redirect(request, reverse('projects:detail', kwargs={'slug': slug}))
 
 
 @login_required
@@ -127,7 +135,7 @@ def add_contact(request, slug):
             project.contacts.add(contact)
             log_activity(request.user, 'updated', f'Added contact "{contact.get_full_name()}" to "{project.name}"', project)
             messages.success(request, 'Contact added.')
-    return redirect(request.META.get('HTTP_REFERER') or reverse('projects:edit', kwargs={'slug': slug}))
+    return _safe_redirect(request, reverse('projects:edit', kwargs={'slug': slug}))
 
 
 @login_required
@@ -142,7 +150,7 @@ def add_company(request, slug):
             project.save()
             log_activity(request.user, 'updated', f'Added company "{company.name}" to "{project.name}"', project)
             messages.success(request, 'Company added.')
-    return redirect(request.META.get('HTTP_REFERER') or reverse('projects:edit', kwargs={'slug': slug}))
+    return _safe_redirect(request, reverse('projects:edit', kwargs={'slug': slug}))
 
 
 @login_required
@@ -153,7 +161,7 @@ def remove_company(request, slug):
         project.save()
         log_activity(request.user, 'updated', f'Removed company from "{project.name}"', project)
         messages.success(request, 'Company removed.')
-    return redirect(request.META.get('HTTP_REFERER') or reverse('projects:detail', kwargs={'slug': slug}))
+    return _safe_redirect(request, reverse('projects:detail', kwargs={'slug': slug}))
 
 
 @login_required

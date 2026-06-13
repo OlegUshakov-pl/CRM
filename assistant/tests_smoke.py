@@ -1,8 +1,15 @@
+# -*- coding: utf-8 -*-
 import os
+import sys
 import django
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 django.setup()
+
+if sys.stdout.encoding != 'utf-8':
+    sys.stdout.reconfigure(encoding='utf-8')
+if sys.stderr.encoding != 'utf-8':
+    sys.stderr.reconfigure(encoding='utf-8')
 
 from django.contrib.auth.models import User
 from assistant.services import LLMService
@@ -53,7 +60,7 @@ for lang, c in cases:
     intent = r.get('intent', '—')
     msg = (r.get('message') or r.get('error') or '')[:160]
     print(f'[{lang} | {kind:10} | {intent:18}] {c}')
-    print(f'    → {msg}')
+    print(f'    -> {msg}')
     if r.get('needs_confirmation'):
         last = r.get('payload', {})
         intent_name = last.get('intent')

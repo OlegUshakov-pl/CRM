@@ -22,10 +22,10 @@ class Task(TimeStampedModel):
     title = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255, unique=True, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='todo')
-    priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default='medium')
-    due_date = models.DateField(blank=True, null=True)
-    project = models.ForeignKey(Project, on_delete=models.SET_NULL, null=True, blank=True, related_name='tasks')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='todo', db_index=True)
+    priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default='medium', db_index=True)
+    due_date = models.DateField(blank=True, null=True, db_index=True)
+    project = models.ForeignKey(Project, on_delete=models.SET_NULL, null=True, blank=True, related_name='tasks', db_index=True)
 
     class Meta:
         ordering = ['-created_at']

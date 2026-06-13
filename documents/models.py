@@ -50,14 +50,14 @@ class Document(models.Model):
         ('other', 'Other'),
     ]
 
-    project = models.ForeignKey(Project, on_delete=models.SET_NULL, null=True, blank=True, related_name='documents')
-    number = models.CharField(max_length=50, blank=True, null=True)
+    project = models.ForeignKey(Project, on_delete=models.SET_NULL, null=True, blank=True, related_name='documents', db_index=True)
+    number = models.CharField(max_length=50, blank=True, null=True, db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     size = models.IntegerField(blank=True, null=True, help_text='File size in bytes')
     file = models.FileField(upload_to=document_upload_to, storage=ProjectFileSystemStorage())
-    file_type = models.CharField(max_length=50, choices=FILE_TYPE_CHOICES, default='other')
-    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, related_name='documents')
+    file_type = models.CharField(max_length=50, choices=FILE_TYPE_CHOICES, default='other', db_index=True)
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, related_name='documents', db_index=True)
 
     class Meta:
         ordering = ['-created_at']
