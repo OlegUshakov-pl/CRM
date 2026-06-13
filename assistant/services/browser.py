@@ -67,8 +67,6 @@ class BrowserService:
     def __init__(self, timeout: Optional[int] = None):
         self.timeout = timeout or getattr(settings, 'AI_BROWSER_TIMEOUT', 20)
         self._ctx = ssl.create_default_context()
-        self._ctx.check_hostname = False
-        self._ctx.verify_mode = ssl.CERT_NONE
 
     def fetch(self, url: str) -> FetchResult:
         url = _ensure_scheme(url.strip())
@@ -111,24 +109,69 @@ class BrowserService:
         )
 
     def extract_pdf_links(self, html: str, base_url: str) -> list:
-        hrefs = re.findall(r'href=["\']([^"\']+\.pdf[^"\']*)["\']', html, re.IGNORECASE)
-        out = []
-        for h in hrefs:
-            out.append(urllib.parse.urljoin(base_url, h))
-        return out
+        from html.parser import HTMLParser
+
+        class PDFLinkFinder(HTMLParser):
+            def __init__(self):
+                super().__init__()
+                self.links = []
+
+            def handle_starttag(self, tag, attrs):
+                if tag != 'a':
+                    return
+                attrs_dict = dict(attrs)
+                href = attrs_dict.get('href', '')
+                if '.pdf' in href.lower():
+                    self.links.append(href)
+
+        parser = PDFLinkFinder()
+        parser.feed(html)
+        return [urllib.parse.urljoin(base_url, h) for h in parser.links]
 
     def extract_titles(self, html: str, limit: int = 5) -> list:
-        titles = re.findall(r'<h[1-3][^>]*>(.*?)</h[1-3]>', html, re.IGNORECASE | re.DOTALL)
-        clean = []
-        for t in titles:
-            t = re.sub(r'<[^>]+>', '', t).strip()
-            if t:
-                clean.append(t)
-            if len(clean) >= limit:
-                break
-        if not clean:
-            clean = re.findall(r'<title>(.*?)</title>', html, re.IGNORECASE | re.DOTALL)
-        return clean[:limit]
+        from html.parser import HTMLParser
+
+        class TitleFinder(HTMLParser):
+            def __init__(self, limit):
+                super().__init__()
+                self.limit = limit
+                self.titles = []
+                self._in_title_tag = False
+                self._in_heading = False
+                self._current_text = []
+                self._heading_tags = {'h1', 'h2', 'h3'}
+                self._tag_stack = []
+
+            def handle_starttag(self, tag, attrs):
+                self._tag_stack.append(tag)
+                if tag == 'title':
+                    self._in_title_tag = True
+                    self._current_text = []
+                elif tag in self._heading_tags:
+                    self._in_heading = True
+                    self._current_text = []
+
+            def handle_endtag(self, tag):
+                if self._tag_stack and self._tag_stack[-1] == tag:
+                    self._tag_stack.pop()
+                if tag == 'title' and self._in_title_tag:
+                    self._in_title_tag = False
+                    text = ''.join(self._current_text).strip()
+                    if text and not self.titles:
+                        self.titles.append(text)
+                elif tag in self._heading_tags and self._in_heading:
+                    self._in_heading = False
+                    text = ''.join(self._current_text).strip()
+                    if text and len(self.titles) < self.limit:
+                        self.titles.append(text)
+
+            def handle_data(self, data):
+                if self._in_title_tag or self._in_heading:
+                    self._current_text.append(data)
+
+        parser = TitleFinder(limit)
+        parser.feed(html)
+        return parser.titles[:limit]
 
     def screenshot(self, url: str) -> bytes:
         """
@@ -159,33 +202,76 @@ class BrowserService:
         )
 
     def _parse_ddg_results(self, html: str, max_results: int) -> list:
-        items = []
-        blocks = re.split(r'<div[^>]*class="[^"]*result[^"]*"[^>]*>', html)
-        for block in blocks[1:]:
-            if len(items) >= max_results:
-                break
-            title_match = re.search(r'<a[^>]*class="[^"]*result__a[^"]*"[^>]*href="([^"]*)"[^>]*>(.*?)</a>', block, re.DOTALL)
-            snippet_match = re.search(r'<a[^>]*class="[^"]*result__snippet[^"]*"[^>]*>(.*?)</a>', block, re.DOTALL)
-            if not title_match:
-                continue
-            url_raw = title_match.group(1)
-            title = re.sub(r'<[^>]+>', '', title_match.group(2)).strip()
-            snippet = ''
-            if snippet_match:
-                snippet = re.sub(r'<[^>]+>', '', snippet_match.group(1)).strip()
-            if url_raw.startswith('//'):
-                url_raw = 'https:' + url_raw
-            elif url_raw.startswith('/'):
-                url_raw = 'https://duckduckgo.com' + url_raw
-            import urllib.parse as _up
-            parsed = _up.urlparse(url_raw)
-            if parsed.hostname and 'duckduckgo' in parsed.hostname:
-                qs = _up.parse_qs(parsed.query)
-                actual = qs.get('uddg', [None])[0] or qs.get('ru', [None])[0] or url_raw
-            else:
-                actual = url_raw
-            items.append({'title': title, 'url': actual, 'snippet': snippet})
-        return items
+        from html.parser import HTMLParser
+
+        class DDGResultParser(HTMLParser):
+            def __init__(self, max_results):
+                super().__init__()
+                self.max_results = max_results
+                self.items = []
+                self._current = None
+                self._in_result = False
+                self._in_title = False
+                self._in_snippet = False
+                self._skip_link = False
+                self._text_parts = []
+
+            def handle_starttag(self, tag, attrs):
+                attrs_dict = dict(attrs)
+                cls = attrs_dict.get('class', '')
+                if 'result' in cls.split():
+                    if self._in_result and self._current:
+                        self._finish_item()
+                    if len(self.items) >= self.max_results:
+                        return
+                    self._in_result = True
+                    self._current = {'title': '', 'url': '', 'snippet': ''}
+                if not self._in_result:
+                    return
+                if tag == 'a' and 'result__a' in cls.split():
+                    self._in_title = True
+                    self._text_parts = []
+                    self._current['url'] = attrs_dict.get('href', '')
+                if tag == 'a' and 'result__snippet' in cls.split():
+                    self._in_snippet = True
+                    self._text_parts = []
+
+            def handle_endtag(self, tag):
+                if not self._in_result:
+                    return
+                if self._in_title and tag == 'a':
+                    self._in_title = False
+                    self._current['title'] = ''.join(self._text_parts).strip()
+                if self._in_snippet and tag == 'a':
+                    self._in_snippet = False
+                    self._current['snippet'] = ''.join(self._text_parts).strip()
+
+            def handle_data(self, data):
+                if self._in_title or self._in_snippet:
+                    self._text_parts.append(data)
+
+            def _finish_item(self):
+                if self._current and self._current['url']:
+                    url = self._current['url']
+                    if url.startswith('//'):
+                        url = 'https:' + url
+                    elif url.startswith('/'):
+                        url = 'https://duckduckgo.com' + url
+                    parsed = urllib.parse.urlparse(url)
+                    if parsed.hostname and 'duckduckgo' in parsed.hostname:
+                        qs = urllib.parse.parse_qs(parsed.query)
+                        actual = qs.get('uddg', [None])[0] or qs.get('ru', [None])[0] or url
+                    else:
+                        actual = url
+                    self._current['url'] = actual
+                    self.items.append(self._current)
+                self._current = None
+
+        parser = DDGResultParser(max_results)
+        parser.feed(html)
+        if parser._in_result and parser._current:
+            parser._finish_item()
+        return parser.items[:max_results]
 
     def search_web(self, query: str, max_results: int = 8) -> list:
         """Search DuckDuckGo and return list of {title, url, snippet}."""

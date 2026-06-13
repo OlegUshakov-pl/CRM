@@ -7,5 +7,5 @@ def app_version(request):
 
 def sidebar_projects(request):
     from projects.models import Project
-    projects = Project.objects.filter(is_active=True).order_by('name')
+    projects = Project.objects.filter(is_active=True).select_related('company').order_by('name')
     return {'sidebar_projects': projects}

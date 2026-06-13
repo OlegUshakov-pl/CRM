@@ -280,8 +280,10 @@ def document_download(request, pk):
     file_path = document.file.path
     if not os.path.exists(file_path):
         return HttpResponse('File not found', status=404)
+    from urllib.parse import quote
+    safe_filename = quote(document.filename)
     response = FileResponse(open(file_path, 'rb'), filename=document.filename)
-    response['Content-Disposition'] = f'attachment; filename="{document.filename}"'
+    response['Content-Disposition'] = f"attachment; filename*=UTF-8''{safe_filename}"
     return response
 
 

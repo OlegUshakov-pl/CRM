@@ -9,7 +9,6 @@ Each handler:
 """
 import logging
 import os
-import re
 import uuid
 from datetime import date, datetime, timedelta
 from typing import Any, Dict, List, Optional
@@ -41,9 +40,11 @@ def _find_project(name: str, lang: str = 'en'):
 
 def _find_contact(name: str, lang: str = 'en'):
     from contacts.models import Contact
-    if not name:
+    if not name or not name.strip():
         return None
-    parts = name.split()
+    parts = name.strip().split()
+    if not parts:
+        return None
     qs = Contact.objects.filter(is_active=True)
     for p in parts:
         qs = qs.filter(Q(first_name__icontains=p) | Q(last_name__icontains=p) | Q(email__icontains=p))
@@ -119,14 +120,20 @@ def _do_create_project(user, payload: Dict[str, Any]) -> CommandResult:
 def _confirm_create_task(ctx: CommandContext) -> CommandResult:
     lang = detect_lang(ctx.text)
     title = ctx.params.get('title') or ctx.params.get('text') or ctx.params.get('task') or ''
-    due = ctx.params.get('date') or ctx.params.get('due_date') or ''
+    due_raw = ctx.params.get('date') or ctx.params.get('due_date') or ''
     project_name = ctx.params.get('project') or ctx.params.get('project_name') or ''
 
     if not title:
         return CommandResult(ok=False, error=t('task_missing_title', lang))
 
     project = _find_project(project_name) if project_name else None
-    if not due:
+    due = due_raw
+    if due:
+        try:
+            datetime.strptime(due, '%Y-%m-%d').date()
+        except (ValueError, TypeError):
+            due = date.today().isoformat()
+    else:
         due = date.today().isoformat()
     project_part = t('task_project_part', lang, name=project.name) if project else ''
 
@@ -341,6 +348,7 @@ def _handle_show_company(ctx: CommandContext) -> CommandResult:
 def _confirm_create_note(ctx: CommandContext) -> CommandResult:
     lang = detect_lang(ctx.text)
     title = ctx.params.get('title') or ctx.params.get('text') or ctx.params.get('content') or ''
+    content = ctx.params.get('content') or ''
     project_name = ctx.params.get('project') or ctx.params.get('project_name') or ''
     project = _find_project(project_name) if project_name else None
 
@@ -357,6 +365,7 @@ def _confirm_create_note(ctx: CommandContext) -> CommandResult:
         payload={
             'intent': 'create_note',
             'title': title,
+            'content': content,
             'project_id': project.id if project else None,
             'lang': lang,
         },
@@ -369,7 +378,7 @@ def _do_create_note(user, payload: Dict[str, Any]) -> CommandResult:
     lang = payload.get('lang') or 'en'
     n = Note(
         title=payload.get('title') or 'Untitled',
-        content=payload.get('title') or '',
+        content=payload.get('content') or payload.get('title') or '',
         date=date.today(),
         project_id=payload.get('project_id') or None,
         created_by=user,
@@ -528,37 +537,46 @@ def _handle_find_on_site(ctx: CommandContext) -> CommandResult:
     if not result.ok or not result.is_html:
         return CommandResult(ok=False, error=t('find_on_site_not_html', lang))
 
+    import urllib.parse
+    from html.parser import HTMLParser
+
+    class LinkFinder(HTMLParser):
+        def __init__(self, file_type, name_filter, final_url):
+            super().__init__()
+            self.file_type = file_type
+            self.name_filter = name_filter
+            self.final_url = final_url
+            self.matches = []
+
+        def handle_starttag(self, tag, attrs):
+            attrs_dict = dict(attrs)
+            if tag == 'a' and 'href' in attrs_dict:
+                href = attrs_dict['href']
+                full_url = urllib.parse.urljoin(self.final_url, href)
+                fname = urllib.parse.urlparse(full_url).path.split('/')[-1] or full_url
+                if self.name_filter and self.name_filter not in fname.lower() and self.name_filter not in full_url.lower():
+                    return
+                if self.file_type == 'pdf':
+                    if '.pdf' in href.lower():
+                        self.matches.append({'title': fname, 'url': full_url})
+            if tag == 'img' and 'src' in attrs_dict and self.file_type != 'pdf':
+                src = attrs_dict['src']
+                full_url = urllib.parse.urljoin(self.final_url, src)
+                fname = urllib.parse.urlparse(full_url).path.split('/')[-1] or full_url
+                if self.name_filter and self.name_filter not in fname.lower() and self.name_filter not in full_url.lower():
+                    return
+                ext = os.path.splitext(fname)[1].lower()
+                if ext in ('.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.svg'):
+                    self.matches.append({'title': fname, 'url': full_url})
+
     try:
         html = result.content.decode('utf-8', errors='ignore')
     except Exception:
         html = result.content.decode('utf-8', errors='ignore')
 
-    import urllib.parse
-
-    if file_type == 'pdf':
-        all_links = re.findall(r'href=["\']([^"\']+)["\']', html, re.IGNORECASE)
-        matches = []
-        for href in all_links:
-            if '.pdf' not in href.lower():
-                continue
-            full_url = urllib.parse.urljoin(result.final_url, href)
-            fname = urllib.parse.urlparse(full_url).path.split('/')[-1] or full_url
-            if name_filter and name_filter not in fname.lower() and name_filter not in full_url.lower():
-                continue
-            matches.append({'title': fname, 'url': full_url})
-    else:
-        all_links = re.findall(r'<a[^>]+href=["\']([^"\']+)["\'][^>]*>.*?</a>', html, re.DOTALL)
-        img_tags = re.findall(r'<img[^>]+src=["\']([^"\']+)["\'][^>]*>', html, re.IGNORECASE)
-        all_srcs = []
-        for src in img_tags:
-            full_url = urllib.parse.urljoin(result.final_url, src)
-            fname = urllib.parse.urlparse(full_url).path.split('/')[-1] or full_url
-            if name_filter and name_filter not in fname.lower() and name_filter not in full_url.lower():
-                continue
-            ext = os.path.splitext(fname)[1].lower()
-            if ext in ('.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.svg'):
-                all_srcs.append({'title': fname, 'url': full_url})
-        matches = all_srcs[:20]
+    finder = LinkFinder(file_type, name_filter, result.final_url)
+    finder.feed(html)
+    matches = finder.matches[:20]
 
     if not matches:
         return CommandResult(ok=True, message=t('find_on_site_none', lang, type=file_type, site=site_url))

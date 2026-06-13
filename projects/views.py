@@ -195,12 +195,13 @@ def project_export(request, slug):
     service = ExportService(project)
     try:
         zip_path = service.export()
-        response = FileResponse(
-            open(str(zip_path), 'rb'),
-            content_type='application/zip',
-            as_attachment=True,
-            filename=f'{project.name}.zip',
-        )
+        with open(str(zip_path), 'rb') as f:
+            response = FileResponse(
+                f.read(),
+                content_type='application/zip',
+                as_attachment=True,
+                filename=f'{project.name}.zip',
+            )
         return response
     except Exception as e:
         messages.error(request, f'Export failed: {e}')

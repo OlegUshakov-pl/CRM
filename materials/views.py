@@ -134,11 +134,12 @@ def material_edit(request, slug):
 
 @login_required
 def material_delete(request, slug):
-    material = get_object_or_404(Material, slug=slug)
+    material = get_object_or_404(Material.objects.filter(is_active=True), slug=slug)
     project_slug = material.project.slug
     if request.method == 'POST':
+        material.is_active = False
+        material.save()
         log_activity(request.user, 'deleted', f'Material "{material.name}"')
-        material.delete()
         messages.success(request, 'Material deleted successfully.')
     return redirect('projects:detail', slug=project_slug)
 
@@ -198,9 +199,11 @@ def common_save(request):
 
 @login_required
 def common_delete(request, slug):
-    material = get_object_or_404(Material, slug=slug)
+    material = get_object_or_404(Material.objects.filter(is_active=True), slug=slug)
     if request.method == 'POST':
-        material.delete()
+        material.is_active = False
+        material.save()
+        log_activity(request.user, 'deleted', f'Material "{material.name}"')
         messages.success(request, 'Material deleted.')
     return redirect('materials:common')
 
