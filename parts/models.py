@@ -30,9 +30,9 @@ class Category(models.Model):
 
 
 class Part(TimeStampedModel):
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='parts', blank=True, null=True)
-    category = models.ForeignKey(Category, on_delete=models.SET_NULL, blank=True, null=True, related_name='parts')
-    number = models.CharField(max_length=255, blank=True)
+    project = models.ForeignKey(Project, on_delete=models.SET_NULL, related_name='parts', blank=True, null=True, db_index=True)
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, blank=True, null=True, related_name='parts', db_index=True)
+    number = models.CharField(max_length=255, blank=True, db_index=True)
     size = models.CharField(max_length=255, blank=True, null=True)
     rev = models.CharField(max_length=50, blank=True, null=True)
     created = models.DateField(blank=True, null=True)

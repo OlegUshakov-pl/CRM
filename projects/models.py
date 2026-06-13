@@ -2,6 +2,7 @@ import os
 from django.db import models
 from django.contrib.auth.models import User
 from django.conf import settings
+from django.core.validators import MinValueValidator
 from core.models import TimeStampedModel, generate_unique_slug
 from companies.models import Company
 from contacts.models import Contact
@@ -34,13 +35,13 @@ class Project(TimeStampedModel):
     name = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255, unique=True, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='planning')
-    company = models.ForeignKey(Company, on_delete=models.SET_NULL, null=True, blank=True, related_name='projects')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='planning', db_index=True)
+    company = models.ForeignKey(Company, on_delete=models.SET_NULL, null=True, blank=True, related_name='projects', db_index=True)
     contacts = models.ManyToManyField(Contact, blank=True, related_name='projects')
     start_date = models.DateField(blank=True, null=True)
     end_date = models.DateField(blank=True, null=True)
-    budget = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
-    number = models.CharField(max_length=11, blank=True, null=True, verbose_name='Project Number')
+    budget = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True, validators=[MinValueValidator(0)])
+    number = models.CharField(max_length=11, blank=True, null=True, verbose_name='Project Number', db_index=True)
     image = models.ImageField(upload_to=project_image_upload_to, storage=ProjectFileSystemStorage(), blank=True, null=True)
 
     class Meta:

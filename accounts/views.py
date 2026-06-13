@@ -1,6 +1,7 @@
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from django.utils.http import url_has_allowed_host_and_scheme
 from .forms import LoginForm, ProfileForm
 
 
@@ -14,8 +15,10 @@ def login_view(request):
             user = authenticate(username=form.cleaned_data['username'], password=form.cleaned_data['password'])
             if user:
                 login(request, user)
-                next_url = request.POST.get('next') or request.GET.get('next') or 'core:dashboard'
-                return redirect(next_url)
+                next_url = request.POST.get('next') or request.GET.get('next') or ''
+                if next_url and url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
+                    return redirect(next_url)
+                return redirect('core:dashboard')
             form.add_error(None, 'Invalid username or password')
     return render(request, 'accounts/login.html', {'form': form})
 

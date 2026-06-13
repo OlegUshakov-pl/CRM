@@ -6,6 +6,7 @@ from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
+from django.utils.http import url_has_allowed_host_and_scheme
 from projects.models import Project
 from projects.utils import ensure_project_subfolder, sanitize_folder_name, get_subfolder_name, get_project_root_path
 from core.models import log_activity
@@ -280,8 +281,10 @@ def document_download(request, pk):
     file_path = document.file.path
     if not os.path.exists(file_path):
         return HttpResponse('File not found', status=404)
+    from urllib.parse import quote
+    safe_filename = quote(document.filename)
     response = FileResponse(open(file_path, 'rb'), filename=document.filename)
-    response['Content-Disposition'] = f'attachment; filename="{document.filename}"'
+    response['Content-Disposition'] = f"attachment; filename*=UTF-8''{safe_filename}"
     return response
 
 
@@ -299,7 +302,10 @@ def document_delete(request, pk):
     if request.method == 'POST':
         document.delete()
         messages.success(request, 'Document deleted.')
-    return redirect(request.META.get('HTTP_REFERER', reverse('documents:list')))
+    referer = request.META.get('HTTP_REFERER', '')
+    if referer and url_has_allowed_host_and_scheme(referer, allowed_hosts={request.get_host()}):
+        return redirect(referer)
+    return redirect(reverse('documents:list'))
 
 
 @login_required

@@ -14,10 +14,10 @@ class Note(TimeStampedModel):
     title = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255, unique=True, blank=True, null=True)
     content = models.TextField()
-    date = models.DateField(null=True, blank=True)
-    project = models.ForeignKey(Project, on_delete=models.SET_NULL, null=True, blank=True, related_name='note_entries')
-    company = models.ForeignKey(Company, on_delete=models.SET_NULL, null=True, blank=True, related_name='note_entries')
-    contact = models.ForeignKey(Contact, on_delete=models.SET_NULL, null=True, blank=True, related_name='note_entries')
+    date = models.DateField(null=True, blank=True, db_index=True)
+    project = models.ForeignKey(Project, on_delete=models.SET_NULL, null=True, blank=True, related_name='note_entries', db_index=True)
+    company = models.ForeignKey(Company, on_delete=models.SET_NULL, null=True, blank=True, related_name='note_entries', db_index=True)
+    contact = models.ForeignKey(Contact, on_delete=models.SET_NULL, null=True, blank=True, related_name='note_entries', db_index=True)
 
     objects = ActiveManager()
 

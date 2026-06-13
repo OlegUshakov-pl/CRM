@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.validators import MinValueValidator
 from core.models import TimeStampedModel, generate_unique_slug
 from companies.models import Company
 from contacts.models import Contact
@@ -29,13 +30,13 @@ class Deal(TimeStampedModel):
     name = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255, unique=True, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='lead')
-    priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default='medium')
-    value = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True, verbose_name='Deal Value')
-    company = models.ForeignKey(Company, on_delete=models.SET_NULL, null=True, blank=True, related_name='deals')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='lead', db_index=True)
+    priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default='medium', db_index=True)
+    value = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True, verbose_name='Deal Value', validators=[MinValueValidator(0)])
+    company = models.ForeignKey(Company, on_delete=models.SET_NULL, null=True, blank=True, related_name='deals', db_index=True)
     contacts = models.ManyToManyField(Contact, blank=True, related_name='deals')
-    assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_deals')
-    due_date = models.DateField(blank=True, null=True)
+    assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_deals', db_index=True)
+    due_date = models.DateField(blank=True, null=True, db_index=True)
     notes = models.TextField(blank=True, null=True)
 
     class Meta:

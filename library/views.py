@@ -1,4 +1,5 @@
 import json
+import bleach
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
@@ -79,6 +80,8 @@ def library_create(request):
         form = LibraryItemForm(request.POST, request.FILES)
         if form.is_valid():
             item = form.save(commit=False)
+            if item.content:
+                item.content = bleach.clean(item.content, tags=['p', 'br', 'strong', 'em', 'u', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'a', 'img', 'blockquote', 'pre', 'code', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'span', 'div'], attributes={'a': ['href', 'target'], 'img': ['src', 'alt', 'width', 'height'], 'span': ['style'], 'div': ['style']}, styles=['color', 'background-color', 'font-size', 'font-weight', 'text-align', 'padding', 'margin'], strip=True)
             item.created_by = request.user
             item.save()
             form._save_tags(item)
@@ -101,7 +104,10 @@ def library_edit(request, slug):
     if request.method == 'POST':
         form = LibraryItemForm(request.POST, request.FILES, instance=item)
         if form.is_valid():
-            form.save()
+            item = form.save(commit=False)
+            if item.content:
+                item.content = bleach.clean(item.content, tags=['p', 'br', 'strong', 'em', 'u', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'a', 'img', 'blockquote', 'pre', 'code', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'span', 'div'], attributes={'a': ['href', 'target'], 'img': ['src', 'alt', 'width', 'height'], 'span': ['style'], 'div': ['style']}, styles=['color', 'background-color', 'font-size', 'font-weight', 'text-align', 'padding', 'margin'], strip=True)
+            item.save()
             log_activity(request.user, 'updated', f'Library item "{item.title}"', item)
             messages.success(request, 'Document updated successfully.')
             return redirect('library:detail', slug=item.slug)

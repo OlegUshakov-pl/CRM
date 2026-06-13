@@ -97,13 +97,19 @@ def get_setting(request, key):
 
 @login_required
 def serve_project_file(request, file_path):
+    if os.path.isabs(file_path):
+        raise Http404("Invalid file path")
+
     root_path = get_project_root_path()
     if root_path:
-        full_path = os.path.normpath(os.path.join(root_path, file_path))
-        if full_path.startswith(os.path.normpath(root_path)) and os.path.exists(full_path):
+        normalized_root = os.path.normpath(root_path)
+        full_path = os.path.normpath(os.path.join(normalized_root, file_path))
+        if full_path.startswith(normalized_root + os.sep) and os.path.exists(full_path):
             return FileResponse(open(full_path, 'rb'), filename=os.path.basename(full_path))
-    media_path = os.path.normpath(os.path.join(str(settings.MEDIA_ROOT), file_path))
-    if os.path.exists(media_path):
+
+    media_root = os.path.normpath(str(settings.MEDIA_ROOT))
+    media_path = os.path.normpath(os.path.join(media_root, file_path))
+    if media_path.startswith(media_root + os.sep) and os.path.exists(media_path):
         return FileResponse(open(media_path, 'rb'), filename=os.path.basename(media_path))
     raise Http404("File not found")
 
