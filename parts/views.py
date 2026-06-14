@@ -137,6 +137,8 @@ def part_delete(request, pk):
     part = get_object_or_404(Part, pk=pk)
     project_slug = part.project.slug if part.project else None
     log_activity(request.user, 'deleted', f'Part {part.number} deleted', part)
+    if part.file:
+        part.file.delete(save=False)
     part.delete()
     if request.headers.get('HX-Request'):
         response = HttpResponse('<script>closeSlideOver()</script>')

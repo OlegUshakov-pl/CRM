@@ -1,3 +1,5 @@
+import os
+import shutil
 from pathlib import Path
 
 from django.http import FileResponse, HttpResponseBadRequest
@@ -11,6 +13,7 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from .models import Project, ProjectImage
 from .forms import ProjectForm
 from .services import ExportService, ImportService
+from .utils import get_project_folder_path
 from contacts.models import Contact
 from companies.models import Company
 from notes.forms import NoteForm
@@ -93,12 +96,18 @@ def project_edit(request, slug):
         else:
             form = ProjectForm(request.POST, request.FILES, instance=project)
             if form.is_valid():
+                old_image = project.image if project.image else None
                 form.save()
+                if old_image and project.image and old_image.name != project.image.name:
+                    old_image.delete(save=False)
                 for f in request.FILES.getlist('images'):
                     ProjectImage.objects.create(project=project, image=f)
                 delete_ids = request.POST.getlist('delete_images')
                 if delete_ids:
-                    ProjectImage.objects.filter(id__in=delete_ids, project=project).delete()
+                    for img in ProjectImage.objects.filter(id__in=delete_ids, project=project):
+                        if img.image:
+                            img.image.delete(save=False)
+                        img.delete()
                 log_activity(request.user, 'updated', f'Project "{project.name}"', project)
                 messages.success(request, 'Project updated successfully.')
                 return redirect('projects:detail', slug=project.slug)
@@ -168,6 +177,8 @@ def remove_company(request, slug):
 def delete_image(request, pk):
     img = get_object_or_404(ProjectImage, pk=pk)
     if request.method == 'POST':
+        if img.image:
+            img.image.delete(save=False)
         img.delete()
         messages.success(request, 'Image deleted.')
     return redirect('projects:edit', slug=img.project.slug)
@@ -177,9 +188,23 @@ def delete_image(request, pk):
 def project_delete(request, slug):
     project = get_object_or_404(Project, slug=slug)
     if request.method == 'POST':
-        project.is_active = False
-        project.save()
-        log_activity(request.user, 'deleted', f'Project "{project.name}"')
+        folder_path = get_project_folder_path(project)
+        project_name = project.name
+        for doc in project.documents.all():
+            if doc.file:
+                doc.file.delete(save=False)
+        project.documents.all().delete()
+        for part in project.parts.all():
+            if part.file:
+                part.file.delete(save=False)
+        project.parts.all().delete()
+        for img in project.images.all():
+            if img.image:
+                img.image.delete(save=False)
+        if folder_path and os.path.exists(folder_path):
+            shutil.rmtree(folder_path, ignore_errors=True)
+        project.delete()
+        log_activity(request.user, 'deleted', f'Project "{project_name}"')
         messages.success(request, 'Project deleted successfully.')
     return redirect('projects:list')
 

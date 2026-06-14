@@ -4,6 +4,11 @@ from core.models import TimeStampedModel, generate_unique_slug
 from projects.models import Project
 
 
+class ActiveTaskManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(is_active=True)
+
+
 class Task(TimeStampedModel):
     PRIORITY_CHOICES = [
         ('low', 'Low'),
@@ -26,6 +31,9 @@ class Task(TimeStampedModel):
     priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default='medium', db_index=True)
     due_date = models.DateField(blank=True, null=True, db_index=True)
     project = models.ForeignKey(Project, on_delete=models.SET_NULL, null=True, blank=True, related_name='tasks', db_index=True)
+
+    objects = ActiveTaskManager()
+    all_tasks = models.Manager()
 
     class Meta:
         ordering = ['-created_at']

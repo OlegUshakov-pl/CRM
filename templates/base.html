@@ -110,7 +110,7 @@
                             <a href="{% url 'projects:list' %}" class="block px-4 py-2 text-[13px] text-[#222] dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#1a1a1a] transition-colors font-medium">All Projects</a>
                             <hr class="border-[#e8e8e8] dark:border-[#222]">
                             {% for p in sidebar_projects %}
-                            <a href="{% url 'projects:edit' p.slug %}" class="block px-4 py-2 text-[13px] text-[#222] dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#1a1a1a] transition-colors truncate" title="{{ p.name }}">{{ p.name }}</a>
+                            <a href="{% url 'projects:detail' p.slug %}" class="block px-4 py-2 text-[13px] text-[#222] dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#1a1a1a] transition-colors truncate" title="{{ p.name }}">{{ p.name }}</a>
                             {% endfor %}
                             {% if not sidebar_projects %}
                             <p class="px-4 py-2 text-[12px] text-gray-400 dark:text-gray-500">No projects yet</p>
@@ -360,6 +360,7 @@
                 <button @click="$store.deleteModal.close()" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-[#1a1a1a] hover:bg-gray-200 dark:hover:bg-[#222] transition-colors">Cancel</button>
                 <form method="post" :action="$store.deleteModal.deleteUrl">
                     {% csrf_token %}
+                    <input type="hidden" name="next" :value="$store.deleteModal.nextUrl">
                     <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600 transition-colors">Delete</button>
                 </form>
             </div>
@@ -410,7 +411,8 @@
                 show: false,
                 deleteUrl: '',
                 itemName: '',
-                open(url, name) { this.deleteUrl = url; this.itemName = name; this.show = true; },
+                nextUrl: '',
+                open(url, name, next) { this.deleteUrl = url; this.itemName = name; this.nextUrl = next || ''; this.show = true; },
                 close() { this.show = false; }
             });
         });

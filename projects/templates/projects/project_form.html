@@ -346,7 +346,7 @@
                     </div>
                     <div class="flex items-center gap-3 mt-2 pt-2 border-t border-gray-200 dark:border-gray-600">
                         <button type="button" onclick="openSlideOver('{% url 'tasks:edit_slide' task.slug %}')" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline">Edit</button>
-                        <button type="button" @click="$store.deleteModal.open('{% url 'tasks:delete' task.slug %}', '{{ task.title|escapejs }}')" class="text-xs text-red-600 dark:text-red-400 hover:underline">Delete</button>
+                        <button type="button" @click="$store.deleteModal.open('{% url 'tasks:delete' task.slug %}', '{{ task.title|escapejs }}', '{% url 'projects:edit' project.slug %}')" class="text-xs text-red-600 dark:text-red-400 hover:underline">Delete</button>
                     </div>
                 </div>
                 {% endfor %}
