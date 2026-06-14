@@ -360,6 +360,7 @@
                 <button @click="$store.deleteModal.close()" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-[#1a1a1a] hover:bg-gray-200 dark:hover:bg-[#222] transition-colors">Cancel</button>
                 <form method="post" :action="$store.deleteModal.deleteUrl">
                     {% csrf_token %}
+                    <input type="hidden" name="next" :value="$store.deleteModal.nextUrl">
                     <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600 transition-colors">Delete</button>
                 </form>
             </div>
@@ -410,7 +411,8 @@
                 show: false,
                 deleteUrl: '',
                 itemName: '',
-                open(url, name) { this.deleteUrl = url; this.itemName = name; this.show = true; },
+                nextUrl: '',
+                open(url, name, next) { this.deleteUrl = url; this.itemName = name; this.nextUrl = next || ''; this.show = true; },
                 close() { this.show = false; }
             });
         });

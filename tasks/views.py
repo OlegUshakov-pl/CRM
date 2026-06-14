@@ -75,12 +75,15 @@ def task_edit(request, slug):
 
 @login_required
 def task_delete(request, slug):
-    task = get_object_or_404(Task, slug=slug)
+    task = get_object_or_404(Task.all_tasks, slug=slug)
     if request.method == 'POST':
         task.is_active = False
         task.save()
         log_activity(request.user, 'deleted', f'Task "{task.title}"')
         messages.success(request, 'Task deleted successfully.')
+        next_url = request.POST.get('next') or request.GET.get('next')
+        if next_url:
+            return redirect(next_url)
     return redirect('tasks:list')
 
 
