@@ -189,11 +189,11 @@ def project_delete(request, slug):
     project = get_object_or_404(Project, slug=slug)
     if request.method == 'POST':
         folder_path = get_project_folder_path(project)
-        project.is_active = False
-        project.save()
+        project_name = project.name
         if folder_path and os.path.exists(folder_path):
             shutil.rmtree(folder_path, ignore_errors=True)
-        log_activity(request.user, 'deleted', f'Project "{project.name}"')
+        project.delete()
+        log_activity(request.user, 'deleted', f'Project "{project_name}"')
         messages.success(request, 'Project deleted successfully.')
     return redirect('projects:list')
 
