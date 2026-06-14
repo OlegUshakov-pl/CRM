@@ -1,5 +1,5 @@
 ![CRM](image.png)
-
+![CRM-gif](CRM.gif)
 # CRM
 
 **Django 6.0.6 + Tailwind CSS 4 + Alpine.js + HTMX + Ollama AI**
