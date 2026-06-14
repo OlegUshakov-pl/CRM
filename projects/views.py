@@ -93,7 +93,10 @@ def project_edit(request, slug):
         else:
             form = ProjectForm(request.POST, request.FILES, instance=project)
             if form.is_valid():
+                old_image = project.image if project.image else None
                 form.save()
+                if old_image and project.image and old_image.name != project.image.name:
+                    old_image.delete(save=False)
                 for f in request.FILES.getlist('images'):
                     ProjectImage.objects.create(project=project, image=f)
                 delete_ids = request.POST.getlist('delete_images')
