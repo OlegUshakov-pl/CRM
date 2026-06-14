@@ -300,6 +300,8 @@ def document_common_latest(request):
 def document_delete(request, pk):
     document = get_object_or_404(Document, pk=pk)
     if request.method == 'POST':
+        if document.file:
+            document.file.delete(save=False)
         document.delete()
         messages.success(request, 'Document deleted.')
     referer = request.META.get('HTTP_REFERER', '')

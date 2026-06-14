@@ -168,6 +168,8 @@ def remove_company(request, slug):
 def delete_image(request, pk):
     img = get_object_or_404(ProjectImage, pk=pk)
     if request.method == 'POST':
+        if img.image:
+            img.image.delete(save=False)
         img.delete()
         messages.success(request, 'Image deleted.')
     return redirect('projects:edit', slug=img.project.slug)
