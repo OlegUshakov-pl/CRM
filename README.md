@@ -1,4 +1,3 @@
-![CRM](image.png)
 ![CRM-gif](CRM.gif)
 # CRM
 
