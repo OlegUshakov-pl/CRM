@@ -5,7 +5,7 @@
 <div style="max-width: 1080px; width: 100%; margin-left: auto; margin-right: auto;">
     <div class="flex items-center justify-between mb-6">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900">{{ project.name }}</h1>
+            <h1 class="text-xl font-bold text-gray-900">{{ project.name }}</h1>
         </div>
         <div class="flex items-center gap-2">
             <button onclick="openSlideOver('{% url 'documents:create_slide' project.slug %}')" class="inline-flex items-center gap-2 px-4 py-2.5 bg-red-400 hover:bg-red-500 text-white text-[14px] font-medium rounded-[20px] shadow-[0_2px_2px_rgba(0,0,0,0.25)] transition-colors">

@@ -232,7 +232,7 @@
         <!-- Main -->
         <main class="flex-1 bg-white border border-light">
             <!-- Header -->
-            <div class="border-b border-light px-6 py-4 flex items-center gap-4">
+            <div class="border-b border-light px-5 py-4 flex items-center gap-4">
                 <div class="flex items-center gap-1 text-[12px] flex-shrink-0">
                     <a href="{% url 'calendar_app:view' %}" class="p-2 hover:bg-[#e5e7eb] dark:hover:bg-[#1a1a1a] transition-colors dark:text-gray-400 inline-flex"><i data-lucide="calendar" class="w-5 h-5"></i></a>
                     <button class="p-2 hover:bg-[#e5e7eb] dark:hover:bg-[#1a1a1a] transition-colors"><i data-lucide="star" class="w-5 h-5" style="color: #FFA84C"></i></button>
@@ -272,7 +272,7 @@
             </div>
 
             <!-- Breadcrumb -->
-            <div class="px-6 py-3 border-b border-light flex items-center justify-between">
+            <div class="px-5 py-3 border-b border-light flex items-center justify-between">
                 <div class="flex items-center gap-2 text-[12px] text-[#999]">
                     <a href="{% url 'core:dashboard' %}" class="hover:opacity-70 transition-opacity"><i data-lucide="house" class="w-5 h-5 dark:text-gray-400"></i></a>
                     <span class="dark:text-gray-500">/</span>
@@ -301,7 +301,7 @@
             {% endif %}
 
             <!-- Content -->
-            <div class="px-10 py-7">
+            <div class="px-5 py-5">
                 {% block content %}{% endblock %}
             </div>
 
