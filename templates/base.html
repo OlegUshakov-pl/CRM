@@ -110,7 +110,7 @@
                             <a href="{% url 'projects:list' %}" class="block px-4 py-2 text-[13px] text-[#222] dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#1a1a1a] transition-colors font-medium">All Projects</a>
                             <hr class="border-[#e8e8e8] dark:border-[#222]">
                             {% for p in sidebar_projects %}
-                            <a href="{% url 'projects:edit' p.slug %}" class="block px-4 py-2 text-[13px] text-[#222] dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#1a1a1a] transition-colors truncate" title="{{ p.name }}">{{ p.name }}</a>
+                            <a href="{% url 'projects:detail' p.slug %}" class="block px-4 py-2 text-[13px] text-[#222] dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#1a1a1a] transition-colors truncate" title="{{ p.name }}">{{ p.name }}</a>
                             {% endfor %}
                             {% if not sidebar_projects %}
                             <p class="px-4 py-2 text-[12px] text-gray-400 dark:text-gray-500">No projects yet</p>
