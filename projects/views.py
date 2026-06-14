@@ -190,6 +190,17 @@ def project_delete(request, slug):
     if request.method == 'POST':
         folder_path = get_project_folder_path(project)
         project_name = project.name
+        for doc in project.documents.all():
+            if doc.file:
+                doc.file.delete(save=False)
+        project.documents.all().delete()
+        for part in project.parts.all():
+            if part.file:
+                part.file.delete(save=False)
+        project.parts.all().delete()
+        for img in project.images.all():
+            if img.image:
+                img.image.delete(save=False)
         if folder_path and os.path.exists(folder_path):
             shutil.rmtree(folder_path, ignore_errors=True)
         project.delete()
