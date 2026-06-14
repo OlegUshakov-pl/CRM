@@ -98,7 +98,10 @@ def project_edit(request, slug):
                     ProjectImage.objects.create(project=project, image=f)
                 delete_ids = request.POST.getlist('delete_images')
                 if delete_ids:
-                    ProjectImage.objects.filter(id__in=delete_ids, project=project).delete()
+                    for img in ProjectImage.objects.filter(id__in=delete_ids, project=project):
+                        if img.image:
+                            img.image.delete(save=False)
+                        img.delete()
                 log_activity(request.user, 'updated', f'Project "{project.name}"', project)
                 messages.success(request, 'Project updated successfully.')
                 return redirect('projects:detail', slug=project.slug)
