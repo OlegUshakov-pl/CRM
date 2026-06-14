@@ -7,7 +7,7 @@
         <div class="flex items-center gap-3">
             {% if category.color %}<span class="w-4 h-4 rounded-full inline-block flex-shrink-0" style="background-color:{{ category.color }}"></span>{% endif %}
             <div>
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ category.name }}</h1>
+                <h1 class="text-xl font-bold text-gray-900 dark:text-white">{{ category.name }}</h1>
                 {% if category.parent %}
                 <p class="text-sm text-gray-500">Subcategory of {{ category.parent.name }}</p>
                 {% endif %}
