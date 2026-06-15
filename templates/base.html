@@ -215,15 +215,15 @@
                     </a>
                 </div>
 
-                <button onclick="openChatModal()" class="p-2 hover:bg-gray-100 dark:hover:bg-[#1a1a1a] rounded flex items-center gap-2 mt-2 pl-0">
-                    <i data-lucide="sparkles" class="w-4 h-4 flex-shrink-0 text-indigo-500"></i>
-                    <span class="sidebar-text">AI Chat</span>
-                </button>
-
                 <a href="{% url 'core:settings_page' %}" class="mt-2">
                     <i data-lucide="settings" class="w-4 h-4 flex-shrink-0"></i>
                     <span class="sidebar-text">Settings</span>
                 </a>
+
+                <button onclick="openChatModal()" class="p-2 hover:bg-gray-100 dark:hover:bg-[#1a1a1a] rounded flex items-center gap-2 mt-2 pl-0">
+                    <i data-lucide="sparkles" class="w-4 h-4 flex-shrink-0 text-indigo-500"></i>
+                    <span class="sidebar-text">AI Chat</span>
+                </button>
 
                 <button id="sidebar-toggle-btn" onclick="toggleSidebar()" class="p-2 hover:bg-gray-100 dark:hover:bg-[#1a1a1a] rounded flex items-center gap-2 mt-4 pl-0">
                     <i data-lucide="panel-left-close" id="toggle-icon" class="w-4 h-4 flex-shrink-0 dark:text-gray-400"></i>
@@ -287,9 +287,6 @@
                     <button onclick="toggleTheme()" class="p-1.5 hover:bg-[#e5e7eb] dark:hover:bg-[#1a1a1a] transition-colors">
                         <i id="theme-icon" data-lucide="moon" class="w-5 h-5" style="color: #666;"></i>
                     </button>
-                    <a href="{% url 'core:settings_page' %}" class="p-1.5 hover:bg-[#e5e7eb] dark:hover:bg-[#1a1a1a] transition-colors">
-                        <i data-lucide="settings" class="w-5 h-5" style="color: #666;"></i>
-                    </a>
                 </div>
             </div>
 
