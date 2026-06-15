@@ -59,36 +59,83 @@ def _log(user, action: str, status: str, description: str, *,
         logger.warning('Failed to write AILog: %s', e)
 
 
-def _ollama_chat(text: str, model: str, user) -> Dict[str, Any]:
-    """Send a message to Ollama and return the response."""
+def _provider_chat(text: str, model: str, user) -> Dict[str, Any]:
+    """Send a message to the active AI provider and return the response."""
     import urllib.request
     import urllib.error
-    base = getattr(settings, 'OLLAMA_BASE_URL', 'http://localhost:11434')
+    from core.models import AIProvider
+
+    active = AIProvider.objects.filter(is_active=True).first()
+    if not active:
+        return {'ok': False, 'message': 'No AI provider configured. Set one in Settings → AI.'}
+
+    api_key = active.get_api_key()
+    base_url = active.base_url or 'http://localhost:11434'
+    provider_id = active.id
+
     if not model:
         return {'ok': False, 'message': 'No model selected. Choose a model from the dropdown.'}
-    payload = {
-        'model': model,
-        'messages': [{'role': 'user', 'content': text}],
-        'stream': False,
+
+    if provider_id == 'ollama':
+        payload = {'model': model, 'messages': [{'role': 'user', 'content': text}], 'stream': False}
+        try:
+            data = json.dumps(payload).encode('utf-8')
+            req = urllib.request.Request(f'{base_url}/api/chat', data=data, headers={'Content-Type': 'application/json'}, method='POST')
+            with urllib.request.urlopen(req, timeout=120) as resp:
+                result = json.loads(resp.read().decode())
+                msg = result.get('message', {}).get('content', '')
+                return {'ok': True, 'message': msg or 'Empty response from model.'}
+        except Exception as e:
+            return {'ok': False, 'message': f'Ollama error: {e}'}
+
+    provider_endpoints = {
+        'anthropic': {'url': 'https://api.anthropic.com/v1/messages', 'headers': lambda k: {'x-api-key': k, 'anthropic-version': '2023-06-01', 'content-type': 'application/json'}},
+        'openai': {'url': 'https://api.openai.com/v1/chat/completions', 'headers': lambda k: {'Authorization': f'Bearer {k}', 'Content-Type': 'application/json'}},
+        'google': {'url': f'https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}', 'headers': lambda k: {'Content-Type': 'application/json'}},
+        'mistral': {'url': 'https://api.mistral.ai/v1/chat/completions', 'headers': lambda k: {'Authorization': f'Bearer {k}', 'Content-Type': 'application/json'}},
+        'groq': {'url': 'https://api.groq.com/openai/v1/chat/completions', 'headers': lambda k: {'Authorization': f'Bearer {k}', 'Content-Type': 'application/json'}},
+        'deepseek': {'url': 'https://api.deepseek.com/chat/completions', 'headers': lambda k: {'Authorization': f'Bearer {k}', 'Content-Type': 'application/json'}},
+        'openrouter': {'url': 'https://openrouter.ai/api/v1/chat/completions', 'headers': lambda k: {'Authorization': f'Bearer {k}', 'Content-Type': 'application/json'}},
     }
+
+    if provider_id not in provider_endpoints:
+        return {'ok': False, 'message': f'Unknown provider: {provider_id}'}
+
+    if not api_key:
+        return {'ok': False, 'message': 'No API key set. Add one in Settings → AI.'}
+
+    endpoint = provider_endpoints[provider_id]
+
+    if provider_id == 'anthropic':
+        payload = json.dumps({'model': model, 'max_tokens': 1024, 'messages': [{'role': 'user', 'content': text}]}).encode('utf-8')
+    elif provider_id == 'google':
+        payload = json.dumps({'contents': [{'parts': [{'text': text}]}]}).encode('utf-8')
+    else:
+        payload = json.dumps({'model': model, 'messages': [{'role': 'user', 'content': text}], 'stream': False}).encode('utf-8')
+
+    req = urllib.request.Request(endpoint['url'], data=payload, headers=endpoint['headers'](api_key), method='POST')
+
     try:
-        data = json.dumps(payload).encode('utf-8')
-        req = urllib.request.Request(
-            f'{base}/api/chat',
-            data=data,
-            headers={'Content-Type': 'application/json'},
-            method='POST',
-        )
         with urllib.request.urlopen(req, timeout=120) as resp:
             result = json.loads(resp.read().decode())
-            msg = result.get('message', {}).get('content', '')
-            if not msg:
-                msg = 'Empty response from model.'
-            return {'ok': True, 'message': msg}
-    except urllib.error.URLError as e:
-        return {'ok': False, 'message': f'Cannot connect to Ollama: {e}'}
+
+            if provider_id == 'anthropic':
+                msg = result.get('content', [{}])[0].get('text', '')
+            elif provider_id == 'google':
+                msg = result.get('candidates', [{}])[0].get('content', {}).get('parts', [{}])[0].get('text', '')
+            else:
+                msg = result.get('choices', [{}])[0].get('message', {}).get('content', '')
+
+            return {'ok': True, 'message': msg or 'Empty response from model.'}
+    except urllib.error.HTTPError as e:
+        error_body = ''
+        try:
+            error_body = e.read().decode()[:500]
+        except Exception:
+            pass
+        return {'ok': False, 'message': f'API error (HTTP {e.code}): {error_body or e.reason}'}
     except Exception as e:
-        return {'ok': False, 'message': f'Ollama error: {e}'}
+        return {'ok': False, 'message': f'Provider error: {e}'}
 
 
 @login_required
@@ -198,17 +245,17 @@ def chat(request):
                 'message_id': m.id,
             })
 
-        ollama_result = _ollama_chat(text, model, request.user)
+        provider_result = _provider_chat(text, model, request.user)
         duration_ms = int((time.time() - start) * 1000)
-        m = _save_message(session, 'assistant', ollama_result['message'], kind='result',
+        m = _save_message(session, 'assistant', provider_result['message'], kind='result',
                           payload={'model': model, 'mode': 'chat'})
-        _log(request.user, 'chat', 'ok' if ollama_result['ok'] else 'error',
-             f'Ollama chat ({model})',
-             request_text=text, response_text=ollama_result['message'],
+        _log(request.user, 'chat', 'ok' if provider_result['ok'] else 'error',
+             f'Provider chat ({model})',
+             request_text=text, response_text=provider_result['message'],
              payload={'model': model}, duration_ms=duration_ms, session=session)
         return JsonResponse({
-            'ok': ollama_result['ok'],
-            'message': ollama_result['message'],
+            'ok': provider_result['ok'],
+            'message': provider_result['message'],
             'actions': [],
             'payload': {'model': model, 'mode': 'chat'},
             'message_id': m.id,
@@ -495,7 +542,9 @@ def ollama_models(request):
     if not active:
         return JsonResponse({'ok': True, 'models': [], 'current': '', 'provider': None, 'configured': False})
 
-    models = list(AIModel.objects.filter(provider=active).order_by('-is_custom', 'name').values_list('model_id', flat=True))
+    is_free = active.type == 'local'
+    models_qs = AIModel.objects.filter(provider=active).order_by('-is_custom', 'name')
+    models = [{'id': m.model_id, 'name': m.name, 'free': is_free} for m in models_qs]
     current = active.selected_model or ''
     return JsonResponse({
         'ok': True,
