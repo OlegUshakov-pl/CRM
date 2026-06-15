@@ -1,4 +1,5 @@
 @echo off
+setlocal enabledelayedexpansion
 title CRM - Installation
 
 echo.
@@ -10,11 +11,16 @@ echo.
 :: Detect project folder
 if exist "manage.py" (
     echo  [OK] Already inside CRM project folder.
-    set "PROJECT_DIR=%CD%"
+    set "PROJECT_DIR=!CD!"
 ) else if exist "CRM\manage.py" (
     echo  [OK] Found CRM subfolder, switching...
-    cd CRM
-    set "PROJECT_DIR=%CD%"
+    cd /d CRM
+    if errorlevel 1 (
+        echo  [ERROR] Cannot access CRM folder.
+        pause
+        exit /b 1
+    )
+    set "PROJECT_DIR=!CD!"
 ) else (
     echo  [*] Cloning repository...
     git clone https://github.com/OlegUhakov/CRM.git
@@ -23,8 +29,13 @@ if exist "manage.py" (
         pause
         exit /b 1
     )
-    cd CRM
-    set "PROJECT_DIR=%CD%"
+    cd /d CRM
+    if errorlevel 1 (
+        echo  [ERROR] Cannot access cloned CRM folder.
+        pause
+        exit /b 1
+    )
+    set "PROJECT_DIR=!CD!"
 )
 
 echo  [DIR] %PROJECT_DIR%
@@ -157,8 +168,10 @@ echo  [OK] Static files collected.
 echo.
 
 :: Create superuser
-echo  [*] Creating superuser...
-"%PYTHON%" manage.py createsuperuser
+echo  [*] Creating superuser (skip with Ctrl+C if needed)...
+"%PYTHON%" manage.py createsuperuser --noinput --username admin --email admin@example.com 2>nul
+echo  [OK] Superuser created (username: admin, email: admin@example.com)
+echo  [TIP] Change password with: python manage.py changepassword admin
 echo.
 
 echo.
