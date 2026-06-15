@@ -47,7 +47,7 @@
         </div>
 
         <!-- Messages -->
-        <div class="flex-1 overflow-y-auto p-3 space-y-1" id="chat-modal-messages">
+        <div class="flex-1 overflow-y-auto px-3 py-1 space-y-0.5" id="chat-modal-messages">
             <template x-for="m in chatMessages" :key="m.id">
                 <div :class="m.role === 'user' ? 'flex justify-end' : 'flex justify-start'">
                     <div :class="m.role === 'user'
