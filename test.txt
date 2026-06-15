@@ -75,5 +75,5 @@
 - [x] #18 transaction.atomic() — добавлен в contacts/views, projects/views
 - [x] #19 total_price() None — возвращает 0 вместо None
 - [ ] #20 File memory — требует чанкованной загрузки
-- [ ] #21 ALLOWED_HOSTS — требует доработки
-- [ ] #22 static() production — требует django.views.static.serve
+- [x] #21 ALLOWED_HOSTS — добавлены дефолтные ['localhost', '127.0.0.1']
+- [x] #22 static() production — documents/ и ai-files/ доступны через django.views.static.serve
