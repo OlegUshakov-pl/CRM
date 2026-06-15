@@ -9,5 +9,6 @@ urlpatterns = [
     path('settings/', views.settings_page, name='settings_page'),
     path('settings/save/', views.save_setting, name='save_setting'),
     path('settings/<str:key>/', views.get_setting, name='get_setting'),
+    path('ai/fetch-models/', views.ai_fetch_models, name='ai_fetch_models'),
     path('project-files/<path:file_path>', views.serve_project_file, name='serve_project_file'),
 ]
