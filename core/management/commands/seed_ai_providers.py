@@ -10,6 +10,7 @@ PROVIDERS = [
     {'id': 'groq', 'name': 'Groq', 'type': 'cloud'},
     {'id': 'deepseek', 'name': 'DeepSeek', 'type': 'cloud'},
     {'id': 'openrouter', 'name': 'OpenRouter', 'type': 'aggregator'},
+    {'id': 'opencode', 'name': 'OpenCode', 'type': 'cloud'},
     {'id': 'ollama', 'name': 'Ollama', 'type': 'local'},
 ]
 

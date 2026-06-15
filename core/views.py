@@ -159,6 +159,10 @@ PROVIDER_ENDPOINTS = {
         'url': 'https://openrouter.ai/api/v1/models',
         'headers': lambda key: {'Authorization': f'Bearer {key}'},
     },
+    'opencode': {
+        'url': 'https://opencode.ai/zen/v1/models',
+        'headers': lambda key: {'Authorization': f'Bearer {key}'},
+    },
 }
 
 
@@ -187,6 +191,9 @@ def _normalize_models(provider, raw_data):
     elif provider == 'openrouter':
         for m in raw_data.get('data', []):
             models.append({'id': m.get('id', ''), 'name': m.get('name', m.get('id', ''))})
+    elif provider == 'opencode':
+        for m in raw_data.get('data', []):
+            models.append({'id': m.get('id', ''), 'name': m.get('id', '')})
     return models
 
 
@@ -261,6 +268,7 @@ def api_providers(request):
             'key_verified_at': p.key_verified_at.isoformat() if p.key_verified_at else None,
             'models_synced_at': p.models_synced_at.isoformat() if p.models_synced_at else None,
             'api_key_masked': p.get_masked_key(),
+            'has_api_key': bool(p.api_key_enc),
         })
     return JsonResponse({'ok': True, 'providers': data})
 
@@ -286,7 +294,7 @@ def api_provider_update(request, provider_id):
         provider.selected_model = body['selected_model'] or None
 
     provider.save()
-    return JsonResponse({'ok': True})
+    return JsonResponse({'ok': True, 'api_key_masked': provider.get_masked_key()})
 
 
 @login_required
@@ -323,7 +331,7 @@ def api_provider_verify(request, provider_id):
         with urllib.request.urlopen(req, timeout=15) as resp:
             provider.key_verified_at = timezone.now()
             provider.save(update_fields=['key_verified_at', 'updated_at'])
-            return JsonResponse({'ok': True})
+            return JsonResponse({'ok': True, 'api_key_masked': provider.get_masked_key()})
     except urllib.error.HTTPError as e:
         return JsonResponse({'ok': False, 'error': f'HTTP {e.code}'})
     except Exception as e:

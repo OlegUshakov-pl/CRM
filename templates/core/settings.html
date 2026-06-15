@@ -62,21 +62,28 @@
                             API Key
                             <span class="inline-block w-2 h-2 rounded-full ml-1.5" :class="ai.keyStatus === 'ok' ? 'bg-green-500' : ai.keyStatus === 'error' ? 'bg-red-500' : 'bg-gray-300 dark:bg-gray-600'"></span>
                         </label>
-                        <div class="flex gap-2">
-                            <div class="relative flex-1">
-                                <input :type="showKey ? 'text' : 'password'" x-model="ai.apiKey" :placeholder="currentPrefix + '...'" class="w-full px-4 py-2.5 pr-10 border border-[#e8e8e8] dark:border-[#222] dark:bg-[#111] dark:text-white text-[14px] outline-none focus:border-violet-300 transition-colors">
-                                <button @click="showKey = !showKey" class="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                                    <i :data-lucide="showKey ? 'eye-off' : 'eye'" class="w-4 h-4"></i>
-                                </button>
-                            </div>
-                            <button @click="verifyKey()" :disabled="keyLoading" class="px-4 py-2.5 bg-gray-100 dark:bg-[#1a1a1a] hover:bg-gray-200 dark:hover:bg-[#222] text-gray-700 dark:text-gray-300 text-[13px] font-medium transition-colors rounded-lg whitespace-nowrap disabled:opacity-50">
-                                <span x-show="!keyLoading">Check Key</span>
-                                <span x-show="keyLoading" class="flex items-center gap-1.5"><svg class="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg> Loading...</span>
-                            </button>
+                        <div x-show="keyConfigured && !editingKey" class="flex gap-2 items-center">
+                            <div class="flex-1 px-4 py-2.5 border border-[#e8e8e8] dark:border-[#222] dark:bg-[#111] text-[14px] text-gray-500 dark:text-gray-400 rounded truncate" x-text="keyMasked"></div>
+                            <button @click="editingKey = true; ai.apiKey = ''" class="px-4 py-2.5 bg-gray-100 dark:bg-[#1a1a1a] hover:bg-gray-200 dark:hover:bg-[#222] text-gray-700 dark:text-gray-300 text-[13px] font-medium transition-colors rounded-lg whitespace-nowrap">Change</button>
                         </div>
-                        <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                            Get key: <a :href="currentKeyUrl" target="_blank" class="text-violet-500 hover:text-violet-600 underline" x-text="currentKeyUrl"></a>
-                        </p>
+                        <div x-show="!keyConfigured || editingKey">
+                            <div class="flex gap-2">
+                                <div class="relative flex-1">
+                                    <input :type="showKey ? 'text' : 'password'" x-model="ai.apiKey" :placeholder="currentPrefix + '...'" class="w-full px-4 py-2.5 pr-10 border border-[#e8e8e8] dark:border-[#222] dark:bg-[#111] dark:text-white text-[14px] outline-none focus:border-violet-300 transition-colors">
+                                    <button @click="showKey = !showKey" class="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                                        <i :data-lucide="showKey ? 'eye-off' : 'eye'" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                                <button @click="verifyKey()" :disabled="keyLoading" class="px-4 py-2.5 bg-gray-100 dark:bg-[#1a1a1a] hover:bg-gray-200 dark:hover:bg-[#222] text-gray-700 dark:text-gray-300 text-[13px] font-medium transition-colors rounded-lg whitespace-nowrap disabled:opacity-50">
+                                    <span x-show="!keyLoading">Check Key</span>
+                                    <span x-show="keyLoading" class="flex items-center gap-1.5"><svg class="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg> Loading...</span>
+                                </button>
+                                <button x-show="editingKey" @click="editingKey = false" class="px-3 py-2.5 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 text-[13px] transition-colors">Cancel</button>
+                            </div>
+                            <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                                Get key: <a :href="currentKeyUrl" target="_blank" class="text-violet-500 hover:text-violet-600 underline" x-text="currentKeyUrl"></a>
+                            </p>
+                        </div>
                     </div>
 
                     <!-- Base URL (Ollama) -->
@@ -189,6 +196,9 @@ function settingsApp() {
     return {
         tab: 'general',
         showKey: false,
+        keyConfigured: false,
+        keyMasked: '',
+        editingKey: false,
         toast: false,
         toastMsg: 'Settings saved',
         toastType: 'success',
@@ -222,6 +232,7 @@ function settingsApp() {
             groq: { keyPrefix: 'gsk_', keyUrl: 'https://console.groq.com/keys' },
             deepseek: { keyPrefix: 'sk-', keyUrl: 'https://platform.deepseek.com/api_keys' },
             openrouter: { keyPrefix: 'sk-or-', keyUrl: 'https://openrouter.ai/keys' },
+            opencode: { keyPrefix: 'sk-', keyUrl: 'https://opencode.ai/settings/keys' },
             ollama: { keyPrefix: '', keyUrl: '' },
         },
 
@@ -337,6 +348,9 @@ function settingsApp() {
                 self.keyLoading = false;
                 if (data.ok) {
                     self.ai.keyStatus = 'ok';
+                    self.keyConfigured = true;
+                    self.keyMasked = data.api_key_masked || self.keyMasked;
+                    self.editingKey = false;
                     self.syncModels();
                 } else {
                     self.ai.keyStatus = 'error';
@@ -518,6 +532,10 @@ function settingsApp() {
                 }),
             ];
             Promise.all(tasks).then(function() {
+                if (self.ai.apiKey) {
+                    self.keyConfigured = true;
+                    self.editingKey = false;
+                }
                 self.showToast('Settings saved', 'success');
             }).catch(function(e) {
                 self.showToast('Save failed', 'error');
@@ -552,6 +570,9 @@ function settingsApp() {
                         self.ai.model = active.selected_model || '';
                         if (active.key_verified_at) self.ai.keyStatus = 'ok';
                         self.lastSyncedAt = active.models_synced_at;
+                        self.keyConfigured = active.has_api_key || false;
+                        self.keyMasked = active.api_key_masked || '';
+                        self.editingKey = false;
                         self.loadModels();
                     }
                 }

@@ -96,6 +96,7 @@ def _provider_chat(text: str, model: str, user) -> Dict[str, Any]:
         'groq': {'url': 'https://api.groq.com/openai/v1/chat/completions', 'headers': lambda k: {'Authorization': f'Bearer {k}', 'Content-Type': 'application/json'}},
         'deepseek': {'url': 'https://api.deepseek.com/chat/completions', 'headers': lambda k: {'Authorization': f'Bearer {k}', 'Content-Type': 'application/json'}},
         'openrouter': {'url': 'https://openrouter.ai/api/v1/chat/completions', 'headers': lambda k: {'Authorization': f'Bearer {k}', 'Content-Type': 'application/json'}},
+        'opencode': {'url': 'https://opencode.ai/zen/v1/chat/completions', 'headers': lambda k: {'Authorization': f'Bearer {k}', 'Content-Type': 'application/json'}},
     }
 
     if provider_id not in provider_endpoints:
