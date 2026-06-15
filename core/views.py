@@ -485,21 +485,20 @@ def api_active_provider(request):
 
 
 @login_required
-@require_GET
 def api_general_settings(request):
-    settings_data = AppSettings.get_all()
-    return JsonResponse({'ok': True, 'settings': settings_data})
+    if request.method == 'GET':
+        settings_data = AppSettings.get_all()
+        return JsonResponse({'ok': True, 'settings': settings_data})
 
+    if request.method == 'PUT':
+        try:
+            body = json.loads(request.body.decode('utf-8') or '{}')
+        except json.JSONDecodeError:
+            return JsonResponse({'ok': False, 'error': 'Invalid JSON.'}, status=400)
 
-@login_required
-@require_http_methods(["PUT"])
-def api_general_settings_update(request):
-    try:
-        body = json.loads(request.body.decode('utf-8') or '{}')
-    except json.JSONDecodeError:
-        return JsonResponse({'ok': False, 'error': 'Invalid JSON.'}, status=400)
+        for key, value in body.items():
+            AppSettings.set_value(key, value)
 
-    for key, value in body.items():
-        AppSettings.set_value(key, value)
+        return JsonResponse({'ok': True})
 
-    return JsonResponse({'ok': True})
+    return JsonResponse({'ok': False, 'error': 'Method not allowed.'}, status=405)
