@@ -8,45 +8,44 @@ echo         CRM - Installation
 echo ========================================
 echo.
 
-:: Detect project folder
+:: Step 1: Ensure we are inside the CRM project folder
 if exist "manage.py" (
     echo  [OK] Already inside CRM project folder.
-    set "PROJECT_DIR=!CD!"
-) else if exist "CRM\manage.py" (
-    echo  [OK] Found CRM subfolder, switching...
-    cd /d CRM
-    if errorlevel 1 (
-        echo  [ERROR] Cannot access CRM folder.
-        pause
-        exit /b 1
-    )
-    set "PROJECT_DIR=!CD!"
-) else (
-    echo  [*] Cloning repository...
-    git clone https://github.com/OlegUhakov/CRM.git
-    if errorlevel 1 (
-        echo  [ERROR] Git clone failed.
-        pause
-        exit /b 1
-    )
-    cd /d CRM
-    if errorlevel 1 (
-        echo  [ERROR] Cannot access cloned CRM folder.
-        pause
-        exit /b 1
-    )
-    set "PROJECT_DIR=!CD!"
+    goto :ready
 )
 
-echo  [DIR] %PROJECT_DIR%
+if exist "CRM\manage.py" (
+    echo  [OK] Found CRM subfolder, switching...
+    cd /d CRM
+    goto :ready
+)
+
+echo  [*] Cloning repository...
+git clone https://github.com/OlegUhakov/CRM.git
+if errorlevel 1 (
+    echo  [ERROR] Git clone failed.
+    pause
+    exit /b 1
+)
+
+echo  [OK] Repository cloned. Entering CRM folder...
+cd /d CRM
+if errorlevel 1 (
+    echo  [ERROR] Cannot enter CRM folder.
+    pause
+    exit /b 1
+)
+
+:ready
+echo  [DIR] !CD!
 echo.
 
-:: Check prerequisites
+:: Step 2: Check prerequisites
 echo  Checking prerequisites...
 
 where python >nul 2>&1
 if errorlevel 1 (
-    echo  [ERROR] Python not found. Install Python 3.14+ and add to PATH.
+    echo  [ERROR] Python not found. Install Python 3.10+ and add to PATH.
     pause
     exit /b 1
 )
@@ -72,15 +71,11 @@ if errorlevel 1 (
     exit /b 1
 )
 
-echo  [OK] All prerequisites found.
-echo.
-
-:: Python version check
 for /f "tokens=2 delims= " %%v in ('python --version 2^>^&1') do set "PY_VER=%%v"
-echo  [OK] Python %PY_VER%
+echo  [OK] Python !PY_VER!
 echo.
 
-:: Virtual environment
+:: Step 3: Virtual environment
 if exist "venv\Scripts\python.exe" (
     echo  [OK] Virtual environment already exists.
 ) else (
@@ -94,16 +89,16 @@ if exist "venv\Scripts\python.exe" (
     echo  [OK] Virtual environment created.
 )
 
-set "PYTHON=%PROJECT_DIR%\venv\Scripts\python.exe"
-set "PIP=%PROJECT_DIR%\venv\Scripts\pip.exe"
+set "PYTHON=!CD!\venv\Scripts\python.exe"
+set "PIP=!CD!\venv\Scripts\pip.exe"
 echo.
 
-:: Install Python dependencies
+:: Step 4: Install Python dependencies
 echo  [*] Upgrading pip...
-"%PYTHON%" -m pip install --upgrade pip >nul 2>&1
+"!PYTHON!" -m pip install --upgrade pip >nul 2>&1
 
 echo  [*] Installing Python dependencies...
-"%PIP%" install -r requirements.txt
+"!PIP!" install -r requirements.txt
 if errorlevel 1 (
     echo  [ERROR] pip install failed.
     pause
@@ -112,7 +107,7 @@ if errorlevel 1 (
 echo  [OK] Python dependencies installed.
 echo.
 
-:: Install Node dependencies
+:: Step 5: Install Node dependencies
 echo  [*] Installing Node dependencies...
 call npm install
 if errorlevel 1 (
@@ -123,7 +118,7 @@ if errorlevel 1 (
 echo  [OK] Node dependencies installed.
 echo.
 
-:: Build Tailwind CSS
+:: Step 6: Build Tailwind CSS
 echo  [*] Building Tailwind CSS...
 call npm run build
 if errorlevel 1 (
@@ -134,9 +129,9 @@ if errorlevel 1 (
 echo  [OK] Tailwind CSS built.
 echo.
 
-:: Database migrations
+:: Step 7: Database migrations
 echo  [*] Running database migrations...
-"%PYTHON%" manage.py migrate
+"!PYTHON!" manage.py migrate
 if errorlevel 1 (
     echo  [ERROR] Migrations failed.
     pause
@@ -145,9 +140,9 @@ if errorlevel 1 (
 echo  [OK] Database migrated.
 echo.
 
-:: Seed AI providers
+:: Step 8: Seed AI providers
 echo  [*] Seeding AI providers...
-"%PYTHON%" manage.py seed_ai_providers
+"!PYTHON!" manage.py seed_ai_providers
 if errorlevel 1 (
     echo  [ERROR] AI providers seeding failed.
     pause
@@ -156,9 +151,9 @@ if errorlevel 1 (
 echo  [OK] AI providers seeded.
 echo.
 
-:: Collect static files
+:: Step 9: Collect static files
 echo  [*] Collecting static files...
-"%PYTHON%" manage.py collectstatic --noinput
+"!PYTHON!" manage.py collectstatic --noinput
 if errorlevel 1 (
     echo  [ERROR] collectstatic failed.
     pause
@@ -167,9 +162,9 @@ if errorlevel 1 (
 echo  [OK] Static files collected.
 echo.
 
-:: Create superuser
-echo  [*] Creating superuser (skip with Ctrl+C if needed)...
-"%PYTHON%" manage.py createsuperuser --noinput --username admin --email admin@example.com 2>nul
+:: Step 10: Create superuser
+echo  [*] Creating superuser...
+"!PYTHON!" manage.py createsuperuser --noinput --username admin --email admin@example.com 2>nul
 echo  [OK] Superuser created (username: admin, email: admin@example.com)
 echo  [TIP] Change password with: python manage.py changepassword admin
 echo.
