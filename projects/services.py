@@ -249,8 +249,10 @@ class ImportService:
             start_date=project_data.get('start_date'),
             end_date=project_data.get('end_date'),
             budget=project_data.get('budget'),
-            created_at=project_data.get('created_at'),
         )
+        created_at = project_data.get('created_at')
+        if created_at:
+            Project.objects.filter(pk=project.pk).update(created_at=created_at)
 
         files_dir = self.tmp_dir / 'files'
 

@@ -47,5 +47,6 @@ class Material(TimeStampedModel):
         super().save(*args, **kwargs)
 
     def total_price(self):
-        if self.unit_price and self.quantity:
+        if self.unit_price is not None and self.quantity is not None:
             return self.quantity * self.unit_price
+        return 0

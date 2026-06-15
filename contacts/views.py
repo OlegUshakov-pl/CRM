@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.core.paginator import Paginator
 from .models import Contact
 from .forms import ContactForm
+from django.db import transaction
 from core.models import log_activity
 
 
@@ -13,7 +14,7 @@ from core.models import log_activity
 def contact_latest(request):
     from django.utils import timezone
     from datetime import timedelta
-    contacts = Contact.objects.filter(is_active=True, created_at__gte=timezone.now() - timedelta(minutes=10)).order_by('-created_at')[:5]
+    contacts = Contact.objects.filter(is_active=True, created_at__gte=timezone.now() - timedelta(minutes=10)).select_related('company').order_by('-created_at')[:5]
     return render(request, 'contacts/common_latest.html', {'contacts': contacts})
 
 
@@ -42,18 +43,19 @@ def contact_create(request):
     if request.method == 'POST':
         form = ContactForm(request.POST, request.FILES)
         if form.is_valid():
-            contact = form.save(commit=False)
-            contact.created_by = request.user
-            contact.save()
-            selected_project = form.cleaned_data.get('projects')
-            if selected_project:
-                selected_project.contacts.add(contact)
-            elif project_slug:
-                from projects.models import Project
-                project = Project.objects.filter(slug=project_slug).first()
-                if project:
-                    project.contacts.add(contact)
-            log_activity(request.user, 'created', f'Contact "{contact.get_full_name()}"', contact)
+            with transaction.atomic():
+                contact = form.save(commit=False)
+                contact.created_by = request.user
+                contact.save()
+                selected_project = form.cleaned_data.get('projects')
+                if selected_project:
+                    selected_project.contacts.add(contact)
+                elif project_slug:
+                    from projects.models import Project
+                    project = Project.objects.filter(slug=project_slug).first()
+                    if project:
+                        project.contacts.add(contact)
+                log_activity(request.user, 'created', f'Contact "{contact.get_full_name()}"', contact)
             messages.success(request, 'Contact created successfully.')
             if request.headers.get('HX-Request'):
                 resp = HttpResponse()

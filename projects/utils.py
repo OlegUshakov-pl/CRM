@@ -87,7 +87,7 @@ class ProjectFileSystemStorage(FileSystemStorage):
         return name
 
     def _open(self, name, mode='rb'):
-        return super(FileSystemStorage, self)._open(name, mode)
+        return super()._open(name, mode)
 
     def exists(self, name):
         return os.path.exists(self.path(name))

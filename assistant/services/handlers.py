@@ -207,7 +207,7 @@ def _handle_find_contact(ctx: CommandContext) -> CommandResult:
             'company': contact.company.name if contact.company else '—',
         },
         actions=[
-            {'type': 'open_url', 'label': t('project_open', lang), 'url': f'/contacts/{contact.id}/'},
+            {'type': 'open_url', 'label': t('project_open', lang), 'url': f'/contacts/{contact.slug}/'},
         ],
     )
 
@@ -341,7 +341,7 @@ def _handle_show_company(ctx: CommandContext) -> CommandResult:
             'email': c.email or '—',
             'website': c.website or '—',
         },
-        actions=[{'type': 'open_url', 'label': t('company_open', lang), 'url': f'/companies/{c.id}/'}],
+        actions=[{'type': 'open_url', 'label': t('company_open', lang), 'url': f'/companies/{c.slug}/'}],
     )
 
 

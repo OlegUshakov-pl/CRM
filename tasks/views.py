@@ -3,6 +3,7 @@ from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
+from django.utils.http import url_has_allowed_host_and_scheme
 from .models import Task
 from .forms import TaskForm
 from core.models import log_activity
@@ -12,7 +13,7 @@ from core.models import log_activity
 def task_latest(request):
     from django.utils import timezone
     from datetime import timedelta
-    tasks = Task.objects.filter(is_active=True, created_at__gte=timezone.now() - timedelta(minutes=10)).order_by('-created_at')[:5]
+    tasks = Task.objects.filter(is_active=True, created_at__gte=timezone.now() - timedelta(minutes=10)).select_related('project').order_by('-created_at')[:5]
     return render(request, 'tasks/common_latest.html', {'tasks': tasks})
 
 
@@ -82,7 +83,7 @@ def task_delete(request, slug):
         log_activity(request.user, 'deleted', f'Task "{task.title}"')
         messages.success(request, 'Task deleted successfully.')
         next_url = request.POST.get('next') or request.GET.get('next')
-        if next_url:
+        if next_url and url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
             return redirect(next_url)
     return redirect('tasks:list')
 

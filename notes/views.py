@@ -12,7 +12,7 @@ from core.models import log_activity
 def note_latest(request):
     from django.utils import timezone
     from datetime import timedelta
-    notes = Note.objects.filter(is_active=True, created_at__gte=timezone.now() - timedelta(minutes=10)).order_by('-created_at')[:5]
+    notes = Note.objects.filter(is_active=True, created_at__gte=timezone.now() - timedelta(minutes=10)).select_related('project', 'company', 'contact').order_by('-created_at')[:5]
     return render(request, 'notes/common_latest.html', {'notes': notes})
 
 

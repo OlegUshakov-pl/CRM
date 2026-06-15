@@ -16,10 +16,12 @@ from .forms import DocumentForm, CommonDocumentForm, CategoryForm
 
 @login_required
 def document_category_list(request):
+    from django.db.models import Count
+    type_counts = Document.objects.values('file_type').annotate(count=Count('id'))
+    count_map = {c['file_type']: c['count'] for c in type_counts}
     categories = []
     for choice_value, choice_label in Document.FILE_TYPE_CHOICES:
-        count = Document.objects.filter(file_type=choice_value).count()
-        categories.append({'value': choice_value, 'label': choice_label, 'count': count})
+        categories.append({'value': choice_value, 'label': choice_label, 'count': count_map.get(choice_value, 0)})
     custom_categories = Category.objects.all()
     return render(request, 'documents/documents_category.html', {'categories': categories, 'custom_categories': custom_categories})
 

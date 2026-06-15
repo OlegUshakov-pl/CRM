@@ -8,6 +8,7 @@ from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
+from django.db import transaction
 from django.db.models import Prefetch
 from django.utils.http import url_has_allowed_host_and_scheme
 from .models import Project, ProjectImage
@@ -59,13 +60,14 @@ def project_create(request):
     if request.method == 'POST':
         form = ProjectForm(request.POST, request.FILES)
         if form.is_valid():
-            project = form.save(commit=False)
-            project.created_by = request.user
-            project.save()
-            form.save_m2m()
-            for f in request.FILES.getlist('images'):
-                ProjectImage.objects.create(project=project, image=f)
-            log_activity(request.user, 'created', f'Project "{project.name}"', project)
+            with transaction.atomic():
+                project = form.save(commit=False)
+                project.created_by = request.user
+                project.save()
+                form.save_m2m()
+                for f in request.FILES.getlist('images'):
+                    ProjectImage.objects.create(project=project, image=f)
+                log_activity(request.user, 'created', f'Project "{project.name}"', project)
             messages.success(request, 'Project created successfully.')
             next_url = request.GET.get('next')
             if next_url == 'dashboard':
@@ -96,19 +98,20 @@ def project_edit(request, slug):
         else:
             form = ProjectForm(request.POST, request.FILES, instance=project)
             if form.is_valid():
-                old_image = project.image if project.image else None
-                form.save()
-                if old_image and project.image and old_image.name != project.image.name:
-                    old_image.delete(save=False)
-                for f in request.FILES.getlist('images'):
-                    ProjectImage.objects.create(project=project, image=f)
-                delete_ids = request.POST.getlist('delete_images')
-                if delete_ids:
-                    for img in ProjectImage.objects.filter(id__in=delete_ids, project=project):
-                        if img.image:
-                            img.image.delete(save=False)
-                        img.delete()
-                log_activity(request.user, 'updated', f'Project "{project.name}"', project)
+                with transaction.atomic():
+                    old_image = project.image if project.image else None
+                    form.save()
+                    if old_image and project.image and old_image.name != project.image.name:
+                        old_image.delete(save=False)
+                    for f in request.FILES.getlist('images'):
+                        ProjectImage.objects.create(project=project, image=f)
+                    delete_ids = request.POST.getlist('delete_images')
+                    if delete_ids:
+                        for img in ProjectImage.objects.filter(id__in=delete_ids, project=project):
+                            if img.image:
+                                img.image.delete(save=False)
+                            img.delete()
+                    log_activity(request.user, 'updated', f'Project "{project.name}"', project)
                 messages.success(request, 'Project updated successfully.')
                 return redirect('projects:detail', slug=project.slug)
 
@@ -188,23 +191,24 @@ def delete_image(request, pk):
 def project_delete(request, slug):
     project = get_object_or_404(Project, slug=slug)
     if request.method == 'POST':
-        folder_path = get_project_folder_path(project)
-        project_name = project.name
-        for doc in project.documents.all():
-            if doc.file:
-                doc.file.delete(save=False)
-        project.documents.all().delete()
-        for part in project.parts.all():
-            if part.file:
-                part.file.delete(save=False)
-        project.parts.all().delete()
-        for img in project.images.all():
-            if img.image:
-                img.image.delete(save=False)
-        if folder_path and os.path.exists(folder_path):
-            shutil.rmtree(folder_path, ignore_errors=True)
-        project.delete()
-        log_activity(request.user, 'deleted', f'Project "{project_name}"')
+        with transaction.atomic():
+            folder_path = get_project_folder_path(project)
+            project_name = project.name
+            for doc in project.documents.all():
+                if doc.file:
+                    doc.file.delete(save=False)
+            project.documents.all().delete()
+            for part in project.parts.all():
+                if part.file:
+                    part.file.delete(save=False)
+            project.parts.all().delete()
+            for img in project.images.all():
+                if img.image:
+                    img.image.delete(save=False)
+            if folder_path and os.path.exists(folder_path):
+                shutil.rmtree(folder_path, ignore_errors=True)
+            project.delete()
+            log_activity(request.user, 'deleted', f'Project "{project_name}"')
         messages.success(request, 'Project deleted successfully.')
     return redirect('projects:list')
 
@@ -228,13 +232,12 @@ def project_export(request, slug):
     service = ExportService(project)
     try:
         zip_path = service.export()
-        with open(str(zip_path), 'rb') as f:
-            response = FileResponse(
-                f.read(),
-                content_type='application/zip',
-                as_attachment=True,
-                filename=f'{project.name}.zip',
-            )
+        response = FileResponse(
+            open(str(zip_path), 'rb'),
+            content_type='application/zip',
+            as_attachment=True,
+            filename=f'{project.name}.zip',
+        )
         return response
     except Exception as e:
         messages.error(request, f'Export failed: {e}')
