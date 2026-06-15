@@ -76,6 +76,11 @@ def search_view(request):
 
 
 @login_required
+def settings_page(request):
+    return render(request, 'core/settings.html')
+
+
+@login_required
 def save_setting(request):
     if request.method == 'POST':
         key = request.POST.get('key', '')

@@ -1,0 +1,333 @@
+{% extends 'base.html' %}
+{% block title %}Settings - CRM{% endblock %}
+{% block breadcrumb %}Settings{% endblock %}
+
+{% block content %}
+<div x-data="settingsApp()" x-init="init()">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <div>
+            <h1 class="text-xl font-bold text-gray-900 dark:text-white">Settings</h1>
+            <p class="text-gray-500 dark:text-gray-400 text-[13px]">Manage your application preferences</p>
+        </div>
+        <button @click="saveAll()" class="px-5 py-2.5 bg-violet-500 hover:bg-violet-600 text-white text-[13px] font-medium transition-colors rounded-[20px] shadow">
+            Save
+        </button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="border-b border-[#e8e8e8] dark:border-[#222] mb-6">
+        <nav class="flex gap-6 text-[13px]">
+            <button @click="tab = 'general'" :class="tab === 'general' ? 'border-b-2 border-violet-500 text-violet-600 dark:text-violet-400 font-medium' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'" class="pb-3 transition-colors">General</button>
+            <button @click="tab = 'ai'" :class="tab === 'ai' ? 'border-b-2 border-violet-500 text-violet-600 dark:text-violet-400 font-medium' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'" class="pb-3 transition-colors">AI</button>
+            <button @click="tab = 'users'" :class="tab === 'users' ? 'border-b-2 border-violet-500 text-violet-600 dark:text-violet-400 font-medium' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'" class="pb-3 transition-colors">Users</button>
+        </nav>
+    </div>
+
+    <!-- General Tab -->
+    <div x-show="tab === 'general'" x-cloak>
+        <div class="max-w-2xl space-y-6">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Project Storage Path</label>
+                <input x-model="general.rootPath" type="text" placeholder="D:\Projects" class="w-full px-4 py-2.5 border border-[#e8e8e8] dark:border-[#222] dark:bg-[#111] dark:text-white text-[14px] outline-none focus:border-violet-300 transition-colors">
+                <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Enter the full path where project folders will be created (e.g. <code>D:\Projects</code>).</p>
+            </div>
+
+            <div class="pt-4 border-t border-[#e8e8e8] dark:border-[#222]">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Subfolder Names</label>
+                <p class="text-xs text-gray-400 dark:text-gray-500 mb-3">Use <code class="bg-gray-100 dark:bg-[#1a1a1a] px-1 rounded">{Number}</code> as project number placeholder.</p>
+                <div class="space-y-2">
+                    <input x-model="general.subfolderDocuments" type="text" placeholder="{Number}_documents" class="w-full px-4 py-2.5 border border-[#e8e8e8] dark:border-[#222] dark:bg-[#111] dark:text-white text-[14px] outline-none focus:border-violet-300 transition-colors">
+                    <input x-model="general.subfolderDrawings" type="text" placeholder="{Number}_drawings" class="w-full px-4 py-2.5 border border-[#e8e8e8] dark:border-[#222] dark:bg-[#111] dark:text-white text-[14px] outline-none focus:border-violet-300 transition-colors">
+                    <input x-model="general.subfolderModels" type="text" placeholder="{Number}_models" class="w-full px-4 py-2.5 border border-[#e8e8e8] dark:border-[#222] dark:bg-[#111] dark:text-white text-[14px] outline-none focus:border-violet-300 transition-colors">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Tab -->
+    <div x-show="tab === 'ai'" x-cloak>
+        <div class="space-y-6">
+            <!-- Provider Selection -->
+            <div>
+                <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Select Provider</h3>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <template x-for="p in providers" :key="p.id">
+                        <button @click="selectProvider(p)" :class="ai.provider === p.id ? 'border-violet-500 bg-violet-50 dark:bg-violet-900/20' : 'border-[#e8e8e8] dark:border-[#222] hover:border-gray-300 dark:hover:border-[#333]'" class="p-4 border-2 rounded-lg text-left transition-all">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-[13px] font-semibold text-gray-900 dark:text-white" x-text="p.name"></span>
+                            </div>
+                            <span class="text-[11px] px-1.5 py-0.5 rounded" :class="p.type === 'Local' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : p.type === 'Aggregator' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-gray-100 text-gray-600 dark:bg-[#1a1a1a] dark:text-gray-400'" x-text="p.type"></span>
+                        </button>
+                    </template>
+                </div>
+            </div>
+
+            <!-- API Key / Base URL -->
+            <div x-show="ai.provider" x-cloak>
+                <div class="max-w-2xl space-y-4 pt-4 border-t border-[#e8e8e8] dark:border-[#222]">
+                    <!-- API Key (not Ollama) -->
+                    <div x-show="ai.provider !== 'ollama'">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            API Key
+                            <span class="inline-block w-2 h-2 rounded-full ml-1.5" :class="ai.keyStatus === 'ok' ? 'bg-green-500' : ai.keyStatus === 'error' ? 'bg-red-500' : 'bg-gray-300 dark:bg-gray-600'"></span>
+                        </label>
+                        <div class="flex gap-2">
+                            <div class="relative flex-1">
+                                <input :type="showKey ? 'text' : 'password'" x-model="ai.apiKey" :placeholder="currentPrefix + '...'" class="w-full px-4 py-2.5 pr-10 border border-[#e8e8e8] dark:border-[#222] dark:bg-[#111] dark:text-white text-[14px] outline-none focus:border-violet-300 transition-colors">
+                                <button @click="showKey = !showKey" class="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                                    <i :data-lucide="showKey ? 'eye-off' : 'eye'" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                            <button @click="checkKey()" class="px-4 py-2.5 bg-gray-100 dark:bg-[#1a1a1a] hover:bg-gray-200 dark:hover:bg-[#222] text-gray-700 dark:text-gray-300 text-[13px] font-medium transition-colors rounded-lg whitespace-nowrap">
+                                Check Key
+                            </button>
+                        </div>
+                        <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                            Get key: <a :href="currentKeyUrl" target="_blank" class="text-violet-500 hover:text-violet-600 underline" x-text="currentKeyUrl"></a>
+                        </p>
+                    </div>
+
+                    <!-- Base URL (Ollama) -->
+                    <div x-show="ai.provider === 'ollama'">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Base URL</label>
+                        <input x-model="ai.baseUrl" type="text" placeholder="http://localhost:11434" class="w-full px-4 py-2.5 border border-[#e8e8e8] dark:border-[#222] dark:bg-[#111] dark:text-white text-[14px] outline-none focus:border-violet-300 transition-colors">
+                        <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Make sure Ollama is running locally.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Models -->
+            <div x-show="ai.provider" x-cloak>
+                <div class="pt-4 border-t border-[#e8e8e8] dark:border-[#222]">
+                    <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Select Model</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                        <template x-for="m in currentModels" :key="m.id">
+                            <button @click="selectModel(m)" :class="ai.model === m.id ? 'border-violet-500 bg-violet-50 dark:bg-violet-900/20' : 'border-[#e8e8e8] dark:border-[#222] hover:border-gray-300 dark:hover:border-[#333]'" class="p-4 border-2 rounded-lg text-left transition-all">
+                                <div class="text-[13px] font-semibold text-gray-900 dark:text-white mb-1" x-text="m.name"></div>
+                                <div class="flex flex-wrap gap-1">
+                                    <template x-for="tag in m.tags" :key="tag">
+                                        <span class="text-[10px] px-1.5 py-0.5 rounded" :class="tagClass(tag)" x-text="tagLabel(tag)"></span>
+                                    </template>
+                                </div>
+                            </button>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Users Tab -->
+    <div x-show="tab === 'users'" x-cloak>
+        <div class="max-w-2xl">
+            <div class="text-center py-12 text-gray-400 dark:text-gray-500">
+                <i data-lucide="users" class="w-12 h-12 mx-auto mb-3 opacity-50"></i>
+                <p class="text-[14px]">User management coming soon.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div x-show="toast" x-transition x-cloak class="fixed bottom-6 right-6 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg text-[13px] font-medium z-50">
+        Settings saved
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function settingsApp() {
+    return {
+        tab: 'general',
+        showKey: false,
+        toast: false,
+
+        general: {
+            rootPath: '',
+            subfolderDocuments: '{Number}_documents',
+            subfolderDrawings: '{Number}_drawings',
+            subfolderModels: '{Number}_models',
+        },
+
+        ai: {
+            provider: '',
+            apiKey: '',
+            baseUrl: 'http://localhost:11434',
+            model: '',
+            keyStatus: 'unchecked',
+        },
+
+        providers: [
+            { id: 'anthropic', name: 'Anthropic', type: 'Cloud', keyPrefix: 'sk-ant-', keyUrl: 'https://console.anthropic.com/settings/keys' },
+            { id: 'openai', name: 'OpenAI', type: 'Cloud', keyPrefix: 'sk-', keyUrl: 'https://platform.openai.com/api-keys' },
+            { id: 'google', name: 'Google AI', type: 'Cloud', keyPrefix: 'AIza', keyUrl: 'https://aistudio.google.com/app/apikey' },
+            { id: 'mistral', name: 'Mistral', type: 'Cloud', keyPrefix: '', keyUrl: 'https://console.mistral.ai/api-keys' },
+            { id: 'groq', name: 'Groq', type: 'Cloud', keyPrefix: 'gsk_', keyUrl: 'https://console.groq.com/keys' },
+            { id: 'deepseek', name: 'DeepSeek', type: 'Cloud', keyPrefix: 'sk-', keyUrl: 'https://platform.deepseek.com/api_keys' },
+            { id: 'openrouter', name: 'OpenRouter', type: 'Aggregator', keyPrefix: 'sk-or-', keyUrl: 'https://openrouter.ai/keys' },
+            { id: 'ollama', name: 'Ollama', type: 'Local', keyPrefix: '', keyUrl: '' },
+        ],
+
+        defaultModels: {
+            anthropic: [
+                { id: 'claude-opus-4-6', name: 'Claude Opus 4', tags: ['smart'] },
+                { id: 'claude-sonnet-4-6', name: 'Claude Sonnet 4', tags: ['smart', 'fast'] },
+                { id: 'claude-haiku-4-5', name: 'Claude Haiku', tags: ['fast', 'cheap'] },
+            ],
+            openai: [
+                { id: 'gpt-4o', name: 'GPT-4o', tags: ['smart', 'vision'] },
+                { id: 'gpt-4o-mini', name: 'GPT-4o mini', tags: ['fast', 'cheap'] },
+                { id: 'o3', name: 'o3', tags: ['smart'] },
+                { id: 'o4-mini', name: 'o4-mini', tags: ['smart', 'fast'] },
+            ],
+            google: [
+                { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro', tags: ['smart', 'vision'] },
+                { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', tags: ['fast', 'cheap'] },
+            ],
+            mistral: [
+                { id: 'mistral-large-latest', name: 'Mistral Large', tags: ['smart'] },
+                { id: 'mistral-small-latest', name: 'Mistral Small', tags: ['cheap', 'fast'] },
+                { id: 'codestral-latest', name: 'Codestral', tags: ['smart'] },
+            ],
+            groq: [
+                { id: 'llama-3.3-70b-versatile', name: 'Llama 3.3 70B', tags: ['fast', 'smart'] },
+                { id: 'llama-3.1-8b-instant', name: 'Llama 3.1 8B', tags: ['fast', 'cheap'] },
+            ],
+            deepseek: [
+                { id: 'deepseek-chat', name: 'DeepSeek V3', tags: ['smart', 'cheap'] },
+                { id: 'deepseek-reasoner', name: 'DeepSeek R1', tags: ['smart'] },
+            ],
+            openrouter: [
+                { id: 'meta-llama/llama-3.3-70b-instruct', name: 'Llama 3.3 70B', tags: ['smart', 'cheap'] },
+                { id: 'google/gemini-2.5-pro', name: 'Gemini 2.5 Pro', tags: ['smart'] },
+                { id: 'anthropic/claude-sonnet-4-6', name: 'Claude Sonnet 4', tags: ['smart', 'fast'] },
+                { id: 'deepseek/deepseek-chat', name: 'DeepSeek V3', tags: ['cheap'] },
+            ],
+            ollama: [
+                { id: 'llama3.2', name: 'Llama 3.2', tags: ['local'] },
+                { id: 'qwen2.5-coder', name: 'Qwen 2.5 Coder', tags: ['local', 'smart'] },
+                { id: 'phi4', name: 'Phi-4', tags: ['local'] },
+                { id: 'mistral', name: 'Mistral 7B', tags: ['local', 'fast'] },
+            ],
+        },
+
+        get currentModels() {
+            if (!this.ai.provider) return [];
+            return this.defaultModels[this.ai.provider] || [];
+        },
+
+        get currentPrefix() {
+            var p = this.providers.find(x => x.id === this.ai.provider);
+            return p ? p.keyPrefix : '';
+        },
+
+        get currentKeyUrl() {
+            var p = this.providers.find(x => x.id === this.ai.provider);
+            return p ? p.keyUrl : '#';
+        },
+
+        selectProvider(p) {
+            this.ai.provider = p.id;
+            this.ai.apiKey = '';
+            this.ai.baseUrl = 'http://localhost:11434';
+            this.ai.model = '';
+            this.ai.keyStatus = 'unchecked';
+        },
+
+        selectModel(m) {
+            this.ai.model = m.id;
+        },
+
+        checkKey() {
+            this.ai.keyStatus = 'ok';
+            this.$nextTick(() => { lucide.createIcons(); });
+        },
+
+        tagClass(tag) {
+            var map = {
+                smart: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
+                fast: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+                cheap: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+                local: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+                vision: 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400',
+            };
+            return map[tag] || 'bg-gray-100 text-gray-600 dark:bg-[#1a1a1a] dark:text-gray-400';
+        },
+
+        tagLabel(tag) {
+            var map = { smart: 'Smart', fast: 'Fast', cheap: 'Cheap', local: 'Local', vision: 'Vision' };
+            return map[tag] || tag;
+        },
+
+        getCSRFToken() {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var c = cookies[i].trim();
+                if (c.startsWith('csrftoken=')) return c.substring(10);
+            }
+            return '';
+        },
+
+        saveSetting(key, value) {
+            var form = new FormData();
+            form.append('key', key);
+            form.append('value', value);
+            return fetch('/settings/save/', {
+                method: 'POST',
+                body: form,
+                headers: { 'X-CSRFToken': this.getCSRFToken() }
+            });
+        },
+
+        saveAll() {
+            var self = this;
+            var tasks = [
+                this.saveSetting('project_root_path', this.general.rootPath),
+                this.saveSetting('subfolder_documents', this.general.subfolderDocuments || '{Number}_documents'),
+                this.saveSetting('subfolder_drawings', this.general.subfolderDrawings || '{Number}_drawings'),
+                this.saveSetting('subfolder_models', this.general.subfolderModels || '{Number}_models'),
+                this.saveSetting('ai_provider', this.ai.provider),
+                this.saveSetting('ai_api_key', this.ai.apiKey),
+                this.saveSetting('ai_base_url', this.ai.baseUrl),
+                this.saveSetting('ai_model', this.ai.model),
+            ];
+            Promise.all(tasks).then(function() {
+                self.toast = true;
+                setTimeout(function() { self.toast = false; }, 2500);
+            }).catch(function(e) {
+                console.error('Save failed', e);
+            });
+        },
+
+        loadSettings() {
+            var self = this;
+            var keys = ['project_root_path', 'subfolder_documents', 'subfolder_drawings', 'subfolder_models',
+                        'ai_provider', 'ai_api_key', 'ai_base_url', 'ai_model'];
+            keys.forEach(function(key) {
+                fetch('/settings/' + key + '/')
+                    .then(function(r) { return r.json(); })
+                    .then(function(data) {
+                        var v = data.value || data.default || '';
+                        switch(key) {
+                            case 'project_root_path': self.general.rootPath = v; break;
+                            case 'subfolder_documents': if (v) self.general.subfolderDocuments = v; break;
+                            case 'subfolder_drawings': if (v) self.general.subfolderDrawings = v; break;
+                            case 'subfolder_models': if (v) self.general.subfolderModels = v; break;
+                            case 'ai_provider': self.ai.provider = v; break;
+                            case 'ai_api_key': self.ai.apiKey = v; if (v) self.ai.keyStatus = 'ok'; break;
+                            case 'ai_base_url': if (v) self.ai.baseUrl = v; break;
+                            case 'ai_model': self.ai.model = v; break;
+                        }
+                    })
+                    .catch(function() {});
+            });
+        },
+
+        init() {
+            this.loadSettings();
+            this.$nextTick(function() { lucide.createIcons(); });
+        },
+    };
+}
+</script>
+{% endblock %}
