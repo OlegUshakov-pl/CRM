@@ -1,5 +1,5 @@
 {% load static %}
-<div id="chat-modal" class="fixed z-[9999] hidden" style="bottom: 20px; right: 20px; width: 500px; height: 220px; min-width: 350px; min-height: 200px;">
+<div id="chat-modal" class="fixed z-[9999] hidden" style="bottom: 20px; right: 20px; width: 580px; height: 340px; min-width: 350px; min-height: 200px;">
     <div class="bg-white dark:bg-[#0a0a0a] border border-light dark:border-[#222] flex flex-col w-full h-full overflow-hidden relative"
          style="border-radius: 0px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); resize: both;">
         <style>
@@ -27,7 +27,7 @@
                 </div>
                 <div>
                     <p class="text-sm font-semibold text-gray-900 dark:text-white">AI Assistant</p>
-                    <p class="text-[11px] text-gray-500 dark:text-gray-400" x-text="chatStorageInfo"></p>
+                    <p class="text-[11px] text-gray-500 dark:text-gray-400" x-text="chatProviderInfo"></p>
                 </div>
             </div>
             <div class="flex items-center gap-1">
@@ -47,7 +47,7 @@
         </div>
 
         <!-- Messages -->
-        <div class="flex-1 overflow-y-auto p-3 space-y-1" id="chat-modal-messages">
+        <div class="flex-1 overflow-y-auto px-3 py-1 space-y-0.5" id="chat-modal-messages">
             <template x-for="m in chatMessages" :key="m.id">
                 <div :class="m.role === 'user' ? 'flex justify-end' : 'flex justify-start'">
                     <div :class="m.role === 'user'
@@ -125,27 +125,39 @@
         <div class="border-t border-light dark:border-[#222] p-2 flex-shrink-0">
             <div class="flex items-end gap-2">
                 <!-- Model selector -->
-                <div class="relative flex-shrink-0" x-data="{ modelsOpen: false }">
+                <div class="relative flex-shrink-0" x-data="{ modelsOpen: false, modelSearch: '' }">
                     <button @click="modelsOpen = !modelsOpen; if(modelsOpen) chatLoadModels()"
                             class="px-2 py-2 text-[11px] bg-gray-100 dark:bg-[#1a1a1a] border border-light dark:border-[#222] rounded hover:bg-gray-200 dark:hover:bg-[#222] text-gray-700 dark:text-gray-300 flex items-center gap-1 whitespace-nowrap">
                         <i data-lucide="cpu" class="w-3.5 h-3.5"></i>
                         <span x-text="chatCurrentModel || 'model'"></span>
                         <i data-lucide="chevron-down" class="w-3 h-3"></i>
                     </button>
-                    <div x-show="modelsOpen" @click.outside="modelsOpen = false"
-                         class="absolute bottom-full left-0 mb-1 w-56 bg-white dark:bg-black border border-light dark:border-[#222] rounded shadow-lg z-50 max-h-48 overflow-y-auto">
-                        <div x-show="chatModelsLoading" class="px-3 py-2 text-[12px] text-gray-400">Loading...</div>
-                        <template x-if="chatModels.length === 0 && !chatModelsLoading">
-                            <div class="px-3 py-2 text-[12px] text-gray-400">No models found</div>
-                        </template>
-                        <template x-for="m in chatModels" :key="m">
-                            <button @click="chatSetModel(m); modelsOpen = false"
-                                    :class="m === chatCurrentModel ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#1a1a1a]'"
-                                    class="w-full text-left px-3 py-2 text-[12px] flex items-center gap-2 transition-colors">
-                                <i data-lucide="check" class="w-3 h-3" x-show="m === chatCurrentModel"></i>
-                                <span x-text="m"></span>
-                            </button>
-                        </template>
+                    <div x-show="modelsOpen" @click.outside="modelsOpen = false; modelSearch = ''"
+                         class="absolute bottom-full left-0 mb-1 w-64 bg-white dark:bg-black border border-light dark:border-[#222] rounded shadow-lg z-50 max-h-64 overflow-hidden flex flex-col">
+                        <div class="p-2 border-b border-light dark:border-[#222]">
+                            <input x-model="modelSearch" type="text" placeholder="Search models..."
+                                   class="w-full px-2 py-1.5 text-[12px] border border-light dark:border-[#222] dark:bg-[#111] dark:text-white rounded outline-none focus:border-indigo-400">
+                        </div>
+                        <div class="overflow-y-auto flex-1">
+                            <div x-show="chatModelsLoading" class="px-3 py-2 text-[12px] text-gray-400">Loading...</div>
+                            <template x-if="chatModels.length === 0 && !chatModelsLoading">
+                                <div class="px-3 py-2 text-[12px]">
+                                    <p class="text-amber-600 dark:text-amber-400">No provider configured</p>
+                                    <a href="{% url 'core:settings_page' %}" class="text-violet-500 hover:text-violet-600 underline mt-1 inline-block" @click="modelsOpen = false; modelSearch = ''">Settings &rarr; AI</a>
+                                </div>
+                            </template>
+                            <template x-for="m in chatModels.filter(function(item) { return !modelSearch || item.id.toLowerCase().includes(modelSearch.toLowerCase()); })" :key="m.id">
+                                <button @click="chatSetModel(m.id); modelsOpen = false; modelSearch = ''"
+                                        :class="m.id === chatCurrentModel ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#1a1a1a]'"
+                                        class="w-full text-left px-3 py-2 text-[12px] flex items-center gap-2 transition-colors">
+                                    <i data-lucide="check" class="w-3 h-3" x-show="m.id === chatCurrentModel"></i>
+                                    <span x-html="m.name || m.id"></span>
+                                    <template x-if="m.free">
+                                        <span class="text-[10px] px-1.5 py-0.5 rounded font-semibold text-green-600 dark:text-green-400 ml-auto whitespace-nowrap">Free</span>
+                                    </template>
+                                </button>
+                            </template>
+                        </div>
                     </div>
                 </div>
 
@@ -254,6 +266,7 @@ function chatApp() {
         chatMessages: [],
         chatLoading: false,
         chatStorageInfo: '',
+        chatProviderInfo: 'No provider configured',
         chatLoadingText: 'Thinking...',
         chatModels: [],
         chatModelsLoading: false,
@@ -278,11 +291,21 @@ function chatApp() {
                     self.chatModels = data.models || [];
                     if (data.current) self.chatCurrentModel = data.current;
                     self.chatModelsLoading = false;
+                    if (data.configured === false) {
+                        self.chatModels = [];
+                        self.chatProviderInfo = 'No provider configured';
+                    } else if (data.provider) {
+                        var providerNames = { anthropic: 'Anthropic', openai: 'OpenAI', google: 'Google AI', mistral: 'Mistral', groq: 'Groq', deepseek: 'DeepSeek', openrouter: 'OpenRouter', ollama: 'Ollama' };
+                        var name = providerNames[data.provider] || data.provider;
+                        var model = self.chatCurrentModel ? ' · ' + self.chatCurrentModel : '';
+                        self.chatProviderInfo = name + model;
+                    }
                     self.$nextTick(function() { if (window.lucide) lucide.createIcons(); });
                 })
                 .catch(function() {
                     self.chatModels = [];
                     self.chatModelsLoading = false;
+                    self.chatProviderInfo = 'No provider configured';
                 });
         },
         chatSetModel: function(model) {
@@ -297,6 +320,8 @@ function chatApp() {
                 if (data.ok) {
                     self.chatCurrentModel = data.model;
                     localStorage.setItem('ollama_model', data.model);
+                    var parts = self.chatProviderInfo.split(' · ');
+                    self.chatProviderInfo = parts[0] + ' · ' + data.model;
                 }
             })
             .catch(function() {});

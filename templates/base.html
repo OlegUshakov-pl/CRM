@@ -52,7 +52,6 @@
         /* ============= DARK MODE ============= */
         .dark body { background: #000; color: #fff; }
         .dark #sidebar, .dark main,
-        .dark #settings-panel,
         .dark .bg-white { background: #000 !important; }
         .dark .bg-gray-100 { background: #1a1a1a !important; }
         .dark .bg-gray-300 { background: #333 !important; }
@@ -221,6 +220,11 @@
                     <span class="sidebar-text">AI Chat</span>
                 </button>
 
+                <a href="{% url 'core:settings_page' %}" class="mt-2">
+                    <i data-lucide="settings" class="w-4 h-4 flex-shrink-0"></i>
+                    <span class="sidebar-text">Settings</span>
+                </a>
+
                 <button id="sidebar-toggle-btn" onclick="toggleSidebar()" class="p-2 hover:bg-gray-100 dark:hover:bg-[#1a1a1a] rounded flex items-center gap-2 mt-4 pl-0">
                     <i data-lucide="panel-left-close" id="toggle-icon" class="w-4 h-4 flex-shrink-0 dark:text-gray-400"></i>
                 </button>
@@ -283,9 +287,9 @@
                     <button onclick="toggleTheme()" class="p-1.5 hover:bg-[#e5e7eb] dark:hover:bg-[#1a1a1a] transition-colors">
                         <i id="theme-icon" data-lucide="moon" class="w-5 h-5" style="color: #666;"></i>
                     </button>
-                    <button onclick="openSettings()" class="p-1.5 hover:bg-[#e5e7eb] dark:hover:bg-[#1a1a1a] transition-colors">
+                    <a href="{% url 'core:settings_page' %}" class="p-1.5 hover:bg-[#e5e7eb] dark:hover:bg-[#1a1a1a] transition-colors">
                         <i data-lucide="settings" class="w-5 h-5" style="color: #666;"></i>
-                    </button>
+                    </a>
                 </div>
             </div>
 
@@ -313,34 +317,6 @@
 
     {% include 'includes/slide_over.html' %}
     {% include 'chat_modal.html' %}
-
-    <!-- Settings Slide-over -->
-    <div id="settings-backdrop" class="fixed inset-0 z-40 bg-black/40 transition-opacity duration-300 opacity-0 pointer-events-none" onclick="closeSettings()"></div>
-    <div id="settings-panel" class="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-white dark:bg-black shadow-2xl border-l border-[#e8e8e8] dark:border-[#222] transform translate-x-full transition-transform duration-300 ease-in-out overflow-y-auto">
-        <div class="flex items-center justify-between p-6 border-b border-[#e8e8e8] dark:border-[#222]">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Settings</h2>
-            <button onclick="closeSettings()" class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
-                <i data-lucide="x" class="w-5 h-5"></i>
-            </button>
-        </div>
-        <div class="p-6 space-y-4">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Project Storage Path</label>
-            <input id="root-path-input" type="text" value="" placeholder="D:\Projects" class="w-full px-4 py-2.5 border border-[#e8e8e8] dark:border-[#222] dark:bg-[#111] dark:text-white text-[14px] outline-none focus:border-violet-300 transition-colors">
-            <p class="text-xs text-gray-400 dark:text-gray-500">Enter the full path where project folders will be created (e.g. <code>D:\Projects</code>).</p>
-
-            <div class="pt-2 border-t border-[#e8e8e8] dark:border-[#222]">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Subfolder Names</label>
-                <p class="text-xs text-gray-400 dark:text-gray-500 mb-3">Use <code class="bg-gray-100 dark:bg-[#1a1a1a] px-1 rounded">{Number}</code> as project number placeholder.</p>
-                <div class="space-y-2">
-                    <input id="subfolder-documents" type="text" value="{Number}_documents" placeholder="{Number}_documents" class="w-full px-4 py-2.5 border border-[#e8e8e8] dark:border-[#222] dark:bg-[#111] dark:text-white text-[14px] outline-none focus:border-violet-300 transition-colors">
-                    <input id="subfolder-drawings" type="text" value="{Number}_drawings" placeholder="{Number}_drawings" class="w-full px-4 py-2.5 border border-[#e8e8e8] dark:border-[#222] dark:bg-[#111] dark:text-white text-[14px] outline-none focus:border-violet-300 transition-colors">
-                    <input id="subfolder-models" type="text" value="{Number}_models" placeholder="{Number}_models" class="w-full px-4 py-2.5 border border-[#e8e8e8] dark:border-[#222] dark:bg-[#111] dark:text-white text-[14px] outline-none focus:border-violet-300 transition-colors">
-                </div>
-            </div>
-
-            <button onclick="saveSettings()" class="w-full py-3 px-4 bg-gray-100 dark:bg-[#1a1a1a] hover:bg-gray-200 dark:hover:bg-[#222] text-gray-700 dark:text-gray-300 font-medium text-[13px] transition-colors rounded-[28px] shadow">Save</button>
-        </div>
-    </div>
 
     <!-- Delete Confirmation Modal -->
     <div x-cloak x-data x-show="$store.deleteModal.show" class="fixed inset-0 z-50 flex items-center justify-center">
@@ -380,7 +356,6 @@
         }
 
         lucide.createIcons();
-        loadRootPath();
         var themeIcon = document.getElementById('theme-icon');
         if (themeIcon && document.documentElement.classList.contains('dark')) {
             themeIcon.setAttribute('data-lucide', 'sun');
@@ -426,69 +401,6 @@
             backdrop.classList.add('opacity-0', 'pointer-events-none');
         }
 
-        function openSettings() {
-            var backdrop = document.getElementById('settings-backdrop');
-            var panel = document.getElementById('settings-panel');
-            backdrop.classList.remove('opacity-0', 'pointer-events-none');
-            backdrop.classList.add('opacity-100');
-            panel.classList.remove('translate-x-full');
-            panel.classList.add('translate-x-0');
-            lucide.createIcons();
-            loadRootPath();
-        }
-
-        function loadRootPath() {
-            fetch('/settings/project_root_path/')
-                .then(r => r.json())
-                .then(data => {
-                    var input = document.getElementById('root-path-input');
-                    if (input) {
-                        input.value = data.value || data.default || '';
-                    }
-                })
-                .catch(() => {});
-            fetch('/settings/subfolder_documents/')
-                .then(r => r.json())
-                .then(data => {
-                    var input = document.getElementById('subfolder-documents');
-                    if (input && data.value) input.value = data.value;
-                })
-                .catch(() => {});
-            fetch('/settings/subfolder_drawings/')
-                .then(r => r.json())
-                .then(data => {
-                    var input = document.getElementById('subfolder-drawings');
-                    if (input && data.value) input.value = data.value;
-                })
-                .catch(() => {});
-            fetch('/settings/subfolder_models/')
-                .then(r => r.json())
-                .then(data => {
-                    var input = document.getElementById('subfolder-models');
-                    if (input && data.value) input.value = data.value;
-                })
-                .catch(() => {});
-        }
-
-        function saveSettings() {
-            var path = document.getElementById('root-path-input').value.trim();
-            var subDocs = document.getElementById('subfolder-documents').value.trim() || '{Number}_documents';
-            var subDraw = document.getElementById('subfolder-drawings').value.trim() || '{Number}_drawings';
-            var subModels = document.getElementById('subfolder-models').value.trim() || '{Number}_models';
-            var settings = [
-                { key: 'project_root_path', value: path },
-                { key: 'subfolder_documents', value: subDocs },
-                { key: 'subfolder_drawings', value: subDraw },
-                { key: 'subfolder_models', value: subModels }
-            ];
-            Promise.all(settings.map(s => {
-                var form = new FormData();
-                form.append('key', s.key);
-                form.append('value', s.value);
-                return fetch('/settings/save/', { method: 'POST', body: form, headers: { 'X-CSRFToken': getCSRFToken() } });
-            })).then(function() { closeSettings(); }).catch(function(e) { console.error('Save failed', e); });
-        }
-
         function getCSRFToken() {
             var cookies = document.cookie.split(';');
             for (var i = 0; i < cookies.length; i++) {
@@ -497,15 +409,6 @@
             }
             var input = document.querySelector('[name=csrfmiddlewaretoken]');
             return input ? input.value : '';
-        }
-
-        function closeSettings() {
-            var backdrop = document.getElementById('settings-backdrop');
-            var panel = document.getElementById('settings-panel');
-            panel.classList.remove('translate-x-0');
-            panel.classList.add('translate-x-full');
-            backdrop.classList.remove('opacity-100');
-            backdrop.classList.add('opacity-0', 'pointer-events-none');
         }
 
         function refreshSection(type) {

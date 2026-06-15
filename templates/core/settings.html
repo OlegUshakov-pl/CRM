@@ -1,0 +1,590 @@
+{% extends 'base.html' %}
+{% block title %}Settings - CRM{% endblock %}
+{% block breadcrumb %}Settings{% endblock %}
+
+{% block content %}
+<div x-data="settingsApp()" x-init="init()">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <div>
+            <h1 class="text-xl font-bold text-gray-900 dark:text-white">Settings</h1>
+            <p class="text-gray-500 dark:text-gray-400 text-[13px]">Manage your application preferences</p>
+        </div>
+        <button @click="saveAll()" class="px-5 py-2.5 bg-violet-500 hover:bg-violet-600 text-white text-[13px] font-medium transition-colors rounded-[20px] shadow">
+            Save
+        </button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="border-b border-[#e8e8e8] dark:border-[#222] mb-6">
+        <nav class="flex gap-6 text-[13px]">
+            <button @click="tab = 'general'" :class="tab === 'general' ? 'border-b-2 border-violet-500 text-violet-600 dark:text-violet-400 font-medium' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'" class="pb-3 transition-colors">General</button>
+            <button @click="tab = 'ai'" :class="tab === 'ai' ? 'border-b-2 border-violet-500 text-violet-600 dark:text-violet-400 font-medium' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'" class="pb-3 transition-colors">AI</button>
+            <button @click="tab = 'users'" :class="tab === 'users' ? 'border-b-2 border-violet-500 text-violet-600 dark:text-violet-400 font-medium' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'" class="pb-3 transition-colors">Users</button>
+        </nav>
+    </div>
+
+    <!-- General Tab -->
+    <div x-show="tab === 'general'" x-cloak>
+        <div class="max-w-2xl space-y-6">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Project Storage Path</label>
+                <input x-model="general.projectPath" type="text" placeholder="D:\Projects" class="w-full px-4 py-2.5 border border-[#e8e8e8] dark:border-[#222] dark:bg-[#111] dark:text-white text-[14px] outline-none focus:border-violet-300 transition-colors">
+                <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Enter the full path where project folders will be created (e.g. <code>D:\Projects</code>).</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Tab -->
+    <div x-show="tab === 'ai'" x-cloak>
+        <div class="space-y-6">
+            <!-- Provider Selection -->
+            <div>
+                <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Select Provider</h3>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <template x-for="p in providers" :key="p.id">
+                        <button @click="selectProvider(p)" :class="ai.provider === p.id ? 'border-violet-500 bg-violet-50 dark:bg-violet-900/20' : 'border-[#e8e8e8] dark:border-[#222] hover:border-gray-300 dark:hover:border-[#333]'" class="p-4 border-2 rounded-lg text-left transition-all">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-[13px] font-semibold text-gray-900 dark:text-white" x-text="p.name"></span>
+                            </div>
+                            <span class="text-[11px] px-1.5 py-0.5 rounded" :class="p.type === 'local' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : p.type === 'aggregator' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-gray-100 text-gray-600 dark:bg-[#1a1a1a] dark:text-gray-400'" x-text="p.type"></span>
+                            <span x-show="p.is_active" class="inline-block w-2 h-2 rounded-full bg-green-500 ml-1"></span>
+                        </button>
+                    </template>
+                </div>
+            </div>
+
+            <!-- API Key / Base URL -->
+            <div x-show="ai.provider" x-cloak>
+                <div class="max-w-2xl space-y-4 pt-4 border-t border-[#e8e8e8] dark:border-[#222]">
+                    <!-- API Key (not Ollama) -->
+                    <div x-show="ai.provider !== 'ollama'">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            API Key
+                            <span class="inline-block w-2 h-2 rounded-full ml-1.5" :class="ai.keyStatus === 'ok' ? 'bg-green-500' : ai.keyStatus === 'error' ? 'bg-red-500' : 'bg-gray-300 dark:bg-gray-600'"></span>
+                        </label>
+                        <div x-show="keyConfigured && !editingKey" class="flex gap-2 items-center">
+                            <div class="flex-1 px-4 py-2.5 border border-[#e8e8e8] dark:border-[#222] dark:bg-[#111] text-[14px] text-gray-500 dark:text-gray-400 rounded truncate" x-text="keyMasked"></div>
+                            <button @click="editingKey = true; ai.apiKey = ''" class="px-4 py-2.5 bg-gray-100 dark:bg-[#1a1a1a] hover:bg-gray-200 dark:hover:bg-[#222] text-gray-700 dark:text-gray-300 text-[13px] font-medium transition-colors rounded-lg whitespace-nowrap">Change</button>
+                        </div>
+                        <div x-show="!keyConfigured || editingKey">
+                            <div class="flex gap-2">
+                                <div class="relative flex-1">
+                                    <input :type="showKey ? 'text' : 'password'" x-model="ai.apiKey" :placeholder="currentPrefix + '...'" class="w-full px-4 py-2.5 pr-10 border border-[#e8e8e8] dark:border-[#222] dark:bg-[#111] dark:text-white text-[14px] outline-none focus:border-violet-300 transition-colors">
+                                    <button @click="showKey = !showKey" class="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                                        <i :data-lucide="showKey ? 'eye-off' : 'eye'" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                                <button @click="verifyKey()" :disabled="keyLoading" class="px-4 py-2.5 bg-gray-100 dark:bg-[#1a1a1a] hover:bg-gray-200 dark:hover:bg-[#222] text-gray-700 dark:text-gray-300 text-[13px] font-medium transition-colors rounded-lg whitespace-nowrap disabled:opacity-50">
+                                    <span x-show="!keyLoading">Check Key</span>
+                                    <span x-show="keyLoading" class="flex items-center gap-1.5"><svg class="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg> Loading...</span>
+                                </button>
+                                <button x-show="editingKey" @click="editingKey = false" class="px-3 py-2.5 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 text-[13px] transition-colors">Cancel</button>
+                            </div>
+                            <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                                Get key: <a :href="currentKeyUrl" target="_blank" class="text-violet-500 hover:text-violet-600 underline" x-text="currentKeyUrl"></a>
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Base URL (Ollama) -->
+                    <div x-show="ai.provider === 'ollama'">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Base URL</label>
+                        <input x-model="ai.baseUrl" type="text" placeholder="http://localhost:11434" class="w-full px-4 py-2.5 border border-[#e8e8e8] dark:border-[#222] dark:bg-[#111] dark:text-white text-[14px] outline-none focus:border-violet-300 transition-colors">
+                        <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Make sure Ollama is running locally.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Models -->
+            <div x-show="ai.provider" x-cloak>
+                <div class="pt-4 border-t border-[#e8e8e8] dark:border-[#222]">
+                    <!-- Models header with refresh -->
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300">Select Model</h3>
+                        <div class="flex items-center gap-3">
+                            <span class="text-[11px] text-gray-400 dark:text-gray-500" x-text="lastUpdatedText"></span>
+                            <button @click="syncModels()" :disabled="modelsLoading" class="flex items-center gap-1.5 px-3 py-1.5 text-[12px] text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#1a1a1a] rounded transition-colors disabled:opacity-50">
+                                <svg x-show="!modelsLoading" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
+                                <svg x-show="modelsLoading" class="animate-spin w-3.5 h-3.5" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                                <span x-text="modelsLoading ? 'Loading...' : 'Refresh'"></span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Model grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                        <template x-for="m in currentModels" :key="m.id + (m.custom ? '-custom' : '')">
+                            <div :class="ai.model === m.id ? 'border-violet-500 bg-violet-50 dark:bg-violet-900/20' : 'border-[#e8e8e8] dark:border-[#222] hover:border-gray-300 dark:hover:border-[#333]'" class="border-2 rounded-lg p-4 transition-all relative group">
+                                <button @click="selectModel(m)" class="text-left w-full">
+                                    <div class="text-[13px] font-semibold text-gray-900 dark:text-white mb-0.5" x-text="m.name || m.id"></div>
+                                    <div class="text-[11px] text-gray-400 dark:text-gray-500 mb-2" x-text="m.id" x-show="m.id !== m.name"></div>
+                                    <div class="flex flex-wrap gap-1">
+                                        <template x-if="m.custom">
+                                            <span class="text-[10px] px-1.5 py-0.5 rounded bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400">Custom</span>
+                                        </template>
+                                        <template x-for="tag in (m.tags || [])" :key="tag">
+                                            <span class="text-[10px] px-1.5 py-0.5 rounded" :class="tagClass(tag)" x-text="tagLabel(tag)"></span>
+                                        </template>
+                                    </div>
+                                </button>
+                                <template x-if="m.custom">
+                                    <button @click.stop="confirmDeleteCustom(m)" class="absolute top-2 right-2 p-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                    </button>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+
+                    <!-- Add custom model -->
+                    <div class="mt-4">
+                        <div x-show="!showAddForm">
+                            <button @click="showAddForm = true" class="flex items-center gap-1.5 text-[12px] text-violet-500 hover:text-violet-600 transition-colors">
+                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                                Add model manually
+                            </button>
+                        </div>
+                        <div x-show="showAddForm" x-cloak class="flex items-end gap-3 p-4 bg-gray-50 dark:bg-[#111] rounded-lg border border-[#e8e8e8] dark:border-[#222]">
+                            <div class="flex-1">
+                                <label class="block text-[11px] text-gray-500 dark:text-gray-400 mb-1">Model ID *</label>
+                                <input x-model="newModel.id" type="text" placeholder="gpt-4-turbo-preview" class="w-full px-3 py-2 border border-[#e8e8e8] dark:border-[#222] dark:bg-[#111] dark:text-white text-[13px] outline-none focus:border-violet-300 transition-colors">
+                            </div>
+                            <div class="flex-1">
+                                <label class="block text-[11px] text-gray-500 dark:text-gray-400 mb-1">Name (optional)</label>
+                                <input x-model="newModel.name" type="text" placeholder="GPT-4 Turbo Preview" class="w-full px-3 py-2 border border-[#e8e8e8] dark:border-[#222] dark:bg-[#111] dark:text-white text-[13px] outline-none focus:border-violet-300 transition-colors">
+                            </div>
+                            <button @click="addCustomModel()" :disabled="!newModel.id.trim()" class="px-4 py-2 bg-violet-500 hover:bg-violet-600 text-white text-[12px] font-medium rounded-lg transition-colors disabled:opacity-50 whitespace-nowrap">Add</button>
+                            <button @click="showAddForm = false; newModel.id = ''; newModel.name = ''" class="px-4 py-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 text-[12px] transition-colors whitespace-nowrap">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Users Tab -->
+    <div x-show="tab === 'users'" x-cloak>
+        <div class="max-w-2xl">
+            <div class="text-center py-12 text-gray-400 dark:text-gray-500">
+                <i data-lucide="users" class="w-12 h-12 mx-auto mb-3 opacity-50"></i>
+                <p class="text-[14px]">User management coming soon.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete confirmation -->
+    <div x-show="deleteTarget" x-cloak class="fixed inset-0 z-50 flex items-center justify-center">
+        <div class="fixed inset-0 bg-black/50" @click="deleteTarget = null"></div>
+        <div class="bg-white dark:bg-black rounded-lg shadow-xl z-10 max-w-sm w-full mx-4 p-6 relative" @click.outside="deleteTarget = null">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Delete model?</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Remove <strong x-text="deleteTarget ? deleteTarget.name || deleteTarget.id : ''"></strong> from your models?</p>
+            <div class="flex justify-end gap-3 mt-6">
+                <button @click="deleteTarget = null" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-[#1a1a1a] hover:bg-gray-200 dark:hover:bg-[#222] transition-colors">Cancel</button>
+                <button @click="deleteCustomModel()" class="px-4 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600 transition-colors">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div x-show="toast" x-transition x-cloak class="fixed bottom-6 right-6 px-4 py-2 rounded-lg shadow-lg text-[13px] font-medium z-50" :class="toastType === 'error' ? 'bg-red-500 text-white' : 'bg-green-500 text-white'" x-text="toastMsg"></div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function settingsApp() {
+    return {
+        tab: 'general',
+        showKey: false,
+        keyConfigured: false,
+        keyMasked: '',
+        editingKey: false,
+        toast: false,
+        toastMsg: 'Settings saved',
+        toastType: 'success',
+        keyLoading: false,
+        modelsLoading: false,
+        showAddForm: false,
+        deleteTarget: null,
+        newModel: { id: '', name: '' },
+
+        general: {
+            projectPath: '',
+        },
+
+        ai: {
+            provider: '',
+            apiKey: '',
+            baseUrl: 'http://localhost:11434',
+            model: '',
+            keyStatus: 'unchecked',
+        },
+
+        providers: [],
+        models: [],
+        lastSyncedAt: null,
+
+        providerMeta: {
+            anthropic: { keyPrefix: 'sk-ant-', keyUrl: 'https://console.anthropic.com/settings/keys' },
+            openai: { keyPrefix: 'sk-', keyUrl: 'https://platform.openai.com/api-keys' },
+            google: { keyPrefix: 'AIza', keyUrl: 'https://aistudio.google.com/app/apikey' },
+            mistral: { keyPrefix: '', keyUrl: 'https://console.mistral.ai/api-keys' },
+            groq: { keyPrefix: 'gsk_', keyUrl: 'https://console.groq.com/keys' },
+            deepseek: { keyPrefix: 'sk-', keyUrl: 'https://platform.deepseek.com/api_keys' },
+            openrouter: { keyPrefix: 'sk-or-', keyUrl: 'https://openrouter.ai/keys' },
+            opencode: { keyPrefix: 'sk-', keyUrl: 'https://opencode.ai/settings/keys' },
+            ollama: { keyPrefix: '', keyUrl: '' },
+        },
+
+        defaultModels: {
+            anthropic: [
+                { id: 'claude-opus-4-6', name: 'Claude Opus 4', tags: ['smart'] },
+                { id: 'claude-sonnet-4-6', name: 'Claude Sonnet 4', tags: ['smart', 'fast'] },
+                { id: 'claude-haiku-4-5', name: 'Claude Haiku', tags: ['fast', 'cheap'] },
+            ],
+            openai: [
+                { id: 'gpt-4o', name: 'GPT-4o', tags: ['smart', 'vision'] },
+                { id: 'gpt-4o-mini', name: 'GPT-4o mini', tags: ['fast', 'cheap'] },
+                { id: 'o3', name: 'o3', tags: ['smart'] },
+                { id: 'o4-mini', name: 'o4-mini', tags: ['smart', 'fast'] },
+            ],
+            google: [
+                { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro', tags: ['smart', 'vision'] },
+                { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', tags: ['fast', 'cheap'] },
+            ],
+            mistral: [
+                { id: 'mistral-large-latest', name: 'Mistral Large', tags: ['smart'] },
+                { id: 'mistral-small-latest', name: 'Mistral Small', tags: ['cheap', 'fast'] },
+                { id: 'codestral-latest', name: 'Codestral', tags: ['smart'] },
+            ],
+            groq: [
+                { id: 'llama-3.3-70b-versatile', name: 'Llama 3.3 70B', tags: ['fast', 'smart'] },
+                { id: 'llama-3.1-8b-instant', name: 'Llama 3.1 8B', tags: ['fast', 'cheap'] },
+            ],
+            deepseek: [
+                { id: 'deepseek-chat', name: 'DeepSeek V3', tags: ['smart', 'cheap'] },
+                { id: 'deepseek-reasoner', name: 'DeepSeek R1', tags: ['smart'] },
+            ],
+            openrouter: [
+                { id: 'meta-llama/llama-3.3-70b-instruct', name: 'Llama 3.3 70B', tags: ['smart', 'cheap'] },
+                { id: 'google/gemini-2.5-pro', name: 'Gemini 2.5 Pro', tags: ['smart'] },
+                { id: 'anthropic/claude-sonnet-4-6', name: 'Claude Sonnet 4', tags: ['smart', 'fast'] },
+                { id: 'deepseek/deepseek-chat', name: 'DeepSeek V3', tags: ['cheap'] },
+            ],
+            ollama: [
+                { id: 'llama3.2', name: 'Llama 3.2', tags: ['local'] },
+                { id: 'qwen2.5-coder', name: 'Qwen 2.5 Coder', tags: ['local', 'smart'] },
+                { id: 'phi4', name: 'Phi-4', tags: ['local'] },
+                { id: 'mistral', name: 'Mistral 7B', tags: ['local', 'fast'] },
+            ],
+        },
+
+        get currentModels() {
+            if (!this.ai.provider) return [];
+            if (this.models.length > 0) return this.models;
+            return this.defaultModels[this.ai.provider] || [];
+        },
+
+        get lastUpdatedText() {
+            if (!this.lastSyncedAt) return 'Never updated';
+            var d = new Date(this.lastSyncedAt);
+            return 'Updated: ' + d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+        },
+
+        get currentPrefix() {
+            var m = this.providerMeta[this.ai.provider];
+            return m ? m.keyPrefix : '';
+        },
+
+        get currentKeyUrl() {
+            var m = this.providerMeta[this.ai.provider];
+            return m ? m.keyUrl : '#';
+        },
+
+        selectProvider(p) {
+            this.ai.provider = p.id;
+            this.ai.apiKey = '';
+            this.ai.baseUrl = p.base_url || 'http://localhost:11434';
+            this.ai.model = p.selected_model || '';
+            this.ai.keyStatus = 'unchecked';
+            this.models = [];
+            this.lastSyncedAt = p.models_synced_at || null;
+            if (p.key_verified_at) this.ai.keyStatus = 'ok';
+            this.loadModels();
+        },
+
+        selectModel(m) {
+            this.ai.model = m.id;
+        },
+
+        verifyKey() {
+            var self = this;
+            self.keyLoading = true;
+            self.ai.keyStatus = 'unchecked';
+
+            fetch('/api/settings/ai/providers/' + self.ai.provider, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': self.getCSRFToken()
+                },
+                body: JSON.stringify({
+                    api_key: self.ai.apiKey,
+                    base_url: self.ai.baseUrl,
+                    selected_model: self.ai.model
+                })
+            })
+            .then(function() {
+                return fetch('/api/settings/ai/providers/' + self.ai.provider + '/verify', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': self.getCSRFToken()
+                    }
+                });
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                self.keyLoading = false;
+                if (data.ok) {
+                    self.ai.keyStatus = 'ok';
+                    self.keyConfigured = true;
+                    self.keyMasked = data.api_key_masked || self.keyMasked;
+                    self.editingKey = false;
+                    self.syncModels();
+                } else {
+                    self.ai.keyStatus = 'error';
+                    self.showToast(data.error || 'Key validation failed', 'error');
+                }
+                self.$nextTick(function() { lucide.createIcons(); });
+            })
+            .catch(function(e) {
+                self.keyLoading = false;
+                self.ai.keyStatus = 'error';
+                self.showToast('Network error', 'error');
+            });
+        },
+
+        syncModels() {
+            var self = this;
+            if (!self.ai.provider) return;
+            if (self.ai.provider !== 'ollama' && !self.ai.apiKey) {
+                self.showToast('Enter an API key first', 'error');
+                return;
+            }
+
+            self.modelsLoading = true;
+
+            fetch('/api/settings/ai/providers/' + self.ai.provider + '/sync-models', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': self.getCSRFToken()
+                },
+                body: JSON.stringify({})
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                self.modelsLoading = false;
+                if (data.ok) {
+                    self.showToast('Models updated (' + data.count + ')', 'success');
+                    self.loadModels();
+                } else {
+                    self.showToast(data.error || 'Failed to load models', 'error');
+                }
+            })
+            .catch(function(e) {
+                self.modelsLoading = false;
+                self.showToast('Network error', 'error');
+            });
+        },
+
+        loadModels() {
+            var self = this;
+            if (!self.ai.provider) return;
+
+            fetch('/api/settings/ai/providers/' + self.ai.provider + '/models', {
+                headers: { 'X-CSRFToken': self.getCSRFToken() }
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.ok) {
+                    self.models = data.models;
+                }
+            })
+            .catch(function() {});
+        },
+
+        addCustomModel() {
+            var self = this;
+            var id = self.newModel.id.trim();
+            if (!id) return;
+            var name = self.newModel.name.trim() || id;
+
+            fetch('/api/settings/ai/providers/' + self.ai.provider + '/models', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': self.getCSRFToken()
+                },
+                body: JSON.stringify({ model_id: id, name: name })
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.ok) {
+                    self.models.push(data.model);
+                    self.newModel.id = '';
+                    self.newModel.name = '';
+                    self.showAddForm = false;
+                } else {
+                    self.showToast(data.error || 'Failed to add model', 'error');
+                }
+            })
+            .catch(function(e) {
+                self.showToast('Network error', 'error');
+            });
+        },
+
+        confirmDeleteCustom(m) {
+            this.deleteTarget = m;
+        },
+
+        deleteCustomModel() {
+            var self = this;
+            if (!self.deleteTarget) return;
+
+            fetch('/api/settings/ai/providers/' + self.ai.provider + '/models/' + encodeURIComponent(self.deleteTarget.id), {
+                method: 'DELETE',
+                headers: { 'X-CSRFToken': self.getCSRFToken() }
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.ok) {
+                    self.models = self.models.filter(function(m) { return m.id !== self.deleteTarget.id; });
+                    if (self.ai.model === self.deleteTarget.id) {
+                        self.ai.model = '';
+                    }
+                } else {
+                    self.showToast(data.error || 'Failed to delete model', 'error');
+                }
+                self.deleteTarget = null;
+            })
+            .catch(function(e) {
+                self.showToast('Network error', 'error');
+                self.deleteTarget = null;
+            });
+        },
+
+        tagClass(tag) {
+            var map = {
+                smart: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
+                fast: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+                cheap: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+                local: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+                vision: 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400',
+            };
+            return map[tag] || 'bg-gray-100 text-gray-600 dark:bg-[#1a1a1a] dark:text-gray-400';
+        },
+
+        tagLabel(tag) {
+            var map = { smart: 'Smart', fast: 'Fast', cheap: 'Cheap', local: 'Local', vision: 'Vision' };
+            return map[tag] || tag;
+        },
+
+        showToast(msg, type) {
+            this.toastMsg = msg;
+            this.toastType = type || 'success';
+            this.toast = true;
+            var self = this;
+            setTimeout(function() { self.toast = false; }, 3000);
+        },
+
+        getCSRFToken() {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var c = cookies[i].trim();
+                if (c.startsWith('csrftoken=')) return c.substring(10);
+            }
+            return '';
+        },
+
+        saveAll() {
+            var self = this;
+            var tasks = [
+                fetch('/api/settings/general', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': self.getCSRFToken() },
+                    body: JSON.stringify({ 'storage.project_path': self.general.projectPath })
+                }),
+                fetch('/api/settings/ai/providers/' + self.ai.provider, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': self.getCSRFToken() },
+                    body: JSON.stringify({
+                        api_key: self.ai.apiKey,
+                        base_url: self.ai.baseUrl,
+                        selected_model: self.ai.model
+                    })
+                }),
+                fetch('/api/settings/ai/active-provider', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': self.getCSRFToken() },
+                    body: JSON.stringify({ provider_id: self.ai.provider })
+                }),
+            ];
+            Promise.all(tasks).then(function() {
+                if (self.ai.apiKey) {
+                    self.keyConfigured = true;
+                    self.editingKey = false;
+                }
+                self.showToast('Settings saved', 'success');
+            }).catch(function(e) {
+                self.showToast('Save failed', 'error');
+            });
+        },
+
+        loadSettings() {
+            var self = this;
+
+            fetch('/api/settings/general', {
+                headers: { 'X-CSRFToken': self.getCSRFToken() }
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.ok && data.settings) {
+                    self.general.projectPath = data.settings['storage.project_path'] || '';
+                }
+            })
+            .catch(function() {});
+
+            fetch('/api/settings/ai/providers', {
+                headers: { 'X-CSRFToken': self.getCSRFToken() }
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.ok) {
+                    self.providers = data.providers;
+                    var active = data.providers.find(function(p) { return p.is_active; });
+                    if (active) {
+                        self.ai.provider = active.id;
+                        self.ai.baseUrl = active.base_url || 'http://localhost:11434';
+                        self.ai.model = active.selected_model || '';
+                        if (active.key_verified_at) self.ai.keyStatus = 'ok';
+                        self.lastSyncedAt = active.models_synced_at;
+                        self.keyConfigured = active.has_api_key || false;
+                        self.keyMasked = active.api_key_masked || '';
+                        self.editingKey = false;
+                        self.loadModels();
+                    }
+                }
+            })
+            .catch(function() {});
+        },
+
+        init() {
+            this.loadSettings();
+            this.$nextTick(function() { lucide.createIcons(); });
+        },
+    };
+}
+</script>
+{% endblock %}
