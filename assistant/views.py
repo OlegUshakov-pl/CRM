@@ -489,23 +489,28 @@ def browser_preview(request, url):
 @login_required
 @require_GET
 def ollama_models(request):
-    import urllib.request
-    import urllib.error
-    base = getattr(settings, 'OLLAMA_BASE_URL', 'http://localhost:11434')
-    try:
-        req = urllib.request.Request(f'{base}/api/tags', method='GET')
-        with urllib.request.urlopen(req, timeout=5) as resp:
-            data = json.loads(resp.read().decode())
-            models = [m.get('name', '') for m in data.get('models', [])]
-    except (urllib.error.URLError, OSError, json.JSONDecodeError):
-        models = []
-    current = request.session.get('ollama_model', getattr(settings, 'OLLAMA_DEFAULT_MODEL', ''))
-    return JsonResponse({'ok': True, 'models': models, 'current': current})
+    from core.models import AIProvider, AIModel
+
+    active = AIProvider.objects.filter(is_active=True).first()
+    if not active:
+        return JsonResponse({'ok': True, 'models': [], 'current': '', 'provider': None, 'configured': False})
+
+    models = list(AIModel.objects.filter(provider=active).order_by('-is_custom', 'name').values_list('model_id', flat=True))
+    current = active.selected_model or ''
+    return JsonResponse({
+        'ok': True,
+        'models': models,
+        'current': current,
+        'provider': active.id,
+        'configured': True,
+    })
 
 
 @login_required
 @require_POST
 def ollama_set_model(request):
+    from core.models import AIProvider
+
     try:
         body = json.loads(request.body.decode('utf-8') or '{}')
     except json.JSONDecodeError:
@@ -513,5 +518,11 @@ def ollama_set_model(request):
     model = (body.get('model') or '').strip()
     if not model:
         return JsonResponse({'ok': False, 'error': 'No model specified.'}, status=400)
+
+    active = AIProvider.objects.filter(is_active=True).first()
+    if active:
+        active.selected_model = model
+        active.save(update_fields=['selected_model', 'updated_at'])
+
     request.session['ollama_model'] = model
     return JsonResponse({'ok': True, 'model': model})

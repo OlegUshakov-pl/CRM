@@ -133,10 +133,13 @@
                         <i data-lucide="chevron-down" class="w-3 h-3"></i>
                     </button>
                     <div x-show="modelsOpen" @click.outside="modelsOpen = false"
-                         class="absolute bottom-full left-0 mb-1 w-56 bg-white dark:bg-black border border-light dark:border-[#222] rounded shadow-lg z-50 max-h-48 overflow-y-auto">
+                         class="absolute bottom-full left-0 mb-1 w-64 bg-white dark:bg-black border border-light dark:border-[#222] rounded shadow-lg z-50 max-h-48 overflow-y-auto">
                         <div x-show="chatModelsLoading" class="px-3 py-2 text-[12px] text-gray-400">Loading...</div>
                         <template x-if="chatModels.length === 0 && !chatModelsLoading">
-                            <div class="px-3 py-2 text-[12px] text-gray-400">No models found</div>
+                            <div class="px-3 py-2 text-[12px]">
+                                <p class="text-amber-600 dark:text-amber-400">No provider configured</p>
+                                <a href="{% url 'core:settings_page' %}" class="text-violet-500 hover:text-violet-600 underline mt-1 inline-block" @click="modelsOpen = false">Settings &rarr; AI</a>
+                            </div>
                         </template>
                         <template x-for="m in chatModels" :key="m">
                             <button @click="chatSetModel(m); modelsOpen = false"
@@ -278,6 +281,9 @@ function chatApp() {
                     self.chatModels = data.models || [];
                     if (data.current) self.chatCurrentModel = data.current;
                     self.chatModelsLoading = false;
+                    if (data.configured === false) {
+                        self.chatModels = [];
+                    }
                     self.$nextTick(function() { if (window.lucide) lucide.createIcons(); });
                 })
                 .catch(function() {
