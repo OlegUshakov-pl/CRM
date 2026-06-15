@@ -550,7 +550,7 @@ def ollama_models(request):
     for m in models_qs:
         display = m.name
         if _re.search(r'free', display, _re.IGNORECASE):
-            display = _re.sub(r'(free)', r'<span class="text-green-600 dark:text-green-400">\1</span>', display, flags=_re.IGNORECASE)
+            display = _re.sub(r'(free)', r'<span class="bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400 px-1 rounded text-[10px] font-medium">\1</span>', display, flags=_re.IGNORECASE)
         models.append({'id': m.model_id, 'name': display, 'free': is_free})
     current = active.selected_model or ''
     return JsonResponse({
