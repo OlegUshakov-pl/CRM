@@ -1,6 +1,10 @@
 asgiref==3.11.1
 bleach==6.4.0
-django==6.0.6
-Pillow==12.2.0
+cffi==2.0.0
+cryptography==49.0.0
+Django==6.0.6
+pillow==12.2.0
+pycparser==3.0
 sqlparse==0.5.5
 tzdata==2026.2
+webencodings==0.5.1
