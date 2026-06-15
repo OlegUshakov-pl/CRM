@@ -341,6 +341,10 @@ function settingsApp() {
                     self.ai.keyStatus = 'ok';
                     self.mergeModels(self.ai.provider, data.models);
                     self.autoSelectFirst();
+                    self.saveSetting('ai_provider', self.ai.provider);
+                    self.saveSetting('ai_api_key', self.ai.apiKey);
+                    self.saveSetting('ai_base_url', self.ai.baseUrl);
+                    self.saveSetting('ai_model', self.ai.model);
                 } else {
                     self.ai.keyStatus = 'error';
                     self.showToast(data.error || 'Key validation failed', 'error');
