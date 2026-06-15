@@ -151,9 +151,9 @@
                                         :class="m.id === chatCurrentModel ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#1a1a1a]'"
                                         class="w-full text-left px-3 py-2 text-[12px] flex items-center gap-2 transition-colors">
                                     <i data-lucide="check" class="w-3 h-3" x-show="m.id === chatCurrentModel"></i>
-                                    <span x-text="m.name || m.id"></span>
+                                    <span x-html="m.name || m.id"></span>
                                     <template x-if="m.free">
-                                        <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-green-500 text-white font-semibold ml-auto whitespace-nowrap">Free</span>
+                                        <span class="text-[10px] px-1.5 py-0.5 rounded font-semibold text-green-600 dark:text-green-400 ml-auto whitespace-nowrap">Free</span>
                                     </template>
                                 </button>
                             </template>

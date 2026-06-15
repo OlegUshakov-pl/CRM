@@ -538,6 +538,7 @@ def browser_preview(request, url):
 @require_GET
 def ollama_models(request):
     from core.models import AIProvider, AIModel
+    import re as _re
 
     active = AIProvider.objects.filter(is_active=True).first()
     if not active:
@@ -545,7 +546,12 @@ def ollama_models(request):
 
     is_free = active.type == 'local'
     models_qs = AIModel.objects.filter(provider=active).order_by('-is_custom', 'name')
-    models = [{'id': m.model_id, 'name': m.name, 'free': is_free} for m in models_qs]
+    models = []
+    for m in models_qs:
+        display = m.name
+        if _re.search(r'free', display, _re.IGNORECASE):
+            display = _re.sub(r'(free)', r'<span class="text-green-600 dark:text-green-400">\1</span>', display, flags=_re.IGNORECASE)
+        models.append({'id': m.model_id, 'name': display, 'free': is_free})
     current = active.selected_model or ''
     return JsonResponse({
         'ok': True,
