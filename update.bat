@@ -87,6 +87,16 @@ if errorlevel 1 (
 )
 echo  [OK] Database migrated.
 
+:: Seed AI providers
+echo  [5.1/6] Seeding AI providers...
+"%PYTHON%" manage.py seed_ai_providers
+if errorlevel 1 (
+    echo  [ERROR] AI providers seeding failed.
+    pause
+    exit /b 1
+)
+echo  [OK] AI providers seeded.
+
 :: Collect static files
 echo  [6/6] Collecting static files...
 "%PYTHON%" manage.py collectstatic --noinput
