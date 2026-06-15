@@ -7,7 +7,8 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.http import JsonResponse, FileResponse, Http404
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_GET, require_http_methods
+from django.utils import timezone
 from projects.models import Project
 from tasks.models import Task
 from companies.models import Company
@@ -16,7 +17,7 @@ from notes.models import Note
 from materials.models import Material
 from parts.models import Part
 from generator.models import Deal
-from .models import AppSetting
+from .models import AppSetting, AIProvider, AIModel, AppSettings
 from projects.utils import get_project_root_path
 
 
@@ -242,3 +243,255 @@ def ai_fetch_models(request):
         return JsonResponse({'ok': False, 'error': f'HTTP {e.code}: {error_body or e.reason}'})
     except Exception as e:
         return JsonResponse({'ok': False, 'error': str(e)})
+
+
+@login_required
+@require_GET
+def api_providers(request):
+    providers = AIProvider.objects.all().order_by('id')
+    data = []
+    for p in providers:
+        data.append({
+            'id': p.id,
+            'name': p.name,
+            'type': p.type,
+            'base_url': p.base_url or '',
+            'selected_model': p.selected_model or '',
+            'is_active': p.is_active,
+            'key_verified_at': p.key_verified_at.isoformat() if p.key_verified_at else None,
+            'models_synced_at': p.models_synced_at.isoformat() if p.models_synced_at else None,
+            'api_key_masked': p.get_masked_key(),
+        })
+    return JsonResponse({'ok': True, 'providers': data})
+
+
+@login_required
+@require_http_methods(["PUT"])
+def api_provider_update(request, provider_id):
+    try:
+        body = json.loads(request.body.decode('utf-8') or '{}')
+    except json.JSONDecodeError:
+        return JsonResponse({'ok': False, 'error': 'Invalid JSON.'}, status=400)
+
+    provider, _ = AIProvider.objects.get_or_create(
+        id=provider_id,
+        defaults={'name': provider_id.title(), 'type': 'cloud'}
+    )
+
+    if 'api_key' in body and body['api_key']:
+        provider.set_api_key(body['api_key'])
+    if 'base_url' in body:
+        provider.base_url = body['base_url'] or None
+    if 'selected_model' in body:
+        provider.selected_model = body['selected_model'] or None
+
+    provider.save()
+    return JsonResponse({'ok': True})
+
+
+@login_required
+@require_POST
+def api_provider_verify(request, provider_id):
+    try:
+        body = json.loads(request.body.decode('utf-8') or '{}')
+    except json.JSONDecodeError:
+        return JsonResponse({'ok': False, 'error': 'Invalid JSON.'}, status=400)
+
+    try:
+        provider = AIProvider.objects.get(id=provider_id)
+    except AIProvider.DoesNotExist:
+        return JsonResponse({'ok': False, 'error': 'Provider not found.'}, status=404)
+
+    api_key = provider.get_api_key()
+    base_url = provider.base_url or 'http://localhost:11434'
+
+    if provider_id == 'ollama':
+        url = f'{base_url}/api/tags'
+        req = urllib.request.Request(url, method='GET')
+    else:
+        if not api_key:
+            return JsonResponse({'ok': False, 'error': 'No API key set.'}, status=400)
+        if provider_id not in PROVIDER_ENDPOINTS:
+            return JsonResponse({'ok': False, 'error': 'Unknown provider.'}, status=400)
+        endpoint = PROVIDER_ENDPOINTS[provider_id]
+        url = endpoint['url']
+        if endpoint.get('key_in_url'):
+            url += api_key
+        req = urllib.request.Request(url, headers=endpoint['headers'](api_key), method='GET')
+
+    try:
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            provider.key_verified_at = timezone.now()
+            provider.save(update_fields=['key_verified_at', 'updated_at'])
+            return JsonResponse({'ok': True})
+    except urllib.error.HTTPError as e:
+        return JsonResponse({'ok': False, 'error': f'HTTP {e.code}'})
+    except Exception as e:
+        return JsonResponse({'ok': False, 'error': str(e)})
+
+
+@login_required
+@require_POST
+def api_provider_sync_models(request, provider_id):
+    try:
+        body = json.loads(request.body.decode('utf-8') or '{}')
+    except json.JSONDecodeError:
+        return JsonResponse({'ok': False, 'error': 'Invalid JSON.'}, status=400)
+
+    try:
+        provider = AIProvider.objects.get(id=provider_id)
+    except AIProvider.DoesNotExist:
+        return JsonResponse({'ok': False, 'error': 'Provider not found.'}, status=404)
+
+    api_key = provider.get_api_key()
+    base_url = provider.base_url or 'http://localhost:11434'
+
+    if provider_id == 'ollama':
+        url = f'{base_url}/api/tags'
+        req = urllib.request.Request(url, method='GET')
+    else:
+        if not api_key:
+            return JsonResponse({'ok': False, 'error': 'No API key set.'}, status=400)
+        if provider_id not in PROVIDER_ENDPOINTS:
+            return JsonResponse({'ok': False, 'error': 'Unknown provider.'}, status=400)
+        endpoint = PROVIDER_ENDPOINTS[provider_id]
+        url = endpoint['url']
+        if endpoint.get('key_in_url'):
+            url += api_key
+        req = urllib.request.Request(url, headers=endpoint['headers'](api_key), method='GET')
+
+    try:
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            raw = json.loads(resp.read().decode())
+            fetched_models = _normalize_models(provider_id, raw)
+
+            custom_models = list(AIModel.objects.filter(provider=provider, is_custom=True).values_list('model_id', flat=True))
+
+            existing = {m.model_id: m for m in AIModel.objects.filter(provider=provider, is_custom=False)}
+
+            for fm in fetched_models:
+                if fm['id'] in existing:
+                    obj = existing[fm['id']]
+                    obj.name = fm['name']
+                    obj.save(update_fields=['name'])
+                else:
+                    AIModel.objects.create(
+                        provider=provider,
+                        model_id=fm['id'],
+                        name=fm['name'],
+                        is_custom=False,
+                        tags=[],
+                    )
+
+            provider.models_synced_at = timezone.now()
+            provider.save(update_fields=['models_synced_at', 'updated_at'])
+
+            return JsonResponse({'ok': True, 'count': len(fetched_models)})
+    except urllib.error.HTTPError as e:
+        return JsonResponse({'ok': False, 'error': f'HTTP {e.code}'})
+    except Exception as e:
+        return JsonResponse({'ok': False, 'error': str(e)})
+
+
+@login_required
+@require_GET
+def api_provider_models(request, provider_id):
+    try:
+        provider = AIProvider.objects.get(id=provider_id)
+    except AIProvider.DoesNotExist:
+        return JsonResponse({'ok': False, 'error': 'Provider not found.'}, status=404)
+
+    models = AIModel.objects.filter(provider=provider).order_by('-is_custom', 'sort_order', 'name')
+    data = [{
+        'id': m.model_id,
+        'name': m.name,
+        'custom': m.is_custom,
+        'tags': m.tags or [],
+    } for m in models]
+    return JsonResponse({'ok': True, 'models': data})
+
+
+@login_required
+@require_POST
+def api_provider_model_add(request, provider_id):
+    try:
+        body = json.loads(request.body.decode('utf-8') or '{}')
+    except json.JSONDecodeError:
+        return JsonResponse({'ok': False, 'error': 'Invalid JSON.'}, status=400)
+
+    model_id = (body.get('model_id') or '').strip()
+    name = (body.get('name') or model_id).strip()
+
+    if not model_id:
+        return JsonResponse({'ok': False, 'error': 'model_id is required.'}, status=400)
+
+    try:
+        provider = AIProvider.objects.get(id=provider_id)
+    except AIProvider.DoesNotExist:
+        return JsonResponse({'ok': False, 'error': 'Provider not found.'}, status=404)
+
+    obj, created = AIModel.objects.get_or_create(
+        provider=provider,
+        model_id=model_id,
+        defaults={'name': name, 'is_custom': True, 'tags': []}
+    )
+    if not created:
+        return JsonResponse({'ok': False, 'error': 'Model already exists.'}, status=400)
+
+    return JsonResponse({'ok': True, 'model': {'id': obj.model_id, 'name': obj.name, 'custom': True, 'tags': []}})
+
+
+@login_required
+@require_http_methods(["DELETE"])
+def api_provider_model_delete(request, provider_id, model_id):
+    try:
+        provider = AIProvider.objects.get(id=provider_id)
+    except AIProvider.DoesNotExist:
+        return JsonResponse({'ok': False, 'error': 'Provider not found.'}, status=404)
+
+    deleted, _ = AIModel.objects.filter(provider=provider, model_id=model_id, is_custom=True).delete()
+    if not deleted:
+        return JsonResponse({'ok': False, 'error': 'Custom model not found.'}, status=404)
+
+    return JsonResponse({'ok': True})
+
+
+@login_required
+@require_http_methods(["PUT"])
+def api_active_provider(request):
+    try:
+        body = json.loads(request.body.decode('utf-8') or '{}')
+    except json.JSONDecodeError:
+        return JsonResponse({'ok': False, 'error': 'Invalid JSON.'}, status=400)
+
+    provider_id = (body.get('provider_id') or '').strip()
+    if not provider_id:
+        return JsonResponse({'ok': False, 'error': 'provider_id is required.'}, status=400)
+
+    AIProvider.objects.filter(is_active=True).update(is_active=False)
+    updated = AIProvider.objects.filter(id=provider_id).update(is_active=True)
+    if not updated:
+        return JsonResponse({'ok': False, 'error': 'Provider not found.'}, status=404)
+
+    return JsonResponse({'ok': True})
+
+
+@login_required
+@require_GET
+def api_general_settings(request):
+    settings_data = AppSettings.get_all()
+    return JsonResponse({'ok': True, 'settings': settings_data})
+
+
+@login_required
+@require_http_methods(["PUT"])
+def api_general_settings_update(request):
+    try:
+        body = json.loads(request.body.decode('utf-8') or '{}')
+    except json.JSONDecodeError:
+        return JsonResponse({'ok': False, 'error': 'Invalid JSON.'}, status=400)
+
+    for key, value in body.items():
+        AppSettings.set_value(key, value)
+
+    return JsonResponse({'ok': True})

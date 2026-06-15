@@ -28,18 +28,8 @@
         <div class="max-w-2xl space-y-6">
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Project Storage Path</label>
-                <input x-model="general.rootPath" type="text" placeholder="D:\Projects" class="w-full px-4 py-2.5 border border-[#e8e8e8] dark:border-[#222] dark:bg-[#111] dark:text-white text-[14px] outline-none focus:border-violet-300 transition-colors">
+                <input x-model="general.projectPath" type="text" placeholder="D:\Projects" class="w-full px-4 py-2.5 border border-[#e8e8e8] dark:border-[#222] dark:bg-[#111] dark:text-white text-[14px] outline-none focus:border-violet-300 transition-colors">
                 <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Enter the full path where project folders will be created (e.g. <code>D:\Projects</code>).</p>
-            </div>
-
-            <div class="pt-4 border-t border-[#e8e8e8] dark:border-[#222]">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Subfolder Names</label>
-                <p class="text-xs text-gray-400 dark:text-gray-500 mb-3">Use <code class="bg-gray-100 dark:bg-[#1a1a1a] px-1 rounded">{Number}</code> as project number placeholder.</p>
-                <div class="space-y-2">
-                    <input x-model="general.subfolderDocuments" type="text" placeholder="{Number}_documents" class="w-full px-4 py-2.5 border border-[#e8e8e8] dark:border-[#222] dark:bg-[#111] dark:text-white text-[14px] outline-none focus:border-violet-300 transition-colors">
-                    <input x-model="general.subfolderDrawings" type="text" placeholder="{Number}_drawings" class="w-full px-4 py-2.5 border border-[#e8e8e8] dark:border-[#222] dark:bg-[#111] dark:text-white text-[14px] outline-none focus:border-violet-300 transition-colors">
-                    <input x-model="general.subfolderModels" type="text" placeholder="{Number}_models" class="w-full px-4 py-2.5 border border-[#e8e8e8] dark:border-[#222] dark:bg-[#111] dark:text-white text-[14px] outline-none focus:border-violet-300 transition-colors">
-                </div>
             </div>
         </div>
     </div>
@@ -56,7 +46,8 @@
                             <div class="flex items-center gap-2 mb-1">
                                 <span class="text-[13px] font-semibold text-gray-900 dark:text-white" x-text="p.name"></span>
                             </div>
-                            <span class="text-[11px] px-1.5 py-0.5 rounded" :class="p.type === 'Local' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : p.type === 'Aggregator' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-gray-100 text-gray-600 dark:bg-[#1a1a1a] dark:text-gray-400'" x-text="p.type"></span>
+                            <span class="text-[11px] px-1.5 py-0.5 rounded" :class="p.type === 'local' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : p.type === 'aggregator' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-gray-100 text-gray-600 dark:bg-[#1a1a1a] dark:text-gray-400'" x-text="p.type"></span>
+                            <span x-show="p.is_active" class="inline-block w-2 h-2 rounded-full bg-green-500 ml-1"></span>
                         </button>
                     </template>
                 </div>
@@ -78,7 +69,7 @@
                                     <i :data-lucide="showKey ? 'eye-off' : 'eye'" class="w-4 h-4"></i>
                                 </button>
                             </div>
-                            <button @click="checkKey()" :disabled="keyLoading" class="px-4 py-2.5 bg-gray-100 dark:bg-[#1a1a1a] hover:bg-gray-200 dark:hover:bg-[#222] text-gray-700 dark:text-gray-300 text-[13px] font-medium transition-colors rounded-lg whitespace-nowrap disabled:opacity-50">
+                            <button @click="verifyKey()" :disabled="keyLoading" class="px-4 py-2.5 bg-gray-100 dark:bg-[#1a1a1a] hover:bg-gray-200 dark:hover:bg-[#222] text-gray-700 dark:text-gray-300 text-[13px] font-medium transition-colors rounded-lg whitespace-nowrap disabled:opacity-50">
                                 <span x-show="!keyLoading">Check Key</span>
                                 <span x-show="keyLoading" class="flex items-center gap-1.5"><svg class="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg> Loading...</span>
                             </button>
@@ -105,7 +96,7 @@
                         <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300">Select Model</h3>
                         <div class="flex items-center gap-3">
                             <span class="text-[11px] text-gray-400 dark:text-gray-500" x-text="lastUpdatedText"></span>
-                            <button @click="refreshModels()" :disabled="modelsLoading" class="flex items-center gap-1.5 px-3 py-1.5 text-[12px] text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#1a1a1a] rounded transition-colors disabled:opacity-50">
+                            <button @click="syncModels()" :disabled="modelsLoading" class="flex items-center gap-1.5 px-3 py-1.5 text-[12px] text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#1a1a1a] rounded transition-colors disabled:opacity-50">
                                 <svg x-show="!modelsLoading" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
                                 <svg x-show="modelsLoading" class="animate-spin w-3.5 h-3.5" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
                                 <span x-text="modelsLoading ? 'Loading...' : 'Refresh'"></span>
@@ -208,10 +199,7 @@ function settingsApp() {
         newModel: { id: '', name: '' },
 
         general: {
-            rootPath: '',
-            subfolderDocuments: '{Number}_documents',
-            subfolderDrawings: '{Number}_drawings',
-            subfolderModels: '{Number}_models',
+            projectPath: '',
         },
 
         ai: {
@@ -222,19 +210,20 @@ function settingsApp() {
             keyStatus: 'unchecked',
         },
 
-        modelsCache: {},
-        lastUpdated: null,
+        providers: [],
+        models: [],
+        lastSyncedAt: null,
 
-        providers: [
-            { id: 'anthropic', name: 'Anthropic', type: 'Cloud', keyPrefix: 'sk-ant-', keyUrl: 'https://console.anthropic.com/settings/keys' },
-            { id: 'openai', name: 'OpenAI', type: 'Cloud', keyPrefix: 'sk-', keyUrl: 'https://platform.openai.com/api-keys' },
-            { id: 'google', name: 'Google AI', type: 'Cloud', keyPrefix: 'AIza', keyUrl: 'https://aistudio.google.com/app/apikey' },
-            { id: 'mistral', name: 'Mistral', type: 'Cloud', keyPrefix: '', keyUrl: 'https://console.mistral.ai/api-keys' },
-            { id: 'groq', name: 'Groq', type: 'Cloud', keyPrefix: 'gsk_', keyUrl: 'https://console.groq.com/keys' },
-            { id: 'deepseek', name: 'DeepSeek', type: 'Cloud', keyPrefix: 'sk-', keyUrl: 'https://platform.deepseek.com/api_keys' },
-            { id: 'openrouter', name: 'OpenRouter', type: 'Aggregator', keyPrefix: 'sk-or-', keyUrl: 'https://openrouter.ai/keys' },
-            { id: 'ollama', name: 'Ollama', type: 'Local', keyPrefix: '', keyUrl: '' },
-        ],
+        providerMeta: {
+            anthropic: { keyPrefix: 'sk-ant-', keyUrl: 'https://console.anthropic.com/settings/keys' },
+            openai: { keyPrefix: 'sk-', keyUrl: 'https://platform.openai.com/api-keys' },
+            google: { keyPrefix: 'AIza', keyUrl: 'https://aistudio.google.com/app/apikey' },
+            mistral: { keyPrefix: '', keyUrl: 'https://console.mistral.ai/api-keys' },
+            groq: { keyPrefix: 'gsk_', keyUrl: 'https://console.groq.com/keys' },
+            deepseek: { keyPrefix: 'sk-', keyUrl: 'https://platform.deepseek.com/api_keys' },
+            openrouter: { keyPrefix: 'sk-or-', keyUrl: 'https://openrouter.ai/keys' },
+            ollama: { keyPrefix: '', keyUrl: '' },
+        },
 
         defaultModels: {
             anthropic: [
@@ -281,70 +270,74 @@ function settingsApp() {
 
         get currentModels() {
             if (!this.ai.provider) return [];
-            var cached = this.modelsCache[this.ai.provider];
-            if (cached && cached.models && cached.models.length > 0) {
-                return cached.models;
-            }
+            if (this.models.length > 0) return this.models;
             return this.defaultModels[this.ai.provider] || [];
         },
 
         get lastUpdatedText() {
-            var cached = this.modelsCache[this.ai.provider];
-            if (!cached || !cached.updatedAt) return 'Never updated';
-            var d = new Date(cached.updatedAt);
+            if (!this.lastSyncedAt) return 'Never updated';
+            var d = new Date(this.lastSyncedAt);
             return 'Updated: ' + d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
         },
 
         get currentPrefix() {
-            var p = this.providers.find(x => x.id === this.ai.provider);
-            return p ? p.keyPrefix : '';
+            var m = this.providerMeta[this.ai.provider];
+            return m ? m.keyPrefix : '';
         },
 
         get currentKeyUrl() {
-            var p = this.providers.find(x => x.id === this.ai.provider);
-            return p ? p.keyUrl : '#';
+            var m = this.providerMeta[this.ai.provider];
+            return m ? m.keyUrl : '#';
         },
 
         selectProvider(p) {
             this.ai.provider = p.id;
             this.ai.apiKey = '';
-            this.ai.baseUrl = 'http://localhost:11434';
-            this.ai.model = '';
+            this.ai.baseUrl = p.base_url || 'http://localhost:11434';
+            this.ai.model = p.selected_model || '';
             this.ai.keyStatus = 'unchecked';
+            this.models = [];
+            this.lastSyncedAt = p.models_synced_at || null;
+            if (p.key_verified_at) this.ai.keyStatus = 'ok';
+            this.loadModels();
         },
 
         selectModel(m) {
             this.ai.model = m.id;
         },
 
-        checkKey() {
+        verifyKey() {
             var self = this;
             self.keyLoading = true;
             self.ai.keyStatus = 'unchecked';
 
-            fetch('/ai/fetch-models/', {
-                method: 'POST',
+            fetch('/api/settings/ai/providers/' + self.ai.provider, {
+                method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRFToken': self.getCSRFToken()
                 },
                 body: JSON.stringify({
-                    provider: self.ai.provider,
                     api_key: self.ai.apiKey,
-                    base_url: self.ai.baseUrl
+                    base_url: self.ai.baseUrl,
+                    selected_model: self.ai.model
                 })
+            })
+            .then(function() {
+                return fetch('/api/settings/ai/providers/' + self.ai.provider + '/verify', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': self.getCSRFToken()
+                    }
+                });
             })
             .then(function(r) { return r.json(); })
             .then(function(data) {
                 self.keyLoading = false;
                 if (data.ok) {
                     self.ai.keyStatus = 'ok';
-                    self.mergeModels(self.ai.provider, data.models);
-                    self.autoSelectFirst();
-                    self.saveSetting('ai_provider', self.ai.provider);
-                    self.saveSetting('ai_api_key', self.ai.apiKey);
-                    self.saveSetting('ai_base_url', self.ai.baseUrl);
-                    self.saveSetting('ai_model', self.ai.model);
+                    self.syncModels();
                 } else {
                     self.ai.keyStatus = 'error';
                     self.showToast(data.error || 'Key validation failed', 'error');
@@ -358,7 +351,7 @@ function settingsApp() {
             });
         },
 
-        refreshModels() {
+        syncModels() {
             var self = this;
             if (!self.ai.provider) return;
             if (self.ai.provider !== 'ollama' && !self.ai.apiKey) {
@@ -368,24 +361,20 @@ function settingsApp() {
 
             self.modelsLoading = true;
 
-            fetch('/ai/fetch-models/', {
+            fetch('/api/settings/ai/providers/' + self.ai.provider + '/sync-models', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRFToken': self.getCSRFToken()
                 },
-                body: JSON.stringify({
-                    provider: self.ai.provider,
-                    api_key: self.ai.apiKey,
-                    base_url: self.ai.baseUrl
-                })
+                body: JSON.stringify({})
             })
             .then(function(r) { return r.json(); })
             .then(function(data) {
                 self.modelsLoading = false;
                 if (data.ok) {
-                    self.mergeModels(self.ai.provider, data.models);
-                    self.showToast('Models updated', 'success');
+                    self.showToast('Models updated (' + data.count + ')', 'success');
+                    self.loadModels();
                 } else {
                     self.showToast(data.error || 'Failed to load models', 'error');
                 }
@@ -396,58 +385,50 @@ function settingsApp() {
             });
         },
 
-        mergeModels(provider, fetchedModels) {
-            var existing = this.modelsCache[provider] || { models: [], updatedAt: null };
-            var customModels = existing.models.filter(function(m) { return m.custom; });
-            var merged = [];
-            var seenIds = {};
+        loadModels() {
+            var self = this;
+            if (!self.ai.provider) return;
 
-            fetchedModels.forEach(function(fm) {
-                var merged_model = { id: fm.id, name: fm.name || fm.id, custom: false, tags: [] };
-                var existing_match = existing.models.find(function(em) { return em.id === fm.id && !em.custom; });
-                if (existing_match && existing_match.tags) {
-                    merged_model.tags = existing_match.tags;
+            fetch('/api/settings/ai/providers/' + self.ai.provider + '/models', {
+                headers: { 'X-CSRFToken': self.getCSRFToken() }
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.ok) {
+                    self.models = data.models;
                 }
-                merged.push(merged_model);
-                seenIds[fm.id] = true;
-            });
-
-            customModels.forEach(function(cm) {
-                if (!seenIds[cm.id]) {
-                    merged.push(cm);
-                    seenIds[cm.id] = true;
-                }
-            });
-
-            this.modelsCache[provider] = {
-                models: merged,
-                updatedAt: new Date().toISOString()
-            };
-        },
-
-        autoSelectFirst() {
-            if (!this.ai.model && this.currentModels.length > 0) {
-                this.ai.model = this.currentModels[0].id;
-            }
+            })
+            .catch(function() {});
         },
 
         addCustomModel() {
-            var id = this.newModel.id.trim();
+            var self = this;
+            var id = self.newModel.id.trim();
             if (!id) return;
-            var name = this.newModel.name.trim() || id;
-            var provider = this.ai.provider;
-            if (!this.modelsCache[provider]) {
-                this.modelsCache[provider] = { models: [], updatedAt: null };
-            }
-            var cache = this.modelsCache[provider];
-            if (cache.models.find(function(m) { return m.id === id; })) {
-                this.showToast('Model already exists', 'error');
-                return;
-            }
-            cache.models.push({ id: id, name: name, custom: true, tags: [] });
-            this.newModel.id = '';
-            this.newModel.name = '';
-            this.showAddForm = false;
+            var name = self.newModel.name.trim() || id;
+
+            fetch('/api/settings/ai/providers/' + self.ai.provider + '/models', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': self.getCSRFToken()
+                },
+                body: JSON.stringify({ model_id: id, name: name })
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.ok) {
+                    self.models.push(data.model);
+                    self.newModel.id = '';
+                    self.newModel.name = '';
+                    self.showAddForm = false;
+                } else {
+                    self.showToast(data.error || 'Failed to add model', 'error');
+                }
+            })
+            .catch(function(e) {
+                self.showToast('Network error', 'error');
+            });
         },
 
         confirmDeleteCustom(m) {
@@ -455,16 +436,29 @@ function settingsApp() {
         },
 
         deleteCustomModel() {
-            if (!this.deleteTarget) return;
-            var provider = this.ai.provider;
-            var cache = this.modelsCache[provider];
-            if (cache) {
-                cache.models = cache.models.filter(function(m) { return m.id !== this.deleteTarget.id; }.bind(this));
-            }
-            if (this.ai.model === this.deleteTarget.id) {
-                this.ai.model = '';
-            }
-            this.deleteTarget = null;
+            var self = this;
+            if (!self.deleteTarget) return;
+
+            fetch('/api/settings/ai/providers/' + self.ai.provider + '/models/' + encodeURIComponent(self.deleteTarget.id), {
+                method: 'DELETE',
+                headers: { 'X-CSRFToken': self.getCSRFToken() }
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.ok) {
+                    self.models = self.models.filter(function(m) { return m.id !== self.deleteTarget.id; });
+                    if (self.ai.model === self.deleteTarget.id) {
+                        self.ai.model = '';
+                    }
+                } else {
+                    self.showToast(data.error || 'Failed to delete model', 'error');
+                }
+                self.deleteTarget = null;
+            })
+            .catch(function(e) {
+                self.showToast('Network error', 'error');
+                self.deleteTarget = null;
+            });
         },
 
         tagClass(tag) {
@@ -500,29 +494,28 @@ function settingsApp() {
             return '';
         },
 
-        saveSetting(key, value) {
-            var form = new FormData();
-            form.append('key', key);
-            form.append('value', value);
-            return fetch('/settings/save/', {
-                method: 'POST',
-                body: form,
-                headers: { 'X-CSRFToken': this.getCSRFToken() }
-            });
-        },
-
         saveAll() {
             var self = this;
             var tasks = [
-                this.saveSetting('project_root_path', this.general.rootPath),
-                this.saveSetting('subfolder_documents', this.general.subfolderDocuments || '{Number}_documents'),
-                this.saveSetting('subfolder_drawings', this.general.subfolderDrawings || '{Number}_drawings'),
-                this.saveSetting('subfolder_models', this.general.subfolderModels || '{Number}_models'),
-                this.saveSetting('ai_provider', this.ai.provider),
-                this.saveSetting('ai_api_key', this.ai.apiKey),
-                this.saveSetting('ai_base_url', this.ai.baseUrl),
-                this.saveSetting('ai_model', this.ai.model),
-                this.saveSetting('ai_models_cache', JSON.stringify(this.modelsCache)),
+                fetch('/api/settings/general', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': self.getCSRFToken() },
+                    body: JSON.stringify({ 'storage.project_path': self.general.projectPath })
+                }),
+                fetch('/api/settings/ai/providers/' + self.ai.provider, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': self.getCSRFToken() },
+                    body: JSON.stringify({
+                        api_key: self.ai.apiKey,
+                        base_url: self.ai.baseUrl,
+                        selected_model: self.ai.model
+                    })
+                }),
+                fetch('/api/settings/ai/active-provider', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': self.getCSRFToken() },
+                    body: JSON.stringify({ provider_id: self.ai.provider })
+                }),
             ];
             Promise.all(tasks).then(function() {
                 self.showToast('Settings saved', 'success');
@@ -533,31 +526,37 @@ function settingsApp() {
 
         loadSettings() {
             var self = this;
-            var keys = ['project_root_path', 'subfolder_documents', 'subfolder_drawings', 'subfolder_models',
-                        'ai_provider', 'ai_api_key', 'ai_base_url', 'ai_model', 'ai_models_cache'];
-            keys.forEach(function(key) {
-                fetch('/settings/' + key + '/')
-                    .then(function(r) { return r.json(); })
-                    .then(function(data) {
-                        var v = data.value || data.default || '';
-                        switch(key) {
-                            case 'project_root_path': self.general.rootPath = v; break;
-                            case 'subfolder_documents': if (v) self.general.subfolderDocuments = v; break;
-                            case 'subfolder_drawings': if (v) self.general.subfolderDrawings = v; break;
-                            case 'subfolder_models': if (v) self.general.subfolderModels = v; break;
-                            case 'ai_provider': self.ai.provider = v; break;
-                            case 'ai_api_key': self.ai.apiKey = v; if (v) self.ai.keyStatus = 'ok'; break;
-                            case 'ai_base_url': if (v) self.ai.baseUrl = v; break;
-                            case 'ai_model': self.ai.model = v; break;
-                            case 'ai_models_cache':
-                                if (v) {
-                                    try { self.modelsCache = JSON.parse(v); } catch(e) { self.modelsCache = {}; }
-                                }
-                                break;
-                        }
-                    })
-                    .catch(function() {});
-            });
+
+            fetch('/api/settings/general', {
+                headers: { 'X-CSRFToken': self.getCSRFToken() }
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.ok && data.settings) {
+                    self.general.projectPath = data.settings['storage.project_path'] || '';
+                }
+            })
+            .catch(function() {});
+
+            fetch('/api/settings/ai/providers', {
+                headers: { 'X-CSRFToken': self.getCSRFToken() }
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.ok) {
+                    self.providers = data.providers;
+                    var active = data.providers.find(function(p) { return p.is_active; });
+                    if (active) {
+                        self.ai.provider = active.id;
+                        self.ai.baseUrl = active.base_url || 'http://localhost:11434';
+                        self.ai.model = active.selected_model || '';
+                        if (active.key_verified_at) self.ai.keyStatus = 'ok';
+                        self.lastSyncedAt = active.models_synced_at;
+                        self.loadModels();
+                    }
+                }
+            })
+            .catch(function() {});
         },
 
         init() {
