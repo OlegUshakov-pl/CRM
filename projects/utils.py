@@ -1,12 +1,16 @@
 import os
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
-from core.models import AppSetting
+from core.models import AppSetting, AppSettings
 
 
 def get_project_root_path():
+    root = AppSettings.get_value('storage.project_path', '')
+    if root:
+        return root
     root = AppSetting.get_value('project_root_path', '')
     if root:
+        AppSettings.set_value('storage.project_path', root)
         return root
     if hasattr(settings, 'PROJECT_ROOT_PATH') and settings.PROJECT_ROOT_PATH:
         return settings.PROJECT_ROOT_PATH
@@ -21,9 +25,11 @@ def sanitize_folder_name(name):
 
 
 def get_subfolder_name(project_number, setting_key, default_suffix):
-    from core.models import AppSetting
+    from core.models import AppSetting, AppSettings
     safe_number = sanitize_folder_name(project_number) if project_number else ''
-    template = AppSetting.get_value(setting_key, '')
+    template = AppSettings.get_value(setting_key, '')
+    if not template:
+        template = AppSetting.get_value(setting_key, '')
     if template:
         return template.replace('{Number}', safe_number)
     return f'{safe_number}_{default_suffix}'
