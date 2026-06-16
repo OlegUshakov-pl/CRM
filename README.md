@@ -8,6 +8,12 @@ A project management, contractor and task tracking system for engineering and ma
 
 ---
 
+## Fast install
+
+To quickly install, run `install.bat` in an empty folder, then go to the `CRM` folder and run `runserver.bat`.
+
+---
+
 ## Quick Start
 
 ```bash
