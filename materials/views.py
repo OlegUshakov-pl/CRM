@@ -7,7 +7,7 @@ from django.core.paginator import Paginator
 from .models import Category, Material, MaterialFile
 from .forms import CategoryForm, MaterialForm, CommonMaterialForm, MaterialFileForm, ALLOWED_MATERIAL_EXTENSIONS
 from projects.models import Project
-from projects.utils import get_project_root_path, sanitize_folder_name
+from projects.utils import get_project_root_path, sanitize_folder_name, cleanup_empty_dirs
 from documents.models import get_project_folder_name
 from core.models import log_activity
 
@@ -147,7 +147,9 @@ def material_delete(request, slug):
     if request.method == 'POST':
         for f in material.files.all():
             if f.file:
+                file_dir = os.path.dirname(f.file.path)
                 f.file.delete(save=False)
+                cleanup_empty_dirs(file_dir)
         material.is_active = False
         material.save()
         log_activity(request.user, 'deleted', f'Material "{material.name}"')
@@ -214,7 +216,9 @@ def common_delete(request, slug):
     if request.method == 'POST':
         for f in material.files.all():
             if f.file:
+                file_dir = os.path.dirname(f.file.path)
                 f.file.delete(save=False)
+                cleanup_empty_dirs(file_dir)
         material.is_active = False
         material.save()
         log_activity(request.user, 'deleted', f'Material "{material.name}"')
@@ -309,7 +313,9 @@ def material_file_delete(request, pk):
     project_slug = material_file.material.project.slug if material_file.material.project else None
     if request.method == 'POST':
         if material_file.file:
+            file_dir = os.path.dirname(material_file.file.path)
             material_file.file.delete(save=False)
+            cleanup_empty_dirs(file_dir)
         material_file.delete()
         messages.success(request, 'File deleted.')
     if request.headers.get('HX-Request'):

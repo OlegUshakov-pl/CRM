@@ -8,7 +8,7 @@ from django.contrib import messages
 from django.core.paginator import Paginator
 from django.utils.http import url_has_allowed_host_and_scheme
 from projects.models import Project
-from projects.utils import ensure_project_subfolder, sanitize_folder_name, get_subfolder_name, get_project_root_path
+from projects.utils import ensure_project_subfolder, sanitize_folder_name, get_subfolder_name, get_project_root_path, cleanup_empty_dirs
 from core.models import log_activity
 from .models import Document, Category
 from .forms import DocumentForm, CommonDocumentForm, CategoryForm
@@ -303,7 +303,9 @@ def document_delete(request, pk):
     document = get_object_or_404(Document, pk=pk)
     if request.method == 'POST':
         if document.file:
+            file_dir = os.path.dirname(document.file.path)
             document.file.delete(save=False)
+            cleanup_empty_dirs(file_dir)
         document.delete()
         messages.success(request, 'Document deleted.')
     referer = request.META.get('HTTP_REFERER', '')

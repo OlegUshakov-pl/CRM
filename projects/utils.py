@@ -54,6 +54,17 @@ def ensure_project_subfolder(project, subfolder_name):
     return subpath
 
 
+def cleanup_empty_dirs(folder_path):
+    if not folder_path or not os.path.exists(folder_path):
+        return
+    while folder_path and os.path.exists(folder_path) and folder_path != get_project_root_path():
+        if not os.listdir(folder_path):
+            os.rmdir(folder_path)
+            folder_path = os.path.dirname(folder_path)
+        else:
+            break
+
+
 def get_project_subfolder_path(project, subfolder_name):
     project_path = get_project_folder_path(project)
     if not project_path:
