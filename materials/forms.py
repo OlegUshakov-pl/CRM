@@ -16,6 +16,8 @@ class MaterialForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['project'].queryset = Project.objects.filter(is_active=True)
+        self.fields['name'].required = False
+        self.fields['name'].widget.attrs['placeholder'] = 'Auto-filled from filename if empty'
 
     class Meta:
         model = Material

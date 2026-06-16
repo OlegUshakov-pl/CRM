@@ -34,6 +34,8 @@
                     <th class="pb-2 font-medium">Unit</th>
                     <th class="pb-2 font-medium">Price</th>
                     <th class="pb-2 font-medium">Total</th>
+                    <th class="pb-2 font-medium">Show</th>
+                    <th class="pb-2 font-medium">Download</th>
                     <th class="pb-2 font-medium">Actions</th>
                 </tr>
             </thead>
@@ -50,6 +52,20 @@
                     </td>
                     <td class="py-2 text-gray-900 font-medium">
                         {% if material.total_price %}${{ material.total_price|floatformat:2 }}{% else %}—{% endif %}
+                    </td>
+                    <td class="py-2">
+                        {% for f in material.files.all %}
+                            {% if forloop.first %}
+                            <a href="{% url 'materials:file_download' f.pk %}" class="inline-flex items-center"><i data-lucide="eye" class="w-4 h-4 text-indigo-600"></i></a>
+                            {% endif %}
+                        {% endfor %}
+                    </td>
+                    <td class="py-2">
+                        {% for f in material.files.all %}
+                            {% if forloop.first %}
+                            <a href="{% url 'materials:file_download' f.pk %}" class="inline-flex items-center"><i data-lucide="download" class="w-4 h-4 text-indigo-600"></i></a>
+                            {% endif %}
+                        {% endfor %}
                     </td>
                     <td class="py-2">
                         {% if material.slug %}

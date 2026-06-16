@@ -7,11 +7,16 @@ from projects.models import Project
 
 def material_file_upload_to(instance, filename):
     material = instance.material
-    if material and material.project and material.project.number:
+    if material and material.project:
         from documents.models import get_project_folder_name
         from projects.utils import sanitize_folder_name
         project_folder = get_project_folder_name(material.project)
-        safe_number = sanitize_folder_name(material.number) if material.number else 'no_number'
+        if material.number:
+            safe_number = sanitize_folder_name(material.number)
+        elif material.project.number:
+            safe_number = sanitize_folder_name(material.project.number)
+        else:
+            safe_number = 'no_number'
         materials_subfolder = f'{safe_number}_materials'
         return os.path.join(project_folder, materials_subfolder, filename)
     return os.path.join('_no_project', 'materials', filename)
