@@ -102,12 +102,15 @@ def material_create(request, project_slug):
     form = MaterialForm()
     if request.method == 'POST':
         form = MaterialForm(request.POST)
+        up_files = request.FILES.getlist('files')
         if form.is_valid():
             material = form.save(commit=False)
             material.project = project
             material.created_by = request.user
+            if not material.name and up_files:
+                material.name = os.path.splitext(up_files[0].name)[0]
             material.save()
-            _handle_material_files(material, request.FILES.getlist('files'))
+            _handle_material_files(material, up_files)
             log_activity(request.user, 'created', f'Material "{material.name}" in "{project.name}"', material)
             if request.headers.get('HX-Request'):
                 response = HttpResponse('<script>closeSlideOver()</script>')
