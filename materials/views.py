@@ -1,11 +1,14 @@
+import os
 from django.shortcuts import render, get_object_or_404, redirect
-from django.http import HttpResponse
+from django.http import HttpResponse, FileResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
-from .models import Category, Material
-from .forms import CategoryForm, MaterialForm, CommonMaterialForm
+from .models import Category, Material, MaterialFile
+from .forms import CategoryForm, MaterialForm, CommonMaterialForm, MaterialFileForm, ALLOWED_MATERIAL_EXTENSIONS
 from projects.models import Project
+from projects.utils import get_project_root_path, sanitize_folder_name
+from documents.models import get_project_folder_name
 from core.models import log_activity
 
 
@@ -104,6 +107,7 @@ def material_create(request, project_slug):
             material.project = project
             material.created_by = request.user
             material.save()
+            _handle_material_files(material, request.FILES.getlist('files'))
             log_activity(request.user, 'created', f'Material "{material.name}" in "{project.name}"', material)
             if request.headers.get('HX-Request'):
                 response = HttpResponse('<script>closeSlideOver()</script>')
@@ -122,6 +126,7 @@ def material_edit(request, slug):
         form = MaterialForm(request.POST, instance=material)
         if form.is_valid():
             form.save()
+            _handle_material_files(material, request.FILES.getlist('files'))
             log_activity(request.user, 'updated', f'Material "{material.name}"')
             if request.headers.get('HX-Request'):
                 response = HttpResponse('<script>closeSlideOver()</script>')
@@ -246,3 +251,77 @@ def category_delete(request, pk):
         category.delete()
         messages.success(request, f'Category "{category.name}" deleted.')
     return redirect('materials:category_list')
+
+
+def _handle_material_files(material, files):
+    if not files:
+        return
+    for f in files:
+        if f:
+            ext = os.path.splitext(f.name)[1].lower()
+            if ext in ALLOWED_MATERIAL_EXTENSIONS:
+                MaterialFile.objects.create(material=material, file=f)
+
+
+@login_required
+def material_file_upload_slide(request, material_slug):
+    material = get_object_or_404(Material, slug=material_slug)
+    form = MaterialFileForm()
+    files = material.files.all()
+    return render(request, 'materials/material_file_form.html', {
+        'form': form, 'material': material, 'files': files, 'title': 'Upload Files',
+    })
+
+
+@login_required
+def material_file_save(request, material_slug):
+    material = get_object_or_404(Material, slug=material_slug)
+    form = MaterialFileForm(request.POST, request.FILES)
+    if form.is_valid():
+        up_files = request.FILES.getlist('file')
+        _handle_material_files(material, up_files)
+        if request.headers.get('HX-Request'):
+            response = HttpResponse()
+            response['HX-Refresh'] = 'true'
+            return response
+        messages.success(request, 'File(s) uploaded successfully.')
+    else:
+        if request.headers.get('HX-Request'):
+            return render(request, 'materials/material_file_form.html', {
+                'form': form, 'material': material, 'files': material.files.all(), 'title': 'Upload Files',
+            })
+    return redirect('materials:page', project_slug=material.project.slug)
+
+
+@login_required
+def material_file_delete(request, pk):
+    material_file = get_object_or_404(MaterialFile, pk=pk)
+    material_slug = material_file.material.slug
+    project_slug = material_file.material.project.slug if material_file.material.project else None
+    if request.method == 'POST':
+        if material_file.file:
+            material_file.file.delete(save=False)
+        material_file.delete()
+        messages.success(request, 'File deleted.')
+    if request.headers.get('HX-Request'):
+        response = HttpResponse()
+        response['HX-Refresh'] = 'true'
+        return response
+    if project_slug:
+        return redirect('materials:page', project_slug=project_slug)
+    return redirect('materials:common')
+
+
+@login_required
+def material_file_download(request, pk):
+    material_file = get_object_or_404(MaterialFile, pk=pk)
+    if not material_file.file:
+        return HttpResponse('File not found', status=404)
+    file_path = material_file.file.path
+    if not os.path.exists(file_path):
+        return HttpResponse('File not found', status=404)
+    from urllib.parse import quote
+    safe_filename = quote(material_file.original_name or material_file.filename)
+    response = FileResponse(open(file_path, 'rb'), filename=material_file.original_name or material_file.filename)
+    response['Content-Disposition'] = f"attachment; filename*=UTF-8''{safe_filename}"
+    return response

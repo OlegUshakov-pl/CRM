@@ -6,8 +6,8 @@
     </button>
     <div class="sort-dropdown-menu absolute right-0 mt-1 w-44 bg-white border border-[#e8e8e8] shadow-lg z-50 py-1" style="display:none">
         {% for field, label in sort_options %}
-        <button hx-get="{% url 'materials:common' %}"
-                hx-target="#material-list"
+        <button hx-get="{{ sort_url }}"
+                hx-target="{{ sort_target|default:'#material-list' }}"
                 hx-include="#filter-form"
                 hx-vals='{"sort":"{{ field }}","order":"{% if current_sort == field and current_order == 'asc' %}desc{% else %}asc{% endif %}"}'
                 onclick="document.getElementById('sort-dropdown').classList.remove('show');"

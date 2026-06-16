@@ -56,7 +56,8 @@
             <h2 class="text-lg font-semibold text-gray-900">Materials</h2>
             <div class="flex items-center gap-3">
                 <span class="text-sm text-gray-500">{{ materials|length }} item(s)</span>
-                {% include 'includes/sort_dropdown.html' %}
+                {% url 'materials:page' project_slug=project.slug as material_page_url %}
+                {% include 'includes/sort_dropdown.html' with sort_url=material_page_url sort_target='#material-table' %}
             </div>
         </div>
         {% if materials %}

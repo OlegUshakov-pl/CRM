@@ -13,7 +13,8 @@
             <input type="hidden" name="sort" value="{{ current_sort }}">
             <input type="hidden" name="order" value="{{ current_order }}">
         </form>
-        {% include 'includes/sort_dropdown.html' %}
+        {% url 'materials:common' as materials_common_url %}
+        {% include 'includes/sort_dropdown.html' with sort_url=materials_common_url sort_target='#material-list' %}
     </div>
 
     <div class="bg-white border border-[#e8e8e8] p-5">

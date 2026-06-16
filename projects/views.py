@@ -22,6 +22,32 @@ from materials.models import Material
 from core.models import log_activity
 
 
+PROJECT_SORT_OPTIONS = [
+    ('number', 'Number'),
+    ('name', 'Name'),
+    ('status', 'Status'),
+    ('created_at', 'Date Created'),
+]
+
+
+def apply_project_sorting(queryset, request):
+    sort_params = request.GET.getlist('sort')
+    order_params = request.GET.getlist('order')
+    sort = sort_params[-1] if sort_params else 'created_at'
+    order = order_params[-1] if order_params else 'desc'
+    valid_fields = [f[0] for f in PROJECT_SORT_OPTIONS]
+    if sort not in valid_fields:
+        sort = 'created_at'
+    if order not in ('asc', 'desc'):
+        order = 'desc'
+    sort_label = dict(PROJECT_SORT_OPTIONS).get(sort, 'Sort')
+    if order == 'asc':
+        queryset = queryset.order_by(sort)
+    else:
+        queryset = queryset.order_by(f'-{sort}')
+    return queryset, sort, order, sort_label
+
+
 def _safe_redirect(request, fallback_url):
     referer = request.META.get('HTTP_REFERER', '')
     if referer and url_has_allowed_host_and_scheme(referer, allowed_hosts={request.get_host()}):
@@ -38,14 +64,22 @@ def project_list(request):
         projects = projects.filter(name__icontains=query)
     if status_filter:
         projects = projects.filter(status=status_filter)
+    projects, sort, order, sort_label = apply_project_sorting(projects, request)
     paginator = Paginator(projects, 12)
     page = request.GET.get('page', 1)
     projects_page = paginator.get_page(page)
-    return render(request, 'projects/project_list.html', {
+    context = {
         'projects': projects_page,
         'query': query,
         'status_filter': status_filter,
-    })
+        'sort_options': PROJECT_SORT_OPTIONS,
+        'current_sort': sort,
+        'current_order': order,
+        'current_sort_label': sort_label,
+    }
+    if request.headers.get('HX-Request'):
+        return render(request, 'projects/partials/project_list_content.html', context)
+    return render(request, 'projects/project_list.html', context)
 
 
 @login_required

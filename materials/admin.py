@@ -10,5 +10,5 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Material)
 class MaterialAdmin(admin.ModelAdmin):
-    list_display = ['name', 'category', 'project', 'quantity', 'unit', 'unit_price']
-    search_fields = ['name', 'project__name', 'category__name']
+    list_display = ['name', 'number', 'category', 'project', 'quantity', 'unit', 'unit_price']
+    search_fields = ['name', 'number', 'project__name', 'category__name']
