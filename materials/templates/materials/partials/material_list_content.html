@@ -56,7 +56,7 @@
                     <td class="py-2">
                         {% for f in material.files.all %}
                             {% if forloop.first %}
-                            <a href="{% url 'materials:file_download' f.pk %}" class="inline-flex items-center"><i data-lucide="eye" class="w-4 h-4 text-indigo-600"></i></a>
+                            <a href="{% url 'materials:file_view' f.pk %}" class="inline-flex items-center"><i data-lucide="eye" class="w-4 h-4 text-indigo-600"></i></a>
                             {% endif %}
                         {% endfor %}
                     </td>

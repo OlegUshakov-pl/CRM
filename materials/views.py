@@ -328,3 +328,33 @@ def material_file_download(request, pk):
     response = FileResponse(open(file_path, 'rb'), filename=material_file.original_name or material_file.filename)
     response['Content-Disposition'] = f"attachment; filename*=UTF-8''{safe_filename}"
     return response
+
+
+@login_required
+def material_file_view(request, pk):
+    material_file = get_object_or_404(MaterialFile, pk=pk)
+    if not material_file.file:
+        return HttpResponse('File not found', status=404)
+    file_path = material_file.file.path
+    if not os.path.exists(file_path):
+        return HttpResponse('File not found', status=404)
+    ext = os.path.splitext(material_file.original_name or material_file.filename)[1].lower()
+    is_image = ext in ('.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp', '.svg')
+    is_pdf = ext == '.pdf'
+    is_text = ext in ('.txt', '.md', '.csv', '.json', '.xml', '.yml', '.yaml', '.html', '.css', '.js', '.py', '.log', '.cfg', '.ini', '.conf')
+    text_content = None
+    if is_text:
+        try:
+            with open(file_path, 'r', encoding='utf-8', errors='replace') as f:
+                text_content = f.read()
+        except Exception:
+            text_content = None
+    return render(request, 'materials/material_file_view.html', {
+        'material_file': material_file,
+        'material': material_file.material,
+        'is_image': is_image,
+        'is_pdf': is_pdf,
+        'is_text': is_text,
+        'text_content': text_content,
+        'file_url': material_file.file.url,
+    })

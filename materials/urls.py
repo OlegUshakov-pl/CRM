@@ -24,4 +24,5 @@ urlpatterns = [
     path('<slug:material_slug>/files/save/', views.material_file_save, name='file_save'),
     path('file/<int:pk>/delete/', views.material_file_delete, name='file_delete'),
     path('file/<int:pk>/download/', views.material_file_download, name='file_download'),
+    path('file/<int:pk>/view/', views.material_file_view, name='file_view'),
 ]

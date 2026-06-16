@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block title %}{{ material_file.original_name }} - {{ material.name }} - CRM{% endblock %}
+{% block breadcrumb %}{{ material.name }} / {{ material_file.original_name }}{% endblock %}
+{% block content %}
+<div style="max-width: 900px; width: 100%; margin-left: auto; margin-right: auto;">
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-xl font-bold text-gray-900 dark:text-white">{{ material_file.original_name }}</h1>
+            <p class="text-gray-500 dark:text-gray-400 mt-1">Material: {{ material.name }}</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <a href="{% url 'materials:file_download' material_file.pk %}" class="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-500 hover:bg-indigo-600 text-white text-[14px] font-medium rounded-[20px] shadow-[0_2px_2px_rgba(0,0,0,0.25)] transition-colors">
+                <i data-lucide="download" class="w-4 h-4"></i>
+                Download
+            </a>
+            <a href="{% url 'materials:page' material.project.slug %}" class="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 transition-colors">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                Back to Materials
+            </a>
+        </div>
+    </div>
+
+    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-5">
+        {% if is_image %}
+            <img src="{{ file_url }}" alt="{{ material_file.original_name }}" class="max-w-full rounded-lg shadow-lg">
+        {% elif is_pdf %}
+            <div class="text-center py-10">
+                <i data-lucide="file-text" class="w-16 h-16 text-red-400 mx-auto mb-4"></i>
+                <p class="text-gray-600 dark:text-gray-400 mb-4">PDF Document</p>
+                <a href="{{ file_url }}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-500 hover:bg-indigo-600 text-white text-[14px] font-medium rounded-[20px] transition-colors">
+                    <i data-lucide="external-link" class="w-4 h-4"></i>
+                    Open PDF
+                </a>
+            </div>
+        {% elif is_text %}
+            <div class="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 overflow-auto max-h-[600px]">
+                <pre class="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap">{{ text_content }}</pre>
+            </div>
+        {% else %}
+            <div class="text-center py-10">
+                <i data-lucide="file" class="w-16 h-16 text-gray-400 mx-auto mb-4"></i>
+                <p class="text-gray-600 dark:text-gray-400 mb-4">{{ material_file.original_name }}</p>
+                <a href="{% url 'materials:file_download' material_file.pk %}" class="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-500 hover:bg-indigo-600 text-white text-[14px] font-medium rounded-[20px] transition-colors">
+                    <i data-lucide="download" class="w-4 h-4"></i>
+                    Download
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-5 mt-4">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">File Info</h2>
+        <div class="grid grid-cols-2 gap-4 text-sm">
+            <div>
+                <p class="text-gray-500 dark:text-gray-400">File name</p>
+                <p class="font-medium text-gray-900 dark:text-white">{{ material_file.original_name }}</p>
+            </div>
+            <div>
+                <p class="text-gray-500 dark:text-gray-400">Size</p>
+                <p class="font-medium text-gray-900 dark:text-white">{% if material_file.size %}{{ material_file.size|filesizeformat }}{% else %}—{% endif %}</p>
+            </div>
+            <div>
+                <p class="text-gray-500 dark:text-gray-400">Uploaded</p>
+                <p class="font-medium text-gray-900 dark:text-white">{{ material_file.uploaded_at|date:'M d, Y H:i' }}</p>
+            </div>
+            <div>
+                <p class="text-gray-500 dark:text-gray-400">Material</p>
+                <p class="font-medium text-gray-900 dark:text-white">{{ material.name }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
