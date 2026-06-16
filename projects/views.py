@@ -84,7 +84,7 @@ def project_list(request):
 
 @login_required
 def project_detail(request, slug):
-    project = get_object_or_404(Project.objects.prefetch_related(Prefetch('materials', queryset=Material.objects.select_related('category')), 'contacts', 'tasks', 'note_entries', 'images'), slug=slug)
+    project = get_object_or_404(Project.objects.prefetch_related(Prefetch('materials', queryset=Material.objects.filter(is_active=True).select_related('category')), 'contacts', 'tasks', 'note_entries', 'images'), slug=slug)
     return render(request, 'projects/project_detail.html', {'project': project})
 
 
@@ -112,7 +112,7 @@ def project_create(request):
 
 @login_required
 def project_edit(request, slug):
-    project = get_object_or_404(Project.objects.prefetch_related('documents', 'materials__category', 'contacts', 'tasks', 'note_entries', 'images'), slug=slug)
+    project = get_object_or_404(Project.objects.prefetch_related('documents', Prefetch('materials', queryset=Material.objects.filter(is_active=True).select_related('category')), 'contacts', 'tasks', 'note_entries', 'images'), slug=slug)
     form = ProjectForm(instance=project)
     note_form = NoteForm()
     available_contacts = Contact.objects.filter(is_active=True).exclude(projects=project)
