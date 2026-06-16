@@ -145,6 +145,9 @@ def material_delete(request, slug):
     material = get_object_or_404(Material.objects.select_related('project').filter(is_active=True), slug=slug)
     project_slug = material.project.slug
     if request.method == 'POST':
+        for f in material.files.all():
+            if f.file:
+                f.file.delete(save=False)
         material.is_active = False
         material.save()
         log_activity(request.user, 'deleted', f'Material "{material.name}"')
@@ -209,6 +212,9 @@ def common_save(request):
 def common_delete(request, slug):
     material = get_object_or_404(Material.objects.filter(is_active=True), slug=slug)
     if request.method == 'POST':
+        for f in material.files.all():
+            if f.file:
+                f.file.delete(save=False)
         material.is_active = False
         material.save()
         log_activity(request.user, 'deleted', f'Material "{material.name}"')
