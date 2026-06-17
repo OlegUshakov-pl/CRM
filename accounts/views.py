@@ -1,8 +1,12 @@
-from django.contrib.auth import authenticate, login, logout
+import logging
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from django.utils.http import url_has_allowed_host_and_scheme
-from .forms import LoginForm, ProfileForm
+from .forms import LoginForm, ProfileForm, PasswordChangeForm
+
+logger = logging.getLogger(__name__)
 
 
 def login_view(request):
@@ -31,10 +35,22 @@ def logout_view(request):
 @login_required
 def profile_view(request):
     if request.method == 'POST':
-        form = ProfileForm(request.POST, instance=request.user)
-        if form.is_valid():
-            form.save()
-            return redirect('accounts:profile')
+        profile_form = ProfileForm(request.POST, instance=request.user)
+        password_form = PasswordChangeForm(request.user, request.POST)
+
+        if 'password_submit' in request.POST:
+            if password_form.is_valid():
+                request.user.set_password(password_form.cleaned_data['new_password'])
+                request.user.save()
+                update_session_auth_hash(request, request.user)
+                request.session.save()
+                messages.success(request, 'Password changed successfully.')
+                return redirect('accounts:profile')
+        elif 'profile_submit' in request.POST:
+            if profile_form.is_valid():
+                profile_form.save()
+                return redirect('accounts:profile')
     else:
-        form = ProfileForm(instance=request.user)
-    return render(request, 'accounts/profile.html', {'form': form})
+        profile_form = ProfileForm(instance=request.user)
+        password_form = PasswordChangeForm(request.user)
+    return render(request, 'accounts/profile.html', {'form': profile_form, 'password_form': password_form})

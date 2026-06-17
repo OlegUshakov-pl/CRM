@@ -37,10 +37,22 @@
                 <span class="text-[#999]">Last name</span>
                 <span class="font-medium text-[#222]">{{ user.last_name|default:'—' }}</span>
             </div>
+            <div class="flex justify-between py-3">
+                <span class="text-[#999]">Password</span>
+                <span class="font-medium text-[#222]">••••••••</span>
+            </div>
         </div>
 
+        {% if messages %}
+        <div class="mb-4">
+            {% for message in messages %}
+            <div class="px-4 py-2 text-[13px] {% if message.tags == 'success' %}bg-green-50 text-green-700 border border-green-200{% endif %}">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
         <!-- Edit mode -->
-        <form id="edit-form" method="post" class="hidden space-y-4">
+        <form id="edit-form" method="post" class="{% if not form.errors and not password_form.errors %}hidden{% endif %} space-y-4">
             {% csrf_token %}
             <div class="space-y-4">
                 {% for field in form %}
@@ -53,8 +65,30 @@
                 </div>
                 {% endfor %}
             </div>
+            <div class="border-t border-[#e8e8e8] pt-4 mt-4">
+                <h3 class="text-[13px] font-semibold text-[#222] mb-3">Change Password</h3>
+                {% if password_form.non_field_errors %}
+                <div class="mb-3">
+                    {% for error in password_form.non_field_errors %}
+                    <p class="text-red-500 text-[12px]">{{ error }}</p>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                <div class="space-y-4">
+                    {% for field in password_form %}
+                    <div>
+                        <label class="block text-[12px] font-medium text-[#666] mb-1">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.errors %}
+                        <p class="text-red-500 text-[12px] mt-1">{{ field.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
             <div class="flex items-center gap-3 pt-2">
-                <button type="submit" class="px-5 py-2 bg-[#22c55e] text-white text-[13px] font-semibold hover:bg-[#16a34a] transition-colors">Save</button>
+                <button type="submit" name="profile_submit" value="1" formnovalidate class="px-5 py-2 bg-[#22c55e] text-white text-[13px] font-semibold hover:bg-[#16a34a] transition-colors">Save Profile</button>
+                <button type="submit" name="password_submit" value="1" formnovalidate class="px-5 py-2 bg-violet-600 text-white text-[13px] font-semibold hover:bg-violet-700 transition-colors">Change Password</button>
                 <button type="button" onclick="document.getElementById('edit-form').classList.add('hidden'); document.getElementById('view-mode').classList.remove('hidden'); document.querySelector('button[onclick*=\"view-mode\"]')?.classList.remove('hidden')" class="px-5 py-2 border border-[#e8e8e8] text-[#666] text-[13px] hover:bg-gray-50 transition-colors">Cancel</button>
             </div>
         </form>
