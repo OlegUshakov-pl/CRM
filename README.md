@@ -12,7 +12,6 @@ A project management, contractor and task tracking system for engineering and ma
 
 To quickly install, run `install.bat` in an empty folder, then go to the `CRM` folder and run `runserver.bat`.
 
-username: admin, password: admin
 ---
 
 ## Quick Start
@@ -30,6 +29,8 @@ python manage.py runserver
 
 Alternatively, run `install.bat` for one-click setup. Use `update.bat` to pull latest changes.
 
+Username: admin
+Password: admin
 ---
 
 ## Tech Stack
