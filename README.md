@@ -28,9 +28,9 @@ python manage.py runserver
 ```
 
 Alternatively, run `install.bat` for one-click setup. Use `update.bat` to pull latest changes.
-
 Username: admin
 Password: admin
+
 ---
 
 ## Tech Stack
