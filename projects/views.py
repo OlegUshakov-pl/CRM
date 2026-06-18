@@ -87,19 +87,18 @@ def project_detail(request, slug):
     project = get_object_or_404(Project.objects.prefetch_related(Prefetch('materials', queryset=Material.objects.filter(is_active=True).select_related('category')), 'contacts', 'tasks', 'note_entries', 'images'), slug=slug)
     from django.db.models import Q
     from parts.models import Part
-    model_exts = Part.MODEL_EXTENSIONS
-    model_ext_q = Q()
-    for ext in model_exts:
-        model_ext_q |= Q(file__iendswith=ext)
     all_parts = project.parts.select_related('category').all()
-    drawings = [p for p in all_parts if not p.is_model]
+    drawings = [p for p in all_parts if not p.is_model and not p.is_dxf]
     models = [p for p in all_parts if p.is_model]
+    dxfs = [p for p in all_parts if p.is_dxf]
     return render(request, 'projects/project_detail.html', {
         'project': project,
         'drawings': drawings[:4],
         'models': models[:4],
+        'dxfs': dxfs[:4],
         'drawings_count': len(drawings),
         'models_count': len(models),
+        'dxfs_count': len(dxfs),
     })
 
 

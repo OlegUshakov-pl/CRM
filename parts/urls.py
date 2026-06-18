@@ -17,6 +17,7 @@ urlpatterns = [
     path('category/<int:pk>/delete/', views.category_delete, name='category_delete'),
     path('<slug:project_slug>/page/', views.part_page, name='page'),
     path('<slug:project_slug>/models/', views.model_page, name='model_page'),
+    path('<slug:project_slug>/dxf/', views.dxf_page, name='dxf_page'),
     path('<slug:project_slug>/create/', views.part_create, name='create'),
     path('<slug:project_slug>/create/slide/', views.part_create_slide, name='create_slide'),
     path('<int:pk>/edit/', views.part_edit, name='edit'),

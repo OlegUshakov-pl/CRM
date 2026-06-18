@@ -52,10 +52,10 @@ def part_list(request):
 def part_projects(request):
     from django.db.models import Q
     from projects.models import Project
-    model_ext_q = Q()
-    for ext in Part.MODEL_EXTENSIONS:
-        model_ext_q |= Q(file__iendswith=ext)
-    drawing_project_ids = Part.objects.exclude(model_ext_q).values_list('project_id', flat=True).distinct()
+    exclude_q = Q()
+    for ext in Part.MODEL_EXTENSIONS + Part.DXF_EXTENSIONS:
+        exclude_q |= Q(file__iendswith=ext)
+    drawing_project_ids = Part.objects.exclude(exclude_q).values_list('project_id', flat=True).distinct()
     projects = Project.objects.filter(id__in=drawing_project_ids)
     return render(request, 'parts/part_projects.html', {'projects': projects})
 
@@ -97,10 +97,10 @@ def part_page(request, project_slug):
     from django.db.models import Q
     from projects.models import Project
     project = get_object_or_404(Project, slug=project_slug)
-    model_ext_q = Q()
-    for ext in Part.MODEL_EXTENSIONS:
-        model_ext_q |= Q(file__iendswith=ext)
-    parts = Part.objects.filter(project=project).exclude(model_ext_q).select_related('category')
+    exclude_q = Q()
+    for ext in Part.MODEL_EXTENSIONS + Part.DXF_EXTENSIONS:
+        exclude_q |= Q(file__iendswith=ext)
+    parts = Part.objects.filter(project=project).exclude(exclude_q).select_related('category')
     parts, sort, order, sort_label = apply_part_sorting(parts, request)
     context = {
         'project': project, 'parts': parts,
@@ -293,6 +293,26 @@ def model_page(request, project_slug):
     if request.headers.get('HX-Request'):
         return render(request, 'parts/partials/model_page_content.html', context)
     return render(request, 'parts/model_page.html', context)
+
+
+@login_required
+def dxf_page(request, project_slug):
+    from django.db.models import Q
+    from projects.models import Project
+    project = get_object_or_404(Project, slug=project_slug)
+    dxf_ext_q = Q()
+    for ext in Part.DXF_EXTENSIONS:
+        dxf_ext_q |= Q(file__iendswith=ext)
+    parts = Part.objects.filter(project=project).filter(dxf_ext_q).select_related('category')
+    parts, sort, order, sort_label = apply_part_sorting(parts, request)
+    context = {
+        'project': project, 'parts': parts,
+        'sort_options': PART_SORT_OPTIONS, 'current_sort': sort, 'current_order': order,
+        'current_sort_label': sort_label,
+    }
+    if request.headers.get('HX-Request'):
+        return render(request, 'parts/partials/dxf_page_content.html', context)
+    return render(request, 'parts/dxf_page.html', context)
 
 
 @login_required

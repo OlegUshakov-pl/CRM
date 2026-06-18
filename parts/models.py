@@ -12,6 +12,8 @@ def part_upload_to(instance, filename):
         ext = os.path.splitext(filename)[1].lower()
         if ext in Part.MODEL_EXTENSIONS:
             subfolder = get_subfolder_name(instance.project.number, 'subfolder_models', 'models')
+        elif ext in Part.DXF_EXTENSIONS:
+            subfolder = get_subfolder_name(instance.project.number, 'subfolder_dxf', 'DXF')
         else:
             subfolder = get_subfolder_name(instance.project.number, 'subfolder_drawings', 'drawings')
         return os.path.join(folder, subfolder, filename)
@@ -40,12 +42,20 @@ class Part(TimeStampedModel):
     file = models.FileField(upload_to=part_upload_to, storage=ProjectFileSystemStorage(), blank=True, null=True)
 
     MODEL_EXTENSIONS = ['.stp', '.ipt', '.iam', '.sldprt', '.sldasm', '.ics', '.stl', '.3mf']
+    DXF_EXTENSIONS = ['.dxf']
 
     @property
     def is_model(self):
         if self.file:
             ext = os.path.splitext(self.file.name)[1].lower()
             return ext in self.MODEL_EXTENSIONS
+        return False
+
+    @property
+    def is_dxf(self):
+        if self.file:
+            ext = os.path.splitext(self.file.name)[1].lower()
+            return ext in self.DXF_EXTENSIONS
         return False
 
     @property
