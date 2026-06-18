@@ -263,6 +263,26 @@ def model_projects(request):
 
 
 @login_required
+def model_page(request, project_slug):
+    from django.db.models import Q
+    from projects.models import Project
+    project = get_object_or_404(Project, slug=project_slug)
+    model_ext_q = Q()
+    for ext in Part.MODEL_EXTENSIONS:
+        model_ext_q |= Q(file__iendswith=ext)
+    parts = Part.objects.filter(project=project).filter(model_ext_q).select_related('category')
+    parts, sort, order, sort_label = apply_part_sorting(parts, request)
+    context = {
+        'project': project, 'parts': parts,
+        'sort_options': PART_SORT_OPTIONS, 'current_sort': sort, 'current_order': order,
+        'current_sort_label': sort_label,
+    }
+    if request.headers.get('HX-Request'):
+        return render(request, 'parts/partials/model_page_content.html', context)
+    return render(request, 'parts/model_page.html', context)
+
+
+@login_required
 def category_list(request):
     categories = Category.objects.all()
     return render(request, 'parts/category_list.html', {'categories': categories})

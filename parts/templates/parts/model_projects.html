@@ -6,7 +6,7 @@
 <h1 class="text-xl font-semibold mb-6">Project Models</h1>
 <div class="space-y-3">
     {% for project in projects %}
-    <a href="{% url 'parts:page' project.slug %}" class="block p-4 border border-[#e8e8e8] hover:bg-[#f8f8f8] transition-colors">
+    <a href="{% url 'parts:model_page' project.slug %}" class="block p-4 border border-[#e8e8e8] hover:bg-[#f8f8f8] transition-colors">
         <span class="font-medium">{{ project.name }}</span>
     </a>
     {% empty %}

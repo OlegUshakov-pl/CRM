@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Models — {{ project.name }}{% endblock %}
+{% block breadcrumb %}Models / {{ project.name }}{% endblock %}
+{% block content %}
+<div style="max-width: 1080px; width: 100%; margin-left: auto; margin-right: auto;">
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-xl font-semibold">Models — {{ project.name }}</h1>
+        <div class="flex items-center gap-2">
+            <button onclick="openSlideOver('{% url 'parts:create_slide' project.slug %}')" class="px-4 py-2 bg-violet-400 hover:opacity-90 text-white font-medium text-[13px] transition-opacity rounded-[20px] shadow">+ Add Model</button>
+            <a href="{% url 'projects:detail' project.slug %}" class="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 transition-colors">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                Back to Project
+            </a>
+        </div>
+    </div>
+
+    <div class="bg-white border border-[#e8e8e8] p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold text-gray-900">Models</h2>
+            <div class="flex items-center gap-3">
+                <span class="text-sm text-gray-500">{{ parts|length }} item(s)</span>
+                {% url 'parts:model_page' project_slug=project.slug as model_page_url %}
+                {% include 'includes/sort_dropdown.html' with sort_url=model_page_url sort_target='#models-content' %}
+            </div>
+        </div>
+        <div id="models-content">
+            {% include 'parts/partials/model_page_content.html' %}
+        </div>
+    </div>
+</div>
+{% endblock %}
