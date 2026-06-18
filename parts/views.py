@@ -37,7 +37,15 @@ def part_common_latest(request):
 @login_required
 def part_list(request):
     parts = Part.objects.select_related('category', 'project').all()
-    return render(request, 'parts/part_list.html', {'parts': parts})
+    parts, sort, order, sort_label = apply_part_sorting(parts, request)
+    context = {
+        'parts': parts,
+        'sort_options': PART_SORT_OPTIONS, 'current_sort': sort, 'current_order': order,
+        'current_sort_label': sort_label,
+    }
+    if request.headers.get('HX-Request'):
+        return render(request, 'parts/partials/part_list_content.html', context)
+    return render(request, 'parts/part_list.html', context)
 
 
 @login_required
@@ -50,14 +58,6 @@ def part_projects(request):
     drawing_project_ids = Part.objects.exclude(model_ext_q).values_list('project_id', flat=True).distinct()
     projects = Project.objects.filter(id__in=drawing_project_ids)
     return render(request, 'parts/part_projects.html', {'projects': projects})
-
-
-from django.db.models import Func, CharField
-
-
-class FileExtension(Func):
-    template = "SUBSTR(%(expressions)s, LENGTH(%(expressions)s) - LENGTH(REPLACE(%(expressions)s, '.', '')) + 1)"
-    output_field = CharField()
 
 
 PART_SORT_OPTIONS = [
@@ -82,7 +82,9 @@ def apply_part_sorting(queryset, request):
         order = 'asc'
     sort_label = dict(PART_SORT_OPTIONS).get(sort, 'Sort')
     if sort == 'file_ext':
-        queryset = queryset.annotate(file_ext=FileExtension('file'))
+        items = list(queryset)
+        items.sort(key=lambda p: p.file_ext or '', reverse=(order == 'desc'))
+        return items, sort, order, sort_label
     if order == 'asc':
         queryset = queryset.order_by(sort)
     else:
