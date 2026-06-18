@@ -185,7 +185,7 @@
             </div>
             {% if project.documents.all|length > 4 %}
             <div class="mt-4 text-right">
-                <a href="{% url 'documents:project' project.slug %}" class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white transition-colors text-[12px]">Page of documents</a>
+                <a href="{% url 'documents:project' project.slug %}" class="text-[13px] font-medium text-[#7c3aed] hover:opacity-80 transition-opacity">Page of documents</a>
             </div>
             {% endif %}
         </div>
@@ -238,13 +238,13 @@
             </div>
             {% if project.materials.all|length > 4 %}
             <div class="mt-4 text-right">
-                <a href="{% url 'materials:page' project.slug %}" class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white transition-colors text-[12px]">Page of materials</a>
+                <a href="{% url 'materials:page' project.slug %}" class="text-[13px] font-medium text-[#7c3aed] hover:opacity-80 transition-opacity">Page of materials</a>
             </div>
             {% endif %}
         </div>
         {% endif %}
 
-        {% if project.parts.all %}
+        {% if drawings %}
         <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-5">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Drawings</h2>
             <div class="overflow-x-auto">
@@ -260,8 +260,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for part in project.parts.all %}
-                        {% if not part.is_model %}
+                        {% for part in drawings %}
                         <tr class="border-b border-gray-100 dark:border-gray-700/50">
                             <td class="py-2 text-gray-900 dark:text-white">{{ part.number }}</td>
                             <td class="py-2 text-gray-600 dark:text-gray-400">{{ part.category.name|default:'—' }}</td>
@@ -270,20 +269,19 @@
                             <td class="py-2 text-gray-600 dark:text-gray-400">{{ part.created|date:"Y-m-d"|default:'—' }}</td>
                             <td class="py-2 text-gray-600 dark:text-gray-400">{{ part.updated|date:"Y-m-d"|default:'—' }}</td>
                         </tr>
-                        {% endif %}
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
-            {% if project.parts.all|length > 4 %}
+            {% if drawings_count > 4 %}
             <div class="mt-4 text-right">
-                <a href="{% url 'parts:page' project.slug %}" class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white transition-colors text-[12px]">Page of drawings</a>
+                <a href="{% url 'parts:page' project.slug %}" class="text-[13px] font-medium text-[#7c3aed] hover:opacity-80 transition-opacity">Page of drawings</a>
             </div>
             {% endif %}
         </div>
         {% endif %}
 
-        {% if project.parts.all %}
+        {% if models %}
         <div id="models-section" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-5">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Models</h2>
             <div class="overflow-x-auto">
@@ -299,8 +297,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for part in project.parts.all %}
-                        {% if part.is_model %}
+                        {% for part in models %}
                         <tr class="border-b border-gray-100 dark:border-gray-700/50">
                             <td class="py-2 text-gray-900 dark:text-white">{{ part.number }}</td>
                             <td class="py-2 text-gray-600 dark:text-gray-400">{{ part.category.name|default:'—' }}</td>
@@ -309,11 +306,15 @@
                             <td class="py-2 text-gray-600 dark:text-gray-400">{{ part.created|date:"Y-m-d"|default:'—' }}</td>
                             <td class="py-2 text-gray-600 dark:text-gray-400">{{ part.updated|date:"Y-m-d"|default:'—' }}</td>
                         </tr>
-                        {% endif %}
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
+            {% if models_count > 4 %}
+            <div class="mt-4 text-right">
+                <a href="{% url 'parts:page' project.slug %}" class="text-[13px] font-medium text-[#7c3aed] hover:opacity-80 transition-opacity">Page of models</a>
+            </div>
+            {% endif %}
         </div>
         {% endif %}
 

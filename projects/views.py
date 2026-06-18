@@ -9,7 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db import transaction
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Q
 from django.utils.http import url_has_allowed_host_and_scheme
 from .models import Project, ProjectImage
 from .forms import ProjectForm
@@ -85,7 +85,22 @@ def project_list(request):
 @login_required
 def project_detail(request, slug):
     project = get_object_or_404(Project.objects.prefetch_related(Prefetch('materials', queryset=Material.objects.filter(is_active=True).select_related('category')), 'contacts', 'tasks', 'note_entries', 'images'), slug=slug)
-    return render(request, 'projects/project_detail.html', {'project': project})
+    from django.db.models import Q
+    from parts.models import Part
+    model_exts = Part.MODEL_EXTENSIONS
+    model_ext_q = Q()
+    for ext in model_exts:
+        model_ext_q |= Q(file__iendswith=ext)
+    all_parts = project.parts.select_related('category').all()
+    drawings = [p for p in all_parts if not p.is_model]
+    models = [p for p in all_parts if p.is_model]
+    return render(request, 'projects/project_detail.html', {
+        'project': project,
+        'drawings': drawings[:4],
+        'models': models[:4],
+        'drawings_count': len(drawings),
+        'models_count': len(models),
+    })
 
 
 @login_required
