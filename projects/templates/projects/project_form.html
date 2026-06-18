@@ -181,6 +181,49 @@
             {% endif %}
         </div>
 
+        <div id="edit-models-section" class="bg-white border border-[#e8e8e8] p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Models</h2>
+                <button type="button" onclick="openSlideOver('{% url 'parts:create_slide' project.slug %}')" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">+ Add model</button>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="text-left text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
+                            <th class="pb-2 font-medium">Number</th>
+                            <th class="pb-2 font-medium">Extension</th>
+                            <th class="pb-2 font-medium">Category</th>
+                            <th class="pb-2 font-medium">Size</th>
+                            <th class="pb-2 font-medium">Rev</th>
+                            <th class="pb-2 font-medium">Created</th>
+                            <th class="pb-2 font-medium">Updated</th>
+                            <th class="pb-2 font-medium"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for part in project.parts.all %}
+                        {% if part.is_model %}
+                        <tr class="border-b border-gray-100 dark:border-gray-700/50">
+                            <td class="py-2 text-gray-900 dark:text-white">{{ part.number }}</td>
+                            <td class="py-2 text-gray-600 dark:text-gray-400">{{ part.file_ext|default:'—' }}</td>
+                            <td class="py-2 text-gray-600 dark:text-gray-400">{{ part.category.name|default:'—' }}</td>
+                            <td class="py-2 text-gray-600 dark:text-gray-400">{{ part.size|default:'—' }}</td>
+                            <td class="py-2 text-gray-600 dark:text-gray-400">{{ part.rev|default:'—' }}</td>
+                            <td class="py-2 text-gray-600 dark:text-gray-400">{{ part.created|date:"Y-m-d"|default:'—' }}</td>
+                            <td class="py-2 text-gray-600 dark:text-gray-400">{{ part.updated|date:"Y-m-d"|default:'—' }}</td>
+                            <td class="py-2">
+                                <button type="button" onclick="openSlideOver('{% url 'parts:edit_slide' part.pk %}')" class="text-indigo-600 dark:text-indigo-400 hover:underline mr-2">Edit</button>
+                                <button type="button" @click="$store.deleteModal.open('{% url 'parts:delete' part.pk %}', '{{ part.number|escapejs }}')" class="text-red-600 dark:text-red-400 hover:underline">Delete</button>
+                            </td>
+                        </tr>
+                        {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <p class="text-gray-500 dark:text-gray-400 text-center py-6" id="no-models-text">No models yet.</p>
+        </div>
+
         <div class="bg-white border border-[#e8e8e8] p-6">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Drawings</h2>
@@ -192,6 +235,7 @@
                     <thead>
                         <tr class="text-left text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
                             <th class="pb-2 font-medium">Number</th>
+                            <th class="pb-2 font-medium">Extension</th>
                             <th class="pb-2 font-medium">Category</th>
                             <th class="pb-2 font-medium">Size</th>
                             <th class="pb-2 font-medium">Rev</th>
@@ -205,6 +249,7 @@
                         {% if not part.is_model %}
                         <tr class="border-b border-gray-100 dark:border-gray-700/50">
                             <td class="py-2 text-gray-900 dark:text-white">{{ part.number }}</td>
+                            <td class="py-2 text-gray-600 dark:text-gray-400">{{ part.file_ext|default:'—' }}</td>
                             <td class="py-2 text-gray-600 dark:text-gray-400">{{ part.category.name|default:'—' }}</td>
                             <td class="py-2 text-gray-600 dark:text-gray-400">{{ part.size|default:'—' }}</td>
                             <td class="py-2 text-gray-600 dark:text-gray-400">{{ part.rev|default:'—' }}</td>
@@ -223,47 +268,6 @@
             {% else %}
             <p class="text-gray-500 dark:text-gray-400 text-center py-6">No drawings yet.</p>
             {% endif %}
-        </div>
-
-        <div id="edit-models-section" class="bg-white border border-[#e8e8e8] p-6">
-            <div class="flex items-center justify-between mb-4">
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Models</h2>
-                <button type="button" onclick="openSlideOver('{% url 'parts:create_slide' project.slug %}')" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">+ Add model</button>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm">
-                    <thead>
-                        <tr class="text-left text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
-                            <th class="pb-2 font-medium">Number</th>
-                            <th class="pb-2 font-medium">Category</th>
-                            <th class="pb-2 font-medium">Size</th>
-                            <th class="pb-2 font-medium">Rev</th>
-                            <th class="pb-2 font-medium">Created</th>
-                            <th class="pb-2 font-medium">Updated</th>
-                            <th class="pb-2 font-medium"></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for part in project.parts.all %}
-                        {% if part.is_model %}
-                        <tr class="border-b border-gray-100 dark:border-gray-700/50">
-                            <td class="py-2 text-gray-900 dark:text-white">{{ part.number }}</td>
-                            <td class="py-2 text-gray-600 dark:text-gray-400">{{ part.category.name|default:'—' }}</td>
-                            <td class="py-2 text-gray-600 dark:text-gray-400">{{ part.size|default:'—' }}</td>
-                            <td class="py-2 text-gray-600 dark:text-gray-400">{{ part.rev|default:'—' }}</td>
-                            <td class="py-2 text-gray-600 dark:text-gray-400">{{ part.created|date:"Y-m-d"|default:'—' }}</td>
-                            <td class="py-2 text-gray-600 dark:text-gray-400">{{ part.updated|date:"Y-m-d"|default:'—' }}</td>
-                            <td class="py-2">
-                                <button type="button" onclick="openSlideOver('{% url 'parts:edit_slide' part.pk %}')" class="text-indigo-600 dark:text-indigo-400 hover:underline mr-2">Edit</button>
-                                <button type="button" @click="$store.deleteModal.open('{% url 'parts:delete' part.pk %}', '{{ part.number|escapejs }}')" class="text-red-600 dark:text-red-400 hover:underline">Delete</button>
-                            </td>
-                        </tr>
-                        {% endif %}
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            <p class="text-gray-500 dark:text-gray-400 text-center py-6" id="no-models-text">No models yet.</p>
         </div>
 
         <div class="bg-white border border-[#e8e8e8] p-6">
