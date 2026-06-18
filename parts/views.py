@@ -52,17 +52,51 @@ def part_projects(request):
     return render(request, 'parts/part_projects.html', {'projects': projects})
 
 
+PART_SORT_OPTIONS = [
+    ('number', 'Number'),
+    ('category__name', 'Category'),
+    ('size', 'Size'),
+    ('created', 'Date Created'),
+    ('updated', 'Date Updated'),
+]
+
+
+def apply_part_sorting(queryset, request):
+    sort_params = request.GET.getlist('sort')
+    order_params = request.GET.getlist('order')
+    sort = sort_params[-1] if sort_params else 'number'
+    order = order_params[-1] if order_params else 'asc'
+    valid_fields = [f[0] for f in PART_SORT_OPTIONS]
+    if sort not in valid_fields:
+        sort = 'number'
+    if order not in ('asc', 'desc'):
+        order = 'asc'
+    sort_label = dict(PART_SORT_OPTIONS).get(sort, 'Sort')
+    if order == 'asc':
+        queryset = queryset.order_by(sort)
+    else:
+        queryset = queryset.order_by(f'-{sort}')
+    return queryset, sort, order, sort_label
+
+
 @login_required
 def part_page(request, project_slug):
     from django.db.models import Q
     from projects.models import Project
     project = get_object_or_404(Project, slug=project_slug)
-    model_exts = Part.MODEL_EXTENSIONS
     model_ext_q = Q()
-    for ext in model_exts:
+    for ext in Part.MODEL_EXTENSIONS:
         model_ext_q |= Q(file__iendswith=ext)
     parts = Part.objects.filter(project=project).exclude(model_ext_q).select_related('category')
-    return render(request, 'parts/part_page.html', {'project': project, 'parts': parts})
+    parts, sort, order, sort_label = apply_part_sorting(parts, request)
+    context = {
+        'project': project, 'parts': parts,
+        'sort_options': PART_SORT_OPTIONS, 'current_sort': sort, 'current_order': order,
+        'current_sort_label': sort_label,
+    }
+    if request.headers.get('HX-Request'):
+        return render(request, 'parts/partials/part_page_content.html', context)
+    return render(request, 'parts/part_page.html', context)
 
 
 @login_required

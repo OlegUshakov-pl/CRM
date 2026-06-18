@@ -99,3 +99,9 @@ class MaterialFile(models.Model):
     @property
     def filename(self):
         return os.path.basename(self.file.name) if self.file else ''
+
+    @property
+    def file_ext(self):
+        if self.file:
+            return os.path.splitext(self.file.name)[1].lower()
+        return ''

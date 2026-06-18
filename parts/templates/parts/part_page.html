@@ -3,46 +3,30 @@
 {% block title %}Drawings — {{ project.name }}{% endblock %}
 {% block breadcrumb %}Drawings / {{ project.name }}{% endblock %}
 {% block content %}
-<div class="flex items-center justify-between mb-6">
-    <h1 class="text-xl font-semibold">Drawings — {{ project.name }}</h1>
-    <button onclick="openSlideOver('{% url 'parts:create_slide' project.slug %}')" class="px-4 py-2 bg-violet-400 hover:opacity-90 text-white font-medium text-[13px] transition-opacity rounded-[20px] shadow">+ Add Drawing</button>
-</div>
+<div style="max-width: 1080px; width: 100%; margin-left: auto; margin-right: auto;">
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-xl font-semibold">Drawings — {{ project.name }}</h1>
+        <div class="flex items-center gap-2">
+            <button onclick="openSlideOver('{% url 'parts:create_slide' project.slug %}')" class="px-4 py-2 bg-violet-400 hover:opacity-90 text-white font-medium text-[13px] transition-opacity rounded-[20px] shadow">+ Add Drawing</button>
+            <a href="{% url 'projects:detail' project.slug %}" class="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 transition-colors">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                Back to Project
+            </a>
+        </div>
+    </div>
 
-<div class="overflow-x-auto">
-    <table class="w-full text-sm">
-        <thead>
-            <tr class="border-b border-[#e8e8e8] text-left">
-                <th class="py-3 px-4 font-medium text-[#8d8d8d]">Number</th>
-                <th class="py-3 px-4 font-medium text-[#8d8d8d]">Category</th>
-                <th class="py-3 px-4 font-medium text-[#8d8d8d]">Size</th>
-                <th class="py-3 px-4 font-medium text-[#8d8d8d]">Rev</th>
-                <th class="py-3 px-4 font-medium text-[#8d8d8d]">Created</th>
-                <th class="py-3 px-4 font-medium text-[#8d8d8d]">Updated</th>
-                <th class="py-3 px-4 font-medium text-[#8d8d8d]"></th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for part in parts %}
-            <tr class="border-b border-[#e8e8e8] hover:bg-[#f8f8f8]">
-                <td class="py-3 px-4">{{ part.number }}</td>
-                <td class="py-3 px-4">{{ part.category.name|default:"—" }}</td>
-                <td class="py-3 px-4">{{ part.size|default:"—" }}</td>
-                <td class="py-3 px-4">{{ part.rev|default:"—" }}</td>
-                <td class="py-3 px-4">{{ part.created|date:"Y-m-d"|default:"—" }}</td>
-                <td class="py-3 px-4">{{ part.updated|date:"Y-m-d"|default:"—" }}</td>
-                <td class="py-3 px-4">
-                    <div class="flex items-center gap-2">
-                        <button onclick="openSlideOver('{% url 'parts:edit_slide' part.pk %}')" class="text-indigo-600 hover:underline">Edit</button>
-                        <button @click="$store.deleteModal.open('{% url 'parts:delete' part.pk %}', '{{ part.number }}')" class="text-red-500 hover:underline">Delete</button>
-                    </div>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="7" class="py-10 text-center text-[#8d8d8d]">No drawings yet.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="bg-white border border-[#e8e8e8] p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold text-gray-900">Drawings</h2>
+            <div class="flex items-center gap-3">
+                <span class="text-sm text-gray-500">{{ parts|length }} item(s)</span>
+                {% url 'parts:page' project_slug=project.slug as parts_page_url %}
+                {% include 'includes/sort_dropdown.html' with sort_url=parts_page_url sort_target='#parts-content' %}
+            </div>
+        </div>
+        <div id="parts-content">
+            {% include 'parts/partials/part_page_content.html' %}
+        </div>
+    </div>
 </div>
 {% endblock %}

@@ -1,0 +1,39 @@
+{% if parts %}
+<div class="overflow-x-auto">
+    <table class="w-full text-sm">
+        <thead>
+            <tr class="border-b border-[#e8e8e8] text-left">
+                <th class="py-3 px-4 font-medium text-[#8d8d8d]">Number</th>
+                <th class="py-3 px-4 font-medium text-[#8d8d8d]">Extension</th>
+                <th class="py-3 px-4 font-medium text-[#8d8d8d]">Category</th>
+                <th class="py-3 px-4 font-medium text-[#8d8d8d]">Size</th>
+                <th class="py-3 px-4 font-medium text-[#8d8d8d]">Rev</th>
+                <th class="py-3 px-4 font-medium text-[#8d8d8d]">Created</th>
+                <th class="py-3 px-4 font-medium text-[#8d8d8d]">Updated</th>
+                <th class="py-3 px-4 font-medium text-[#8d8d8d]"></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for part in parts %}
+            <tr class="border-b border-[#e8e8e8] hover:bg-[#f8f8f8]">
+                <td class="py-3 px-4">{{ part.number }}</td>
+                <td class="py-3 px-4">{{ part.file_ext|default:"—" }}</td>
+                <td class="py-3 px-4">{{ part.category.name|default:"—" }}</td>
+                <td class="py-3 px-4">{{ part.size|default:"—" }}</td>
+                <td class="py-3 px-4">{{ part.rev|default:"—" }}</td>
+                <td class="py-3 px-4">{{ part.created|date:"Y-m-d"|default:"—" }}</td>
+                <td class="py-3 px-4">{{ part.updated|date:"Y-m-d"|default:"—" }}</td>
+                <td class="py-3 px-4">
+                    <div class="flex items-center gap-2">
+                        <button onclick="openSlideOver('{% url 'parts:edit_slide' part.pk %}')" class="text-indigo-600 hover:underline">Edit</button>
+                        <button @click="$store.deleteModal.open('{% url 'parts:delete' part.pk %}', '{{ part.number }}')" class="text-red-500 hover:underline">Delete</button>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<p class="text-[#8d8d8d] text-center py-10">No drawings yet.</p>
+{% endif %}

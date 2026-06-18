@@ -48,6 +48,12 @@ class Part(TimeStampedModel):
             return ext in self.MODEL_EXTENSIONS
         return False
 
+    @property
+    def file_ext(self):
+        if self.file:
+            return os.path.splitext(self.file.name)[1].lower()
+        return ''
+
     class Meta:
         ordering = ['number']
 
