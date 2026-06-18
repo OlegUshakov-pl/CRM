@@ -52,8 +52,17 @@ def part_projects(request):
     return render(request, 'parts/part_projects.html', {'projects': projects})
 
 
+from django.db.models import Func, CharField
+
+
+class FileExtension(Func):
+    template = "SUBSTR(%(expressions)s, LENGTH(%(expressions)s) - LENGTH(REPLACE(%(expressions)s, '.', '')) + 1)"
+    output_field = CharField()
+
+
 PART_SORT_OPTIONS = [
     ('number', 'Number'),
+    ('file_ext', 'Extension'),
     ('category__name', 'Category'),
     ('size', 'Size'),
     ('created', 'Date Created'),
@@ -72,6 +81,8 @@ def apply_part_sorting(queryset, request):
     if order not in ('asc', 'desc'):
         order = 'asc'
     sort_label = dict(PART_SORT_OPTIONS).get(sort, 'Sort')
+    if sort == 'file_ext':
+        queryset = queryset.annotate(file_ext=FileExtension('file'))
     if order == 'asc':
         queryset = queryset.order_by(sort)
     else:
