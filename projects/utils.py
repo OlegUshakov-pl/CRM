@@ -65,6 +65,84 @@ def cleanup_empty_dirs(folder_path):
             break
 
 
+def rename_project_folder(project, old_number, old_name):
+    from django.db.models import Q
+    old_safe_number = sanitize_folder_name(old_number) if old_number else ''
+    old_safe_name = sanitize_folder_name(old_name)
+    old_folder_name = f"{old_safe_number}_{old_safe_name}_Project"
+    root_path = get_project_root_path()
+    if not root_path:
+        return
+    old_path = os.path.join(root_path, old_folder_name)
+    if not os.path.exists(old_path):
+        return
+    new_safe_number = sanitize_folder_name(project.number) if project.number else ''
+    new_safe_name = sanitize_folder_name(project.name)
+    new_folder_name = f"{new_safe_number}_{new_safe_name}_Project"
+    new_path = os.path.join(root_path, new_folder_name)
+    if old_path == new_path:
+        return
+    old_subs = {}
+    if os.path.exists(old_path):
+        for entry in os.listdir(old_path):
+            entry_path = os.path.join(old_path, entry)
+            if os.path.isdir(entry_path):
+                old_subs[entry] = entry_path
+    new_subs = {}
+    for old_sub_name, old_sub_path in old_subs.items():
+        new_sub_name = old_sub_name
+        if old_safe_number and old_sub_name.startswith(f'{old_safe_number}_'):
+            suffix = old_sub_name[len(f'{old_safe_number}_'):]
+            new_sub_name = f'{new_safe_number}_{suffix}'
+        new_sub_path = os.path.join(old_path, new_sub_name)
+        new_subs[old_sub_name] = new_sub_path
+    file_updates = []
+    for model_class, file_field_name, project_rel in _get_file_models():
+        filter_q = Q(**{f'{file_field_name}__contains': old_folder_name})
+        queryset = model_class.objects.filter(**{f'{project_rel}': project}).filter(filter_q)
+        for obj in queryset:
+            old_file = getattr(obj, file_field_name)
+            if old_file and old_file.name and old_folder_name in old_file.name:
+                new_name = old_file.name.replace(old_folder_name, new_folder_name, 1)
+                for old_sub, new_sub_path in new_subs.items():
+                    if old_sub in new_name:
+                        new_sub_name_actual = os.path.basename(new_sub_path)
+                        new_name = new_name.replace(old_sub, new_sub_name_actual, 1)
+                file_updates.append((obj, file_field_name, old_file, new_name))
+    if os.path.exists(old_path):
+        os.rename(old_path, new_path)
+    for old_sub_name, new_sub_path in new_subs.items():
+        new_sub_actual = os.path.basename(new_sub_path)
+        old_sub_full = os.path.join(new_path, old_sub_name)
+        new_sub_full = os.path.join(new_path, new_sub_actual)
+        if os.path.exists(old_sub_full) and old_sub_full != new_sub_full:
+            os.rename(old_sub_full, new_sub_full)
+    for obj, file_field_name, old_file, new_name in file_updates:
+        old_file.name = new_name
+        setattr(obj, file_field_name, old_file)
+        obj.save(update_fields=[file_field_name])
+    if project.image and project.image.name and old_folder_name in project.image.name:
+        new_img_name = project.image.name.replace(old_folder_name, new_folder_name, 1)
+        for old_sub, new_sub_path in new_subs.items():
+            if old_sub in new_img_name:
+                new_img_name = new_img_name.replace(old_sub, os.path.basename(new_sub_path), 1)
+        project.image.name = new_img_name
+        project.save(update_fields=['image'])
+
+
+def _get_file_models():
+    from documents.models import Document
+    from parts.models import Part
+    from materials.models import MaterialFile
+    from .models import ProjectImage
+    return [
+        (Document, 'file', 'project'),
+        (Part, 'file', 'project'),
+        (MaterialFile, 'file', 'material__project'),
+        (ProjectImage, 'image', 'project'),
+    ]
+
+
 def get_project_subfolder_path(project, subfolder_name):
     project_path = get_project_folder_path(project)
     if not project_path:

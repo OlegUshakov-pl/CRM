@@ -14,7 +14,7 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from .models import Project, ProjectImage
 from .forms import ProjectForm
 from .services import ExportService, ImportService
-from .utils import get_project_folder_path
+from .utils import get_project_folder_path, rename_project_folder
 from contacts.models import Contact
 from companies.models import Company
 from notes.forms import NoteForm
@@ -145,11 +145,15 @@ def project_edit(request, slug):
                 messages.success(request, 'Note added successfully.')
                 return redirect('projects:edit', slug=project.slug)
         else:
+            old_number = project.number or ''
+            old_name = project.name
             form = ProjectForm(request.POST, request.FILES, instance=project)
             if form.is_valid():
                 with transaction.atomic():
                     old_image = project.image if project.image else None
                     form.save()
+                    if old_number != (project.number or '') or old_name != project.name:
+                        rename_project_folder(project, old_number, old_name)
                     if old_image and project.image and old_image.name != project.image.name:
                         old_image.delete(save=False)
                     for f in request.FILES.getlist('images'):
