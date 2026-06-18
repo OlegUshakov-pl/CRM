@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 import shutil
 import tempfile
 import zipfile
@@ -260,7 +261,7 @@ class ImportService:
         if image_name:
             src = files_dir / image_name
             if src.exists():
-                project.image.save(image_name, open(str(src), 'rb'), save=True)
+                project.image.save(os.path.basename(image_name), open(str(src), 'rb'), save=True)
 
         for m_data in self.export_data.get('materials', []):
             category = None
@@ -307,7 +308,7 @@ class ImportService:
             if file_name:
                 src = files_dir / file_name
                 if src.exists():
-                    doc.file.save(file_name, open(str(src), 'rb'), save=True)
+                    doc.file.save(os.path.basename(file_name), open(str(src), 'rb'), save=True)
                 else:
                     doc.save()
             else:
@@ -332,7 +333,7 @@ class ImportService:
             if file_name:
                 src = files_dir / file_name
                 if src.exists():
-                    part.file.save(file_name, open(str(src), 'rb'), save=True)
+                    part.file.save(os.path.basename(file_name), open(str(src), 'rb'), save=True)
                 else:
                     part.save()
             else:
@@ -344,7 +345,7 @@ class ImportService:
                 src = files_dir / file_name
                 if src.exists():
                     img = ProjectImage(project=project)
-                    img.image.save(file_name, open(str(src), 'rb'), save=True)
+                    img.image.save(os.path.basename(file_name), open(str(src), 'rb'), save=True)
 
         return project
 
