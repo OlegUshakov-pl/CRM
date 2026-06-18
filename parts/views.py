@@ -42,15 +42,26 @@ def part_list(request):
 
 @login_required
 def part_projects(request):
-    projects = Part.objects.values('project__name', 'project__slug').distinct()
+    from django.db.models import Q
+    from projects.models import Project
+    model_ext_q = Q()
+    for ext in Part.MODEL_EXTENSIONS:
+        model_ext_q |= Q(file__iendswith=ext)
+    drawing_project_ids = Part.objects.exclude(model_ext_q).values_list('project_id', flat=True).distinct()
+    projects = Project.objects.filter(id__in=drawing_project_ids)
     return render(request, 'parts/part_projects.html', {'projects': projects})
 
 
 @login_required
 def part_page(request, project_slug):
+    from django.db.models import Q
     from projects.models import Project
     project = get_object_or_404(Project, slug=project_slug)
-    parts = Part.objects.filter(project=project).select_related('category')
+    model_exts = Part.MODEL_EXTENSIONS
+    model_ext_q = Q()
+    for ext in model_exts:
+        model_ext_q |= Q(file__iendswith=ext)
+    parts = Part.objects.filter(project=project).exclude(model_ext_q).select_related('category')
     return render(request, 'parts/part_page.html', {'project': project, 'parts': parts})
 
 

@@ -6,8 +6,8 @@
 <h1 class="text-xl font-semibold mb-6">Project Drawings</h1>
 <div class="space-y-3">
     {% for p in projects %}
-    <a href="{% url 'parts:page' p.project__slug %}" class="block p-4 border border-[#e8e8e8] hover:bg-[#f8f8f8] transition-colors">
-        <span class="font-medium">{{ p.project__name }}</span>
+    <a href="{% url 'parts:page' p.slug %}" class="block p-4 border border-[#e8e8e8] hover:bg-[#f8f8f8] transition-colors">
+        <span class="font-medium">{{ p.name }}</span>
     </a>
     {% empty %}
     <p class="text-[#8d8d8d] text-center py-10">No projects with drawings.</p>
