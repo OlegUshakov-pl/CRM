@@ -52,7 +52,8 @@ Alternatively, run `install.bat` for one-click setup. Use `update.bat` to pull l
 
 | Module | Description |
 |--------|-------------|
-| **Dashboard** | Key metrics, recent projects, tasks, notes |
+| **Dashboard** | Key metrics, recent projects, tasks, notes; global search; settings panel |
+| **Accounts** | Login, logout, profile management, password reset |
 | **Companies** | Company directory with contacts and details |
 | **Contacts** | Contacts linked to companies |
 | **Projects** | Full lifecycle: statuses, budget, dates, image gallery, ZIP export/import |
@@ -63,6 +64,7 @@ Alternatively, run `install.bat` for one-click setup. Use `update.bat` to pull l
 | **Documents** | File upload with preview (images, PDF, text) |
 | **Parts** | Engineering drawings and 3D models (.stp, .ipt, .sldprt, .ics, .sldasm, .iam) |
 | **Calendar** | Three-month rolling calendar view with navigation |
+| **AI Assistant** | Multi-provider AI chat with CHAT and COMMANDS modes, browser agent, web search, file management |
 | **Generator** | Module scaffolding template for rapid prototyping of new apps |
 
 ---
@@ -245,6 +247,16 @@ python manage.py collectstatic
 # Run server
 python manage.py runserver
 ```
+
+---
+
+## Testing
+
+```bash
+python manage.py test core accounts assistant
+```
+
+Test suites cover unit tests, navigation, and security (path traversal, SSRF, open redirects).
 
 ---
 
