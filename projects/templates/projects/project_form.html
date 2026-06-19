@@ -277,12 +277,12 @@
             {% endif %}
         </div>
 
-        {% if pdf_files %}
         <div class="bg-white border border-[#e8e8e8] p-6">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white">PDF</h2>
                 <button type="button" onclick="openSlideOver('{% url 'documents:create_slide' project.slug %}')" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">+ Add pdf</button>
             </div>
+            {% if pdf_files %}
             <div class="overflow-x-auto">
                 <table class="w-full text-sm">
                     <thead>
@@ -343,8 +343,10 @@
                 <a href="{% url 'documents:project' project.slug %}" class="text-[13px] font-medium text-[#7c3aed] hover:opacity-80 transition-opacity">Page of PDF</a>
             </div>
             {% endif %}
+            {% else %}
+            <p class="text-gray-500 dark:text-gray-400 text-center py-6">No PDF files yet.</p>
+            {% endif %}
         </div>
-        {% endif %}
 
         <div class="bg-white border border-[#e8e8e8] p-6">
             <div class="flex items-center justify-between mb-4">
