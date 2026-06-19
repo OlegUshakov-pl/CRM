@@ -411,26 +411,23 @@ def api_provider_sync_models(request, provider_id):
 
 
 @login_required
-@require_GET
-def api_provider_models(request, provider_id):
+@require_http_methods(["GET", "POST"])
+def api_provider_models_or_add(request, provider_id):
     try:
         provider = AIProvider.objects.get(id=provider_id)
     except AIProvider.DoesNotExist:
         return JsonResponse({'ok': False, 'error': 'Provider not found.'}, status=404)
 
-    models = AIModel.objects.filter(provider=provider).order_by('-is_custom', 'sort_order', 'name')
-    data = [{
-        'id': m.model_id,
-        'name': m.name,
-        'custom': m.is_custom,
-        'tags': m.tags or [],
-    } for m in models]
-    return JsonResponse({'ok': True, 'models': data})
+    if request.method == 'GET':
+        models = AIModel.objects.filter(provider=provider).order_by('-is_custom', 'sort_order', 'name')
+        data = [{
+            'id': m.model_id,
+            'name': m.name,
+            'custom': m.is_custom,
+            'tags': m.tags or [],
+        } for m in models]
+        return JsonResponse({'ok': True, 'models': data})
 
-
-@login_required
-@require_POST
-def api_provider_model_add(request, provider_id):
     try:
         body = json.loads(request.body.decode('utf-8') or '{}')
     except json.JSONDecodeError:
@@ -441,11 +438,6 @@ def api_provider_model_add(request, provider_id):
 
     if not model_id:
         return JsonResponse({'ok': False, 'error': 'model_id is required.'}, status=400)
-
-    try:
-        provider = AIProvider.objects.get(id=provider_id)
-    except AIProvider.DoesNotExist:
-        return JsonResponse({'ok': False, 'error': 'Provider not found.'}, status=404)
 
     obj, created = AIModel.objects.get_or_create(
         provider=provider,

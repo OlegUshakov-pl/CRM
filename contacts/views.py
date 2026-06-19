@@ -7,6 +7,7 @@ from django.core.paginator import Paginator
 from .models import Contact
 from .forms import ContactForm
 from django.db import transaction
+from django.db.models import Q
 from core.models import log_activity
 
 
@@ -23,7 +24,7 @@ def contact_list(request):
     contacts = Contact.objects.filter(is_active=True).select_related('company').prefetch_related('projects').order_by('first_name')
     query = request.GET.get('q', '')
     if query:
-        contacts = contacts.filter(first_name__icontains=query) | contacts.filter(last_name__icontains=query)
+        contacts = contacts.filter(Q(first_name__icontains=query) | Q(last_name__icontains=query))
     paginator = Paginator(contacts, 20)
     page = request.GET.get('page', 1)
     contacts_page = paginator.get_page(page)

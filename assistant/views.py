@@ -364,7 +364,7 @@ def _undo_action(user, token: str, lang: str = 'en'):
     log = AILog.objects.filter(user=user, payload__undo_token=token).order_by('-created_at').first()
     if not log:
         return False, t('undo_not_found', lang), lang
-    if (timezone.now() - log.created_at).total_seconds() > 10:
+    if (timezone.now() - log.created_at).total_seconds() > 600:
         return False, t('undo_expired', lang), lang
     payload = log.payload or {}
     intent = payload.get('intent')
