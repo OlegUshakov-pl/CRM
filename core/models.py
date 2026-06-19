@@ -83,13 +83,22 @@ def generate_unique_slug(instance, source_field, ModelClass):
     base_slug = slugify(getattr(instance, source_field))
     if not base_slug:
         base_slug = 'untitled'
+
+    from django.db import IntegrityError
+
     slug = base_slug
     counter = 1
-    with transaction.atomic():
-        while ModelClass._base_manager.select_for_update().filter(slug=slug).exclude(pk=instance.pk).exists():
+    max_attempts = 100
+
+    for _ in range(max_attempts):
+        with transaction.atomic():
+            if not ModelClass._base_manager.select_for_update().filter(slug=slug).exclude(pk=instance.pk).exists():
+                return slug
             slug = f"{base_slug}-{counter}"
             counter += 1
-    return slug
+
+    import uuid
+    return f"{base_slug}-{uuid.uuid4().hex[:8]}"
 
 
 def _get_encryption_key():

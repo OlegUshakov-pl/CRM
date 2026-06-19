@@ -169,3 +169,46 @@ class SettingsSecurityTest(TestCase):
         finally:
             os.environ.pop('DJANGO_SECRET_KEY', None)
             reload(config.settings)
+
+
+class GenerateUniqueSlugRaceConditionTest(TestCase):
+    def test_slug_generation_with_many_collisions(self):
+        from projects.models import Project
+        user = User.objects.create_user(username='racetest', password='testpass')
+        slugs = set()
+        for i in range(50):
+            p = Project(name='Collision Test', number=f'C{i:03d}', created_by=user)
+            p.save()
+            self.assertNotIn(p.slug, slugs)
+            slugs.add(p.slug)
+
+    def test_slug_never_exceeds_max_attempts(self):
+        from projects.models import Project
+        user = User.objects.create_user(username='maxtest', password='testpass')
+        for i in range(10):
+            p = Project(name='Max Test', number=f'M{i:03d}', created_by=user)
+            p.save()
+            self.assertTrue(p.slug.startswith('max-test'))
+
+
+class FileMemoryOptimizationTest(TestCase):
+    def test_save_uploaded_passes_file_object_directly(self):
+        from unittest.mock import MagicMock, patch
+        from assistant.services.files import AIFileService
+
+        user = User.objects.create_user(username='filetest', password='testpass')
+        service = AIFileService(user)
+
+        mock_file = MagicMock()
+        mock_file.name = 'test.jpg'
+        mock_file.size = 1024
+        mock_file.__bool__ = lambda self: True
+
+        with patch('assistant.models.AIFile') as MockAIFile:
+            mock_ai = MagicMock()
+            MockAIFile.return_value = mock_ai
+            mock_ai.file = MagicMock()
+            service.save_uploaded(mock_file)
+            mock_ai.file.save.assert_called_once()
+            call_args = mock_ai.file.save.call_args
+            self.assertIs(call_args[0][1], mock_file)

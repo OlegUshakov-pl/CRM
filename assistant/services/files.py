@@ -14,6 +14,8 @@ from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 
+CHUNK_SIZE = 64 * 1024  # 64KB chunks for file operations
+
 
 ALLOWED_EXT = {'.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp',
                '.pdf', '.docx', '.xlsx', '.dwg'}
@@ -56,11 +58,12 @@ class AIFileService:
             original_name=name,
             size=size,
         )
-        ai_file.file.save(name, ContentFile(uploaded_file.read()), save=True)
+        ai_file.file.save(name, uploaded_file, save=True)
         return ai_file
 
     def save_downloaded(self, fetch_result) -> Optional['AIFile']:
         from ..models import AIFile
+        from io import BytesIO
 
         if not fetch_result.ok:
             return None
@@ -78,7 +81,8 @@ class AIFileService:
             source_url=fetch_result.final_url or None,
             size=fetch_result.size,
         )
-        ai_file.file.save(fetch_result.file_name, ContentFile(fetch_result.content), save=True)
+        content_file = ContentFile(fetch_result.content)
+        ai_file.file.save(fetch_result.file_name, content_file, save=True)
         return ai_file
 
     def save_content(self, filename: str, content: str) -> Optional['AIFile']:
@@ -123,9 +127,9 @@ class AIFileService:
         else:
             file_type = 'other'
 
-        with open(ai.file.path, 'rb') as f:
-            doc = Document(project=project, file_type=file_type, number=ai.original_name, size=ai.size)
-            doc.file.save(ai.original_name, ContentFile(f.read()), save=True)
+        doc = Document(project=project, file_type=file_type, number=ai.original_name, size=ai.size)
+        with open(ai.file.path, 'rb') as src:
+            doc.file.save(ai.original_name, src, save=True)
         return doc
 
     def total_size(self) -> int:

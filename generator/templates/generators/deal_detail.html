@@ -65,7 +65,7 @@
             </div>
             <div>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Assigned To</p>
-                <p class="font-medium text-gray-900 dark:text-white">{{ deal.assigned_to.get_full_name|default:deal.assigned_to.username|default:'—' }}</p>
+                <p class="font-medium text-gray-900 dark:text-white">{% if deal.assigned_to %}{{ deal.assigned_to.get_full_name|default:deal.assigned_to.username|default:'—' }}{% else %}—{% endif %}</p>
             </div>
             <div>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Due Date</p>

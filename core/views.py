@@ -39,7 +39,16 @@ def dashboard(request):
 @login_required
 def search_view(request):
     query = request.GET.get('q', '').strip()
-    results = {}
+    results = {
+        'projects': [],
+        'contacts': [],
+        'companies': [],
+        'tasks': [],
+        'notes': [],
+        'materials': [],
+        'parts': [],
+        'deals': [],
+    }
 
     if query:
         results['projects'] = Project.objects.filter(is_active=True).filter(
