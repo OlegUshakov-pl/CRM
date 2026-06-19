@@ -99,7 +99,7 @@
                             </td>
                             <td class="py-2">
                                 <button type="button" onclick="openSlideOver('{% url 'documents:edit_slide' doc.pk %}')" class="text-indigo-600 dark:text-indigo-400 hover:underline mr-2">Edit</button>
-                                <button type="button" @click="$store.deleteModal.open('{% url 'documents:delete' doc.pk %}', '{{ doc.number|default:doc.filename|escapejs }}')" class="text-red-600 dark:text-red-400 hover:underline">Delete</button>
+                                <button type="button" @click="$store.deleteModal.open('{% url 'documents:delete' doc.pk %}', '{{ doc.number|default:doc.filename|escapejs }}', '{% url 'projects:edit' project.slug %}')" class="text-red-600 dark:text-red-400 hover:underline">Delete</button>
                             </td>
                         </tr>
                         {% endfor %}
@@ -163,7 +163,7 @@
                             <td class="py-2">
                                 {% if material.slug %}
                                 <button type="button" onclick="openSlideOver('{% url 'materials:edit_slide' material.slug %}')" class="text-indigo-600 dark:text-indigo-400 hover:underline mr-2">Edit</button>
-                                <button type="button" @click="$store.deleteModal.open('{% url 'materials:delete' material.slug %}', '{{ material.name|escapejs }}')" class="text-red-600 dark:text-red-400 hover:underline">Delete</button>
+                                <button type="button" @click="$store.deleteModal.open('{% url 'materials:delete' material.slug %}', '{{ material.name|escapejs }}', '{% url 'projects:edit' project.slug %}')" class="text-red-600 dark:text-red-400 hover:underline">Delete</button>
                                 {% endif %}
                             </td>
                         </tr>
@@ -213,7 +213,7 @@
                             <td class="py-2 text-gray-600 dark:text-gray-400">{{ part.updated|date:"Y-m-d"|default:'—' }}</td>
                             <td class="py-2">
                                 <button type="button" onclick="openSlideOver('{% url 'parts:edit_slide' part.pk %}')" class="text-indigo-600 dark:text-indigo-400 hover:underline mr-2">Edit</button>
-                                <button type="button" @click="$store.deleteModal.open('{% url 'parts:delete' part.pk %}', '{{ part.number|escapejs }}')" class="text-red-600 dark:text-red-400 hover:underline">Delete</button>
+                                <button type="button" @click="$store.deleteModal.open('{% url 'parts:delete' part.pk %}', '{{ part.number|escapejs }}', '{% url 'projects:edit' project.slug %}')" class="text-red-600 dark:text-red-400 hover:underline">Delete</button>
                             </td>
                         </tr>
                         {% endfor %}
@@ -262,7 +262,7 @@
                             <td class="py-2 text-gray-600 dark:text-gray-400">{{ part.updated|date:"Y-m-d"|default:'—' }}</td>
                             <td class="py-2">
                                 <button type="button" onclick="openSlideOver('{% url 'parts:edit_slide' part.pk %}')" class="text-indigo-600 dark:text-indigo-400 hover:underline mr-2">Edit</button>
-                                <button type="button" @click="$store.deleteModal.open('{% url 'parts:delete' part.pk %}', '{{ part.number|escapejs }}')" class="text-red-600 dark:text-red-400 hover:underline">Delete</button>
+                                <button type="button" @click="$store.deleteModal.open('{% url 'parts:delete' part.pk %}', '{{ part.number|escapejs }}', '{% url 'projects:edit' project.slug %}')" class="text-red-600 dark:text-red-400 hover:underline">Delete</button>
                             </td>
                         </tr>
                         {% endfor %}
@@ -311,7 +311,7 @@
                             <td class="py-2 text-gray-600 dark:text-gray-400">{{ part.updated|date:"Y-m-d"|default:'—' }}</td>
                             <td class="py-2">
                                 <button type="button" onclick="openSlideOver('{% url 'parts:edit_slide' part.pk %}')" class="text-indigo-600 dark:text-indigo-400 hover:underline mr-2">Edit</button>
-                                <button type="button" @click="$store.deleteModal.open('{% url 'parts:delete' part.pk %}', '{{ part.number|escapejs }}')" class="text-red-600 dark:text-red-400 hover:underline">Delete</button>
+                                <button type="button" @click="$store.deleteModal.open('{% url 'parts:delete' part.pk %}', '{{ part.number|escapejs }}', '{% url 'projects:edit' project.slug %}')" class="text-red-600 dark:text-red-400 hover:underline">Delete</button>
                             </td>
                         </tr>
                         {% endfor %}
