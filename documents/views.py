@@ -20,8 +20,11 @@ def document_list(request):
     documents = Document.objects.select_related('project').all()
     query = request.GET.get('q', '')
     sort = request.GET.get('sort', 'created_desc')
+    doc_type = request.GET.get('type', '')
     if query:
         documents = documents.filter(number__icontains=query)
+    if doc_type:
+        documents = documents.filter(document_type=doc_type)
     if sort == 'size':
         documents = documents.order_by('size')
     elif sort == 'size_desc':
@@ -38,6 +41,7 @@ def document_list(request):
     return render(request, 'documents/documents_list.html', {
         'documents': documents_page, 'query': query,
         'current_sort': sort, 'total_count': paginator.count,
+        'current_type': doc_type,
     })
 
 
