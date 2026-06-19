@@ -96,6 +96,7 @@ def project_detail(request, slug):
     from documents.models import Document
     all_docs = project.documents.all()
     pdf_files = [d for d in all_docs if d.file and os.path.splitext(d.file.name)[1].lower() in PDF_EXTENSIONS]
+    non_pdf_docs = [d for d in all_docs if not d.file or os.path.splitext(d.file.name)[1].lower() not in PDF_EXTENSIONS]
 
     return render(request, 'projects/project_detail.html', {
         'project': project,
@@ -107,6 +108,8 @@ def project_detail(request, slug):
         'dxfs_count': len(dxfs),
         'pdf_files': pdf_files[:4],
         'pdf_files_count': len(pdf_files),
+        'non_pdf_docs': non_pdf_docs[:4],
+        'non_pdf_docs_count': len(non_pdf_docs),
     })
 
 
@@ -129,7 +132,7 @@ def project_create(request):
             if next_url == 'dashboard':
                 return redirect('core:dashboard')
             return redirect('projects:list')
-    return render(request, 'projects/project_create_page.html', {'form': form, 'title': 'Add Project', 'is_page': True})
+    return render(request, 'projects/project_create_page.html', {'form': form, 'title': 'Add Project', 'is_page': True, 'pdf_files': [], 'pdf_files_count': 0})
 
 
 @login_required
@@ -153,6 +156,7 @@ def project_edit(request, slug):
     from documents.models import Document
     all_docs = project.documents.all()
     pdf_files = [d for d in all_docs if d.file and os.path.splitext(d.file.name)[1].lower() in PDF_EXTENSIONS]
+    non_pdf_docs = [d for d in all_docs if not d.file or os.path.splitext(d.file.name)[1].lower() not in PDF_EXTENSIONS]
 
     if request.method == 'POST':
         if 'note_submit' in request.POST:
@@ -205,6 +209,8 @@ def project_edit(request, slug):
         'edit_dxfs_count': edit_dxfs_count,
         'pdf_files': pdf_files,
         'pdf_files_count': len(pdf_files),
+        'non_pdf_docs': non_pdf_docs,
+        'non_pdf_docs_count': len(non_pdf_docs),
     })
 
 

@@ -15,42 +15,13 @@ from .forms import DocumentForm, CommonDocumentForm, CategoryForm
 
 
 @login_required
-def document_category_list(request):
-    from django.db.models import Count
-    type_counts = Document.objects.values('file_type').annotate(count=Count('id'))
-    count_map = {c['file_type']: c['count'] for c in type_counts}
-    categories = []
-    for choice_value, choice_label in Document.FILE_TYPE_CHOICES:
-        categories.append({'value': choice_value, 'label': choice_label, 'count': count_map.get(choice_value, 0)})
-    custom_categories = Category.objects.all()
-    return render(request, 'documents/documents_category.html', {'categories': categories, 'custom_categories': custom_categories})
-
-
-@login_required
-def document_category_detail(request, file_type):
-    valid_values = [c[0] for c in Document.FILE_TYPE_CHOICES]
-    if file_type not in valid_values:
-        raise Http404("Invalid category")
-    label = dict(Document.FILE_TYPE_CHOICES).get(file_type, file_type)
-    documents = Document.objects.filter(file_type=file_type).select_related('project')
-    return render(request, 'documents/documents_category_detail.html', {
-        'documents': documents, 'category_label': label, 'category_value': file_type,
-    })
-
-
-@login_required
 def document_list(request):
     documents = Document.objects.select_related('project').all()
     query = request.GET.get('q', '')
-    type_filter = request.GET.get('type', '')
     sort = request.GET.get('sort', 'created_desc')
     if query:
         documents = documents.filter(number__icontains=query)
-    if type_filter:
-        documents = documents.filter(file_type=type_filter)
-    if sort == 'type':
-        documents = documents.order_by('file_type')
-    elif sort == 'size':
+    if sort == 'size':
         documents = documents.order_by('size')
     elif sort == 'size_desc':
         documents = documents.order_by('-size')
@@ -65,7 +36,7 @@ def document_list(request):
     documents_page = paginator.get_page(page)
     return render(request, 'documents/documents_list.html', {
         'documents': documents_page, 'query': query,
-        'current_type': type_filter, 'current_sort': sort, 'total_count': paginator.count,
+        'current_sort': sort, 'total_count': paginator.count,
     })
 
 
@@ -74,9 +45,7 @@ def document_project(request, project_slug):
     project = get_object_or_404(Project, slug=project_slug)
     documents = Document.objects.filter(project=project)
     sort = request.GET.get('sort', 'created_desc')
-    if sort == 'type':
-        documents = documents.order_by('file_type')
-    elif sort == 'size':
+    if sort == 'size':
         documents = documents.order_by('size')
     elif sort == 'size_desc':
         documents = documents.order_by('-size')
@@ -128,7 +97,6 @@ def document_save(request, project_slug):
     project = get_object_or_404(Project, slug=project_slug)
     form = DocumentForm(request.POST, request.FILES)
     if form.is_valid():
-        file_type = form.cleaned_data.get('file_type', 'other')
         up_files = request.FILES.getlist('file')
         if up_files and project.number:
             from documents.models import get_project_folder_name, PDF_EXTENSIONS, IMAGE_EXTENSIONS
@@ -140,22 +108,15 @@ def document_save(request, project_slug):
                     if ext in PDF_EXTENSIONS or ext in IMAGE_EXTENSIONS:
                         subfolder = get_subfolder_name(project.number, 'subfolder_pdf', 'PDF')
                     else:
-                        subfolder_map = {
-                            'drawings': get_subfolder_name(project.number, 'subfolder_drawings', 'drawings'),
-                            'models_3d': get_subfolder_name(project.number, 'subfolder_models', 'models'),
-                            'documents': get_subfolder_name(project.number, 'subfolder_documents', 'documents'),
-                            'photos': get_subfolder_name(project.number, 'subfolder_documents', 'documents'),
-                            'other': get_subfolder_name(project.number, 'subfolder_documents', 'documents'),
-                        }
-                        subfolder = subfolder_map.get(file_type, get_subfolder_name(project.number, 'subfolder_documents', 'documents'))
+                        subfolder = get_subfolder_name(project.number, 'subfolder_documents', 'documents')
                     if root_path:
                         os.makedirs(os.path.join(root_path, project_folder, subfolder), exist_ok=True)
         if up_files:
             for f in up_files:
                 if f:
-                    Document.objects.create(project=project, number=form.cleaned_data.get('number', ''), file=f, file_type=file_type)
+                    Document.objects.create(project=project, number=form.cleaned_data.get('number', ''), file=f)
         else:
-            Document.objects.create(project=project, number=form.cleaned_data.get('number', ''), file_type=file_type)
+            Document.objects.create(project=project, number=form.cleaned_data.get('number', ''))
         if request.headers.get('HX-Request'):
             response = HttpResponse()
             response['HX-Refresh'] = 'true'
@@ -176,7 +137,6 @@ def document_common_save(request):
     form = CommonDocumentForm(request.POST, request.FILES)
     if form.is_valid():
         project = form.cleaned_data.get('project')
-        file_type = form.cleaned_data.get('file_type', 'other')
         up_files = request.FILES.getlist('file')
         if up_files and project and project.number:
             from documents.models import get_project_folder_name, PDF_EXTENSIONS, IMAGE_EXTENSIONS
@@ -188,22 +148,15 @@ def document_common_save(request):
                     if ext in PDF_EXTENSIONS or ext in IMAGE_EXTENSIONS:
                         subfolder = get_subfolder_name(project.number, 'subfolder_pdf', 'PDF')
                     else:
-                        subfolder_map = {
-                            'drawings': get_subfolder_name(project.number, 'subfolder_drawings', 'drawings'),
-                            'models_3d': get_subfolder_name(project.number, 'subfolder_models', 'models'),
-                            'documents': get_subfolder_name(project.number, 'subfolder_documents', 'documents'),
-                            'photos': get_subfolder_name(project.number, 'subfolder_documents', 'documents'),
-                            'other': get_subfolder_name(project.number, 'subfolder_documents', 'documents'),
-                        }
-                        subfolder = subfolder_map.get(file_type, get_subfolder_name(project.number, 'subfolder_documents', 'documents'))
+                        subfolder = get_subfolder_name(project.number, 'subfolder_documents', 'documents')
                     if root_path:
                         os.makedirs(os.path.join(root_path, project_folder, subfolder), exist_ok=True)
         if up_files:
             for f in up_files:
                 if f:
-                    Document.objects.create(project=project, number=form.cleaned_data.get('number', ''), file=f, file_type=file_type)
+                    Document.objects.create(project=project, number=form.cleaned_data.get('number', ''), file=f)
         else:
-            Document.objects.create(project=project, number=form.cleaned_data.get('number', ''), file_type=file_type)
+            Document.objects.create(project=project, number=form.cleaned_data.get('number', ''))
         if request.headers.get('HX-Request'):
             response = HttpResponse()
             response['HX-Refresh'] = 'true'
@@ -267,7 +220,7 @@ def document_view(request, pk):
     text_content = None
     if is_image:
         photos = Document.objects.filter(
-            project=document.project, file_type='photos'
+            project=document.project
         ).exclude(pk=document.pk).order_by('-created_at')[:10]
     elif is_text:
         file_path = document.filepath
@@ -343,7 +296,7 @@ def category_save(request):
             response['HX-Refresh'] = 'true'
             return response
         messages.success(request, 'Category created.')
-        return redirect('documents:category_list')
+        return redirect('documents:list')
     return render(request, 'documents/category_form.html', {'form': form, 'title': 'Add Category'})
 
 
@@ -357,4 +310,4 @@ def category_delete(request, pk):
         response['HX-Refresh'] = 'true'
         return response
     messages.success(request, 'Category deleted.')
-    return redirect('documents:category_list')
+    return redirect('documents:list')

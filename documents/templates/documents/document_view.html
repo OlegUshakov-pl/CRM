@@ -7,7 +7,7 @@
     <div class="flex items-center justify-between mb-6">
         <div>
             <h1 class="text-2xl font-bold text-gray-900">{% if is_image %}Photo{% else %}{{ doc.filename }}{% endif %}</h1>
-            <p class="text-sm text-gray-500 mt-1">{% if doc.project %}<a href="{% url 'projects:detail' doc.project.slug %}" class="text-indigo-600 hover:underline">{{ doc.project.name }}</a>{% else %}—{% endif %} · {{ doc.get_file_type_display }} · {% if doc.size %}{{ doc.size|filesizeformat }}{% endif %}</p>
+            <p class="text-sm text-gray-500 mt-1">{% if doc.project %}<a href="{% url 'projects:detail' doc.project.slug %}" class="text-indigo-600 hover:underline">{{ doc.project.name }}</a>{% else %}—{% endif %} · {% if doc.size %}{{ doc.size|filesizeformat }}{% endif %}</p>
         </div>
         <div class="flex items-center gap-2">
             <a href="{% if request.META.HTTP_REFERER %}{{ request.META.HTTP_REFERER }}{% else %}{% url 'documents:list' %}{% endif %}" class="inline-flex items-center gap-2 px-4 py-2.5 border border-gray-300 text-gray-700 hover:bg-gray-50 text-[14px] transition-colors">

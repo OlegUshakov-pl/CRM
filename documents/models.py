@@ -24,15 +24,7 @@ def document_upload_to(instance, filename):
         if ext in PDF_EXTENSIONS or ext in IMAGE_EXTENSIONS:
             subfolder = get_subfolder_name(instance.project.number, 'subfolder_pdf', 'PDF')
         else:
-            file_type = getattr(instance, 'file_type', 'other')
-            subfolder_map = {
-                'drawings': get_subfolder_name(instance.project.number, 'subfolder_drawings', 'drawings'),
-                'models_3d': get_subfolder_name(instance.project.number, 'subfolder_models', 'models'),
-                'documents': get_subfolder_name(instance.project.number, 'subfolder_documents', 'documents'),
-                'photos': get_subfolder_name(instance.project.number, 'subfolder_documents', 'documents'),
-                'other': get_subfolder_name(instance.project.number, 'subfolder_documents', 'documents'),
-            }
-            subfolder = subfolder_map.get(file_type, get_subfolder_name(instance.project.number, 'subfolder_documents', 'documents'))
+            subfolder = get_subfolder_name(instance.project.number, 'subfolder_documents', 'documents')
         return os.path.join(folder, subfolder, filename)
     return os.path.join('_no_project', filename)
 
@@ -49,21 +41,12 @@ class Category(models.Model):
 
 
 class Document(models.Model):
-    FILE_TYPE_CHOICES = [
-        ('drawings', 'Drawings'),
-        ('models_3d', 'Models 3D'),
-        ('documents', 'Documents'),
-        ('photos', 'Photos'),
-        ('other', 'Other'),
-    ]
-
     project = models.ForeignKey(Project, on_delete=models.SET_NULL, null=True, blank=True, related_name='documents', db_index=True)
     number = models.CharField(max_length=50, blank=True, null=True, db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     size = models.IntegerField(blank=True, null=True, help_text='File size in bytes')
     file = models.FileField(upload_to=document_upload_to, storage=ProjectFileSystemStorage())
-    file_type = models.CharField(max_length=50, choices=FILE_TYPE_CHOICES, default='other', db_index=True)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, related_name='documents', db_index=True)
 
     class Meta:

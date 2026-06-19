@@ -31,13 +31,12 @@ class DocumentForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['project'].required = False
-        self.fields['file_type'].label = 'Category'
         self.fields['project'].queryset = Project.objects.filter(is_active=True)
         self.fields['category'].queryset = Category.objects.all()
 
     class Meta:
         model = Document
-        fields = ['project', 'number', 'file', 'file_type', 'category']
+        fields = ['project', 'number', 'file', 'category']
         widgets = {
             'project': forms.Select(attrs={
                 'class': 'w-full px-4 py-2.5 border border-[#e8e8e8] text-[14px] outline-none focus:border-violet-300 transition-colors',
@@ -45,9 +44,6 @@ class DocumentForm(forms.ModelForm):
             'number': forms.TextInput(attrs={
                 'class': 'w-full px-4 py-2.5 border border-[#e8e8e8] text-[14px] outline-none focus:border-violet-300 transition-colors',
                 'placeholder': 'Document number',
-            }),
-            'file_type': forms.Select(attrs={
-                'class': 'w-full px-4 py-2.5 border border-[#e8e8e8] text-[14px] outline-none focus:border-violet-300 transition-colors',
             }),
             'category': forms.Select(attrs={
                 'class': 'w-full px-4 py-2.5 border border-[#e8e8e8] text-[14px] outline-none focus:border-violet-300 transition-colors',
@@ -66,13 +62,12 @@ class CommonDocumentForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['project'].required = False
-        self.fields['file_type'].label = 'Category'
         self.fields['project'].queryset = Project.objects.filter(is_active=True)
         self.fields['category'].queryset = Category.objects.all()
 
     class Meta:
         model = Document
-        fields = ['project', 'number', 'file', 'file_type', 'category']
+        fields = ['project', 'number', 'file', 'category']
         widgets = {
             'project': forms.Select(attrs={
                 'class': 'w-full px-4 py-2.5 border border-[#e8e8e8] text-[14px] outline-none focus:border-violet-300 transition-colors',
@@ -80,9 +75,6 @@ class CommonDocumentForm(forms.ModelForm):
             'number': forms.TextInput(attrs={
                 'class': 'w-full px-4 py-2.5 border border-[#e8e8e8] text-[14px] outline-none focus:border-violet-300 transition-colors',
                 'placeholder': 'Document number',
-            }),
-            'file_type': forms.Select(attrs={
-                'class': 'w-full px-4 py-2.5 border border-[#e8e8e8] text-[14px] outline-none focus:border-violet-300 transition-colors',
             }),
             'category': forms.Select(attrs={
                 'class': 'w-full px-4 py-2.5 border border-[#e8e8e8] text-[14px] outline-none focus:border-violet-300 transition-colors',
