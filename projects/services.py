@@ -104,7 +104,6 @@ class ExportService:
         for d in self.project.documents.all():
             entry = {
                 'number': d.number or '',
-                'file_type': d.file_type,
                 'size': d.size,
                 'file_name': d.file.name if d.file else None,
             }
@@ -302,7 +301,6 @@ class ImportService:
             doc = Document(
                 project=project,
                 number=d_data.get('number') or None,
-                file_type=d_data.get('file_type', 'other'),
                 size=d_data.get('size'),
             )
             if file_name:
