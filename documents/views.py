@@ -112,12 +112,13 @@ def document_save(request, project_slug):
                         subfolder = get_subfolder_name(project.number, 'subfolder_documents', 'documents')
                     if root_path:
                         os.makedirs(os.path.join(root_path, project_folder, subfolder), exist_ok=True)
+        category = form.cleaned_data.get('category')
         if up_files:
             for f in up_files:
                 if f:
-                    Document.objects.create(project=project, number=form.cleaned_data.get('number', ''), file=f)
+                    Document.objects.create(project=project, number=form.cleaned_data.get('number', ''), file=f, category=category)
         else:
-            Document.objects.create(project=project, number=form.cleaned_data.get('number', ''))
+            Document.objects.create(project=project, number=form.cleaned_data.get('number', ''), category=category)
         if request.headers.get('HX-Request'):
             response = HttpResponse()
             response['HX-Refresh'] = 'true'
@@ -152,12 +153,13 @@ def document_common_save(request):
                         subfolder = get_subfolder_name(project.number, 'subfolder_documents', 'documents')
                     if root_path:
                         os.makedirs(os.path.join(root_path, project_folder, subfolder), exist_ok=True)
+        category = form.cleaned_data.get('category')
         if up_files:
             for f in up_files:
                 if f:
-                    Document.objects.create(project=project, number=form.cleaned_data.get('number', ''), file=f)
+                    Document.objects.create(project=project, number=form.cleaned_data.get('number', ''), file=f, category=category)
         else:
-            Document.objects.create(project=project, number=form.cleaned_data.get('number', ''))
+            Document.objects.create(project=project, number=form.cleaned_data.get('number', ''), category=category)
         if request.headers.get('HX-Request'):
             response = HttpResponse()
             response['HX-Refresh'] = 'true'
