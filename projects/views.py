@@ -91,6 +91,12 @@ def project_detail(request, slug):
     drawings = [p for p in all_parts if not p.is_model and not p.is_dxf]
     models = [p for p in all_parts if p.is_model]
     dxfs = [p for p in all_parts if p.is_dxf]
+
+    PDF_EXTENSIONS = ('.pdf', '.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp')
+    from documents.models import Document
+    all_docs = project.documents.all()
+    pdf_files = [d for d in all_docs if d.file and os.path.splitext(d.file.name)[1].lower() in PDF_EXTENSIONS]
+
     return render(request, 'projects/project_detail.html', {
         'project': project,
         'drawings': drawings[:4],
@@ -99,6 +105,8 @@ def project_detail(request, slug):
         'drawings_count': len(drawings),
         'models_count': len(models),
         'dxfs_count': len(dxfs),
+        'pdf_files': pdf_files[:4],
+        'pdf_files_count': len(pdf_files),
     })
 
 
@@ -140,6 +148,11 @@ def project_edit(request, slug):
     edit_models_count = len([p for p in all_parts if p.is_model])
     edit_drawings_count = len([p for p in all_parts if not p.is_model and not p.is_dxf])
     edit_dxfs_count = len([p for p in all_parts if p.is_dxf])
+
+    PDF_EXTENSIONS = ('.pdf', '.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp')
+    from documents.models import Document
+    all_docs = project.documents.all()
+    pdf_files = [d for d in all_docs if d.file and os.path.splitext(d.file.name)[1].lower() in PDF_EXTENSIONS]
 
     if request.method == 'POST':
         if 'note_submit' in request.POST:
@@ -190,6 +203,8 @@ def project_edit(request, slug):
         'edit_models_count': edit_models_count,
         'edit_drawings_count': edit_drawings_count,
         'edit_dxfs_count': edit_dxfs_count,
+        'pdf_files': pdf_files,
+        'pdf_files_count': len(pdf_files),
     })
 
 

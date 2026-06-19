@@ -131,19 +131,25 @@ def document_save(request, project_slug):
         file_type = form.cleaned_data.get('file_type', 'other')
         up_files = request.FILES.getlist('file')
         if up_files and project.number:
-            from documents.models import get_project_folder_name
+            from documents.models import get_project_folder_name, PDF_EXTENSIONS, IMAGE_EXTENSIONS
             project_folder = get_project_folder_name(project)
-            subfolder_map = {
-                'drawings': get_subfolder_name(project.number, 'subfolder_drawings', 'drawings'),
-                'models_3d': get_subfolder_name(project.number, 'subfolder_models', 'models'),
-                'documents': get_subfolder_name(project.number, 'subfolder_documents', 'documents'),
-                'photos': get_subfolder_name(project.number, 'subfolder_documents', 'documents'),
-                'other': get_subfolder_name(project.number, 'subfolder_documents', 'documents'),
-            }
-            subfolder = subfolder_map.get(file_type, get_subfolder_name(project.number, 'subfolder_documents', 'documents'))
             root_path = get_project_root_path()
-            if root_path:
-                os.makedirs(os.path.join(root_path, project_folder, subfolder), exist_ok=True)
+            for f in up_files:
+                if f:
+                    ext = os.path.splitext(f.name)[1].lower()
+                    if ext in PDF_EXTENSIONS or ext in IMAGE_EXTENSIONS:
+                        subfolder = get_subfolder_name(project.number, 'subfolder_pdf', 'PDF')
+                    else:
+                        subfolder_map = {
+                            'drawings': get_subfolder_name(project.number, 'subfolder_drawings', 'drawings'),
+                            'models_3d': get_subfolder_name(project.number, 'subfolder_models', 'models'),
+                            'documents': get_subfolder_name(project.number, 'subfolder_documents', 'documents'),
+                            'photos': get_subfolder_name(project.number, 'subfolder_documents', 'documents'),
+                            'other': get_subfolder_name(project.number, 'subfolder_documents', 'documents'),
+                        }
+                        subfolder = subfolder_map.get(file_type, get_subfolder_name(project.number, 'subfolder_documents', 'documents'))
+                    if root_path:
+                        os.makedirs(os.path.join(root_path, project_folder, subfolder), exist_ok=True)
         if up_files:
             for f in up_files:
                 if f:
@@ -173,19 +179,25 @@ def document_common_save(request):
         file_type = form.cleaned_data.get('file_type', 'other')
         up_files = request.FILES.getlist('file')
         if up_files and project and project.number:
-            from documents.models import get_project_folder_name
+            from documents.models import get_project_folder_name, PDF_EXTENSIONS, IMAGE_EXTENSIONS
             project_folder = get_project_folder_name(project)
-            subfolder_map = {
-                'drawings': get_subfolder_name(project.number, 'subfolder_drawings', 'drawings'),
-                'models_3d': get_subfolder_name(project.number, 'subfolder_models', 'models'),
-                'documents': get_subfolder_name(project.number, 'subfolder_documents', 'documents'),
-                'photos': get_subfolder_name(project.number, 'subfolder_documents', 'documents'),
-                'other': get_subfolder_name(project.number, 'subfolder_documents', 'documents'),
-            }
-            subfolder = subfolder_map.get(file_type, get_subfolder_name(project.number, 'subfolder_documents', 'documents'))
             root_path = get_project_root_path()
-            if root_path:
-                os.makedirs(os.path.join(root_path, project_folder, subfolder), exist_ok=True)
+            for f in up_files:
+                if f:
+                    ext = os.path.splitext(f.name)[1].lower()
+                    if ext in PDF_EXTENSIONS or ext in IMAGE_EXTENSIONS:
+                        subfolder = get_subfolder_name(project.number, 'subfolder_pdf', 'PDF')
+                    else:
+                        subfolder_map = {
+                            'drawings': get_subfolder_name(project.number, 'subfolder_drawings', 'drawings'),
+                            'models_3d': get_subfolder_name(project.number, 'subfolder_models', 'models'),
+                            'documents': get_subfolder_name(project.number, 'subfolder_documents', 'documents'),
+                            'photos': get_subfolder_name(project.number, 'subfolder_documents', 'documents'),
+                            'other': get_subfolder_name(project.number, 'subfolder_documents', 'documents'),
+                        }
+                        subfolder = subfolder_map.get(file_type, get_subfolder_name(project.number, 'subfolder_documents', 'documents'))
+                    if root_path:
+                        os.makedirs(os.path.join(root_path, project_folder, subfolder), exist_ok=True)
         if up_files:
             for f in up_files:
                 if f:

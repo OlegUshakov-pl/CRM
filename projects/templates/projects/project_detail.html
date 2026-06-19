@@ -191,6 +191,73 @@
         </div>
         {% endif %}
 
+        {% if pdf_files %}
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-5">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">PDF / Images</h2>
+                <span class="text-sm text-gray-500 dark:text-gray-400">{{ pdf_files_count }} item(s)</span>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="text-left text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
+                            <th class="pb-2 font-medium">Number</th>
+                            <th class="pb-2 font-medium">Type</th>
+                            <th class="pb-2 font-medium">File</th>
+                            <th class="pb-2 font-medium">Size</th>
+                            <th class="pb-2 font-medium">Created</th>
+                            <th class="pb-2 font-medium">Show</th>
+                            <th class="pb-2 font-medium">Download</th>
+                            <th class="pb-2 font-medium">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for doc in pdf_files %}
+                        <tr class="border-b border-gray-100 dark:border-gray-700/50">
+                            <td class="py-2 text-gray-900 dark:text-white">{{ doc.number|default:'—' }}</td>
+                            <td class="py-2 text-gray-600 dark:text-gray-400">
+                                {% with ext=doc.filename|slice:"-3:" %}
+                                {% if ext == 'pdf' %}
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300">PDF</span>
+                                {% elif ext == 'jpg' or ext == 'peg' %}
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">JPG</span>
+                                {% elif ext == 'png' %}
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">PNG</span>
+                                {% else %}
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">{{ ext|upper }}</span>
+                                {% endif %}
+                                {% endwith %}
+                            </td>
+                            <td class="py-2 text-gray-600 dark:text-gray-400 max-w-[150px] truncate" title="{{ doc.filename }}">{{ doc.filename|truncatechars:20 }}</td>
+                            <td class="py-2 text-gray-600 dark:text-gray-400">{% if doc.size %}{{ doc.size|filesizeformat }}{% else %}—{% endif %}</td>
+                            <td class="py-2 text-gray-600 dark:text-gray-400">{{ doc.created_at|date:'M d, Y' }}</td>
+                            <td class="py-2">
+                                {% if doc.file %}
+                                <a href="{% url 'documents:view' doc.pk %}" class="inline-flex items-center"><i data-lucide="eye" class="w-4 h-4 text-indigo-600"></i></a>
+                                {% endif %}
+                            </td>
+                            <td class="py-2">
+                                {% if doc.file %}
+                                <a href="{% url 'documents:download' doc.pk %}" class="inline-flex items-center"><i data-lucide="download" class="w-4 h-4 text-indigo-600"></i></a>
+                                {% endif %}
+                            </td>
+                            <td class="py-2">
+                                <button onclick="openSlideOver('{% url 'documents:edit_slide' doc.pk %}')" class="text-indigo-600 hover:underline mr-2">Edit</button>
+                                <button @click="$store.deleteModal.open('{% url 'documents:delete' doc.pk %}', '{{ doc.number|default:doc.filename|escapejs }}')" class="text-red-600 hover:underline">Delete</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% if pdf_files_count > 4 %}
+            <div class="mt-4 text-right">
+                <a href="{% url 'documents:project' project.slug %}" class="text-[13px] font-medium text-[#7c3aed] hover:opacity-80 transition-opacity">Page of PDF / Images</a>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
         {% if project.materials.all %}
         <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-5">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Materials</h2>

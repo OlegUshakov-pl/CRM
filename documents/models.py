@@ -7,6 +7,9 @@ from projects.utils import ProjectFileSystemStorage, sanitize_folder_name, get_s
 
 DocumentStorage = ProjectFileSystemStorage
 
+PDF_EXTENSIONS = ('.pdf',)
+IMAGE_EXTENSIONS = ('.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp')
+
 
 def get_project_folder_name(project):
     safe_number = sanitize_folder_name(project.number) if project.number else ''
@@ -17,15 +20,19 @@ def get_project_folder_name(project):
 def document_upload_to(instance, filename):
     if instance.project:
         folder = get_project_folder_name(instance.project)
-        file_type = getattr(instance, 'file_type', 'other')
-        subfolder_map = {
-            'drawings': get_subfolder_name(instance.project.number, 'subfolder_drawings', 'drawings'),
-            'models_3d': get_subfolder_name(instance.project.number, 'subfolder_models', 'models'),
-            'documents': get_subfolder_name(instance.project.number, 'subfolder_documents', 'documents'),
-            'photos': get_subfolder_name(instance.project.number, 'subfolder_documents', 'documents'),
-            'other': get_subfolder_name(instance.project.number, 'subfolder_documents', 'documents'),
-        }
-        subfolder = subfolder_map.get(file_type, get_subfolder_name(instance.project.number, 'subfolder_documents', 'documents'))
+        ext = os.path.splitext(filename)[1].lower()
+        if ext in PDF_EXTENSIONS or ext in IMAGE_EXTENSIONS:
+            subfolder = get_subfolder_name(instance.project.number, 'subfolder_pdf', 'PDF')
+        else:
+            file_type = getattr(instance, 'file_type', 'other')
+            subfolder_map = {
+                'drawings': get_subfolder_name(instance.project.number, 'subfolder_drawings', 'drawings'),
+                'models_3d': get_subfolder_name(instance.project.number, 'subfolder_models', 'models'),
+                'documents': get_subfolder_name(instance.project.number, 'subfolder_documents', 'documents'),
+                'photos': get_subfolder_name(instance.project.number, 'subfolder_documents', 'documents'),
+                'other': get_subfolder_name(instance.project.number, 'subfolder_documents', 'documents'),
+            }
+            subfolder = subfolder_map.get(file_type, get_subfolder_name(instance.project.number, 'subfolder_documents', 'documents'))
         return os.path.join(folder, subfolder, filename)
     return os.path.join('_no_project', filename)
 
@@ -85,3 +92,17 @@ class Document(models.Model):
         if root_path and self.file:
             return os.path.join(root_path, self.file.name)
         return os.path.join(settings.MEDIA_ROOT, self.file.name) if self.file else ''
+
+    @property
+    def is_pdf(self):
+        if self.file:
+            ext = os.path.splitext(self.file.name)[1].lower()
+            return ext in PDF_EXTENSIONS
+        return False
+
+    @property
+    def is_image(self):
+        if self.file:
+            ext = os.path.splitext(self.file.name)[1].lower()
+            return ext in IMAGE_EXTENSIONS
+        return False
