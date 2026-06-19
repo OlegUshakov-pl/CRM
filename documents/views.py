@@ -206,7 +206,15 @@ def document_show(request, pk):
     file_path = document.file.path
     if not os.path.exists(file_path):
         return HttpResponse('File not found', status=404)
-    return FileResponse(open(file_path, 'rb'), filename=document.filename)
+    ext = os.path.splitext(document.filename)[1].lower()
+    content_type = 'application/pdf' if ext == '.pdf' else 'application/octet-stream'
+    try:
+        with open(file_path, 'rb') as f:
+            response = HttpResponse(f.read(), content_type=content_type)
+        response['Content-Disposition'] = 'inline; filename="{}"'.format(document.filename)
+        return response
+    except Exception:
+        return HttpResponse('Unable to read file', status=500)
 
 
 @login_required
