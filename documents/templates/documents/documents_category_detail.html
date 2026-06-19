@@ -20,6 +20,7 @@
                 <thead>
                     <tr class="text-left text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
                         <th class="pb-2 font-medium">Number</th>
+                        <th class="pb-2 font-medium">Type</th>
                         <th class="pb-2 font-medium">Project</th>
                         <th class="pb-2 font-medium">File</th>
                         <th class="pb-2 font-medium">Size</th>
@@ -32,6 +33,13 @@
                     {% for doc in documents %}
                     <tr class="border-b border-gray-100 dark:border-gray-700/50">
                         <td class="py-2 text-gray-900 dark:text-white">{{ doc.number|default:'—' }}</td>
+                        <td class="py-2 text-gray-600 dark:text-gray-400">
+                            {% if doc.document_type == 'pdf_catalog' %}
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300">PDF Catalog</span>
+                            {% else %}
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">Document</span>
+                            {% endif %}
+                        </td>
                         <td class="py-2 text-gray-600 dark:text-gray-400">{{ doc.project.name|default:'—' }}</td>
                         <td class="py-2 text-gray-600 dark:text-gray-400 max-w-[100px] truncate" title="{{ doc.filename }}">{{ doc.filename|truncatechars:10 }}</td>
                         <td class="py-2 text-gray-600 dark:text-gray-400">{% if doc.size %}{{ doc.size|filesizeformat }}{% else %}—{% endif %}</td>

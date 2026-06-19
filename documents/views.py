@@ -17,7 +17,7 @@ from .forms import DocumentForm, CommonDocumentForm, CategoryForm
 
 @login_required
 def document_list(request):
-    documents = Document.objects.select_related('project').filter(document_type='document')
+    documents = Document.objects.select_related('project').all()
     query = request.GET.get('q', '')
     sort = request.GET.get('sort', 'created_desc')
     if query:

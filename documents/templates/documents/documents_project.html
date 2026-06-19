@@ -40,6 +40,7 @@
                 <thead>
                     <tr class="text-left text-gray-500 border-b border-gray-200">
                         <th class="pb-2 font-medium">Number</th>
+                        <th class="pb-2 font-medium">Type</th>
                         <th class="pb-2 font-medium">File</th>
                         <th class="pb-2 font-medium">Size</th>
                         <th class="pb-2 font-medium">Created</th>
@@ -52,6 +53,13 @@
                     {% for doc in documents %}
                     <tr class="border-b border-gray-100">
                         <td class="py-2 text-gray-900">{{ doc.number|default:'—' }}</td>
+                        <td class="py-2 text-gray-600">
+                            {% if doc.document_type == 'pdf_catalog' %}
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700">PDF Catalog</span>
+                            {% else %}
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700">Document</span>
+                            {% endif %}
+                        </td>
                         <td class="py-2 text-gray-600 max-w-[100px] truncate" title="{{ doc.filename }}">{{ doc.filename|truncatechars:10 }}</td>
                         <td class="py-2 text-gray-600">{% if doc.size %}{{ doc.size|filesizeformat }}{% else %}—{% endif %}</td>
                         <td class="py-2 text-gray-600">{{ doc.created_at|date:'M d, Y' }}</td>

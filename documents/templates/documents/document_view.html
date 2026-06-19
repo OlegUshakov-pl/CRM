@@ -31,14 +31,12 @@
         </div>
     </div>
     {% elif is_pdf %}
-    <div class="bg-white border border-[#e8e8e8] p-12 text-center">
-        <i data-lucide="file-text" class="w-16 h-16 text-gray-300 mx-auto mb-4"></i>
-        <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ doc.filename }}</h3>
-        <p class="text-sm text-gray-500 mb-6">{{ doc.size|filesizeformat }}</p>
-        <a href="{% url 'documents:show' doc.pk %}" target="_blank" class="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-[14px] font-medium transition-colors">
-            <i data-lucide="external-link" class="w-4 h-4"></i>
-            Open PDF
-        </a>
+    <div class="bg-white border border-[#e8e8e8]">
+        <div class="border-b border-[#e8e8e8] px-6 py-3 flex items-center justify-between bg-gray-50">
+            <span class="text-sm font-medium text-gray-700">{{ doc.filename }}</span>
+            <span class="text-xs text-gray-400">{{ doc.size|filesizeformat }}</span>
+        </div>
+        <iframe src="{% url 'documents:show' doc.pk %}" class="w-full" style="height: 85vh;" frameborder="0"></iframe>
     </div>
     {% elif is_text %}
     <div class="bg-white border border-[#e8e8e8]">
