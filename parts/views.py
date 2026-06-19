@@ -203,6 +203,9 @@ def part_delete(request, pk):
         response['HX-Refresh'] = 'true'
         return response
     messages.success(request, 'Part deleted.')
+    next_url = request.POST.get('next') or request.GET.get('next')
+    if next_url:
+        return redirect(next_url)
     if project_slug:
         return redirect('parts:page', project_slug=project_slug)
     return redirect('parts:list')

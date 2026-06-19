@@ -42,7 +42,7 @@
             <button type="button" onclick="closeSlideOver()" class="px-6 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium text-[13px] transition-colors rounded-[20px]">Cancel</button>
         </div>
         {% if part %}
-        <button type="button" @click="closeSlideOver(); $store.deleteModal.open('{% url 'parts:delete' part.pk %}', '{{ part.number|escapejs }}')" class="px-6 py-2.5 bg-red-500 hover:bg-red-600 text-white font-medium text-[13px] transition-colors rounded-[20px] shadow">Delete</button>
+        <button type="button" @click="closeSlideOver(); $store.deleteModal.open('{% url 'parts:delete' part.pk %}', '{{ part.number|escapejs }}', window.location.href)" class="px-6 py-2.5 bg-red-500 hover:bg-red-600 text-white font-medium text-[13px] transition-colors rounded-[20px] shadow">Delete</button>
         {% endif %}
     </div>
 </form>
