@@ -332,12 +332,12 @@
         </div>
         {% endif %}
 
+        {% if pdf_files %}
         <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-5">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white">PDF</h2>
-                <span class="text-sm text-gray-500 dark:text-gray-400">{% if pdf_files %}{{ pdf_files_count }} item(s){% endif %}</span>
+                <span class="text-sm text-gray-500 dark:text-gray-400">{{ pdf_files_count }} item(s)</span>
             </div>
-            {% if pdf_files %}
             <div class="overflow-x-auto">
                 <table class="w-full text-sm">
                     <thead>
@@ -396,10 +396,8 @@
                 <a href="{% url 'documents:project' project.slug %}" class="text-[13px] font-medium text-[#7c3aed] hover:opacity-80 transition-opacity">Page of PDF</a>
             </div>
             {% endif %}
-            {% else %}
-            <p class="text-gray-500 dark:text-gray-400 text-center py-6">No PDF files yet.</p>
-            {% endif %}
         </div>
+        {% endif %}
 
         {% if dxfs %}
         <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-5">
