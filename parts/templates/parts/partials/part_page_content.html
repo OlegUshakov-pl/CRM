@@ -24,10 +24,7 @@
                 <td class="py-3 px-4">{{ part.created|date:"Y-m-d"|default:"—" }}</td>
                 <td class="py-3 px-4">{{ part.updated|date:"Y-m-d"|default:"—" }}</td>
                 <td class="py-3 px-4">
-                    <div class="flex items-center gap-2">
-                        <button onclick="openSlideOver('{% url 'parts:edit_slide' part.pk %}')" class="text-indigo-600 hover:underline">Edit</button>
-                        <button @click="$store.deleteModal.open('{% url 'parts:delete' part.pk %}', '{{ part.number }}')" class="text-red-500 hover:underline">Delete</button>
-                    </div>
+                    <button onclick="openSlideOver('{% url 'parts:edit_slide' part.pk %}')" class="text-indigo-600 hover:underline">Edit</button>
                 </td>
             </tr>
             {% endfor %}

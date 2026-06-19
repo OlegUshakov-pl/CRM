@@ -132,6 +132,15 @@ def project_edit(request, slug):
     available_contacts = Contact.objects.filter(is_active=True).exclude(projects=project)
     available_companies = Company.objects.filter(is_active=True).exclude(pk=project.company_id) if project.company_id else Company.objects.filter(is_active=True)
 
+    from parts.models import Part
+    all_parts = project.parts.select_related('category').all()
+    edit_models = [p for p in all_parts if p.is_model][:4]
+    edit_drawings = [p for p in all_parts if not p.is_model and not p.is_dxf][:4]
+    edit_dxfs = [p for p in all_parts if p.is_dxf][:4]
+    edit_models_count = len([p for p in all_parts if p.is_model])
+    edit_drawings_count = len([p for p in all_parts if not p.is_model and not p.is_dxf])
+    edit_dxfs_count = len([p for p in all_parts if p.is_dxf])
+
     if request.method == 'POST':
         if 'note_submit' in request.POST:
             note_form = NoteForm(request.POST)
@@ -175,6 +184,12 @@ def project_edit(request, slug):
         'note_form': note_form,
         'available_contacts': available_contacts,
         'available_companies': available_companies,
+        'edit_models': edit_models,
+        'edit_drawings': edit_drawings,
+        'edit_dxfs': edit_dxfs,
+        'edit_models_count': edit_models_count,
+        'edit_drawings_count': edit_drawings_count,
+        'edit_dxfs_count': edit_dxfs_count,
     })
 
 
