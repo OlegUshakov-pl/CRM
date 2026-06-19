@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.contrib import messages
 from core.models import log_activity
-from projects.utils import ensure_project_subfolder, sanitize_folder_name
+from projects.utils import ensure_project_subfolder, sanitize_folder_name, cleanup_empty_dirs
 from .models import Part, Category
 from .forms import PartForm, CommonPartForm, CategoryForm
 
@@ -196,7 +196,9 @@ def part_delete(request, pk):
     project_slug = part.project.slug if part.project else None
     log_activity(request.user, 'deleted', f'Part {part.number} deleted', part)
     if part.file:
+        file_dir = os.path.dirname(part.file.path)
         part.file.delete(save=False)
+        cleanup_empty_dirs(file_dir)
     part.delete()
     if request.headers.get('HX-Request'):
         response = HttpResponse('<script>closeSlideOver()</script>')
@@ -262,6 +264,10 @@ def common_save(request):
 def common_delete(request, pk):
     part = get_object_or_404(Part, pk=pk)
     log_activity(request.user, 'deleted', f'Part {part.number} deleted', part)
+    if part.file:
+        file_dir = os.path.dirname(part.file.path)
+        part.file.delete(save=False)
+        cleanup_empty_dirs(file_dir)
     part.delete()
     if request.headers.get('HX-Request'):
         response = HttpResponse('<script>closeSlideOver()</script>')
