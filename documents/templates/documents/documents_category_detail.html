@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
-{% block title %}{{ category_label }} - CRM{% endblock %}
-{% block breadcrumb %}{{ category_label }}{% endblock %}
+{% block title %}{{ category.name }} - CRM{% endblock %}
+{% block breadcrumb %}{{ category.name }}{% endblock %}
 {% block content %}
 <div class="space-y-6">
     <div class="flex items-center gap-4">
@@ -8,7 +8,7 @@
             <i data-lucide="arrow-left" class="w-5 h-5"></i>
         </a>
         <div>
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ category_label }}</h1>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ category.name }}</h1>
             <p class="text-gray-500 dark:text-gray-400">{{ documents|length }} document{{ documents|length|pluralize }}</p>
         </div>
     </div>
@@ -21,6 +21,7 @@
                     <tr class="text-left text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
                         <th class="pb-2 font-medium">Number</th>
                         <th class="pb-2 font-medium">Project</th>
+                        <th class="pb-2 font-medium">File</th>
                         <th class="pb-2 font-medium">Size</th>
                         <th class="pb-2 font-medium">Created</th>
                         <th class="pb-2 font-medium">Show</th>
@@ -32,6 +33,7 @@
                     <tr class="border-b border-gray-100 dark:border-gray-700/50">
                         <td class="py-2 text-gray-900 dark:text-white">{{ doc.number|default:'—' }}</td>
                         <td class="py-2 text-gray-600 dark:text-gray-400">{{ doc.project.name|default:'—' }}</td>
+                        <td class="py-2 text-gray-600 dark:text-gray-400 max-w-[100px] truncate" title="{{ doc.filename }}">{{ doc.filename|truncatechars:10 }}</td>
                         <td class="py-2 text-gray-600 dark:text-gray-400">{% if doc.size %}{{ doc.size|filesizeformat }}{% else %}—{% endif %}</td>
                         <td class="py-2 text-gray-600 dark:text-gray-400">{{ doc.created_at|date:'M d, Y' }}</td>
                         <td class="py-2">

@@ -19,21 +19,14 @@
         <tbody>
             {% for category in categories %}
             <tr class="border-b border-[#e8e8e8] hover:bg-[#f8f8f8]">
-                <td class="py-3 px-4"><a href="{% url 'documents:category_detail' category.value %}" class="text-indigo-600 hover:underline">{{ category.label }}</a></td>
-                <td class="py-3 px-4">{{ category.count }}</td>
-                <td class="py-3 px-4"></td>
-            </tr>
-            {% endfor %}
-            {% for category in custom_categories %}
-            <tr class="border-b border-[#e8e8e8] hover:bg-[#f8f8f8]">
-                <td class="py-3 px-4"><span class="text-gray-900">{{ category.name }}</span></td>
-                <td class="py-3 px-4">—</td>
+                <td class="py-3 px-4"><a href="{% url 'documents:category_detail' category.pk %}" class="text-indigo-600 hover:underline">{{ category.name }}</a></td>
+                <td class="py-3 px-4">{{ category.doc_count }}</td>
                 <td class="py-3 px-4">
                     <button @click="$store.deleteModal.open('{% url 'documents:category_delete' category.pk %}', '{{ category.name }}')" class="text-red-500 hover:underline text-sm">Delete</button>
                 </td>
             </tr>
             {% endfor %}
-            {% if not categories and not custom_categories %}
+            {% if not categories %}
             <tr>
                 <td colspan="3" class="py-10 text-center text-[#8d8d8d]">No categories yet.</td>
             </tr>

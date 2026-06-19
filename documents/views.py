@@ -6,6 +6,7 @@ from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
+from django.db.models import Count
 from django.utils.http import url_has_allowed_host_and_scheme
 from projects.models import Project
 from projects.utils import ensure_project_subfolder, sanitize_folder_name, get_subfolder_name, get_project_root_path, cleanup_empty_dirs
@@ -277,6 +278,22 @@ def document_delete(request, pk):
     if referer and url_has_allowed_host_and_scheme(referer, allowed_hosts={request.get_host()}):
         return redirect(referer)
     return redirect(reverse('documents:list'))
+
+
+@login_required
+def category_list(request):
+    categories = Category.objects.annotate(doc_count=Count('documents')).order_by('name')
+    return render(request, 'documents/documents_category.html', {'categories': categories})
+
+
+@login_required
+def category_detail(request, pk):
+    category = get_object_or_404(Category, pk=pk)
+    documents = Document.objects.filter(category=category).select_related('project').order_by('-created_at')
+    return render(request, 'documents/documents_category_detail.html', {
+        'category': category,
+        'documents': documents,
+    })
 
 
 @login_required

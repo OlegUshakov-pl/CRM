@@ -4,6 +4,8 @@ from . import views
 app_name = 'documents'
 urlpatterns = [
     path('', views.document_list, name='list'),
+    path('categories/', views.category_list, name='category_list'),
+    path('categories/<int:pk>/', views.category_detail, name='category_detail'),
     path('categories/create/slide/', views.category_create_slide, name='category_create_slide'),
     path('categories/save/', views.category_save, name='category_save'),
     path('categories/<int:pk>/delete/', views.category_delete, name='category_delete'),
