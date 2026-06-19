@@ -95,8 +95,8 @@ def project_detail(request, slug):
     PDF_EXTENSIONS = ('.pdf', '.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp')
     from documents.models import Document
     all_docs = project.documents.all()
-    pdf_files = [d for d in all_docs if d.file and os.path.splitext(d.file.name)[1].lower() in PDF_EXTENSIONS]
-    non_pdf_docs = [d for d in all_docs if not d.file or os.path.splitext(d.file.name)[1].lower() not in PDF_EXTENSIONS]
+    pdf_files = list(all_docs.filter(document_type='pdf_catalog'))
+    non_pdf_docs = list(all_docs.filter(document_type='document'))
 
     return render(request, 'projects/project_detail.html', {
         'project': project,
@@ -155,8 +155,8 @@ def project_edit(request, slug):
     PDF_EXTENSIONS = ('.pdf', '.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp')
     from documents.models import Document
     all_docs = project.documents.all()
-    pdf_files = [d for d in all_docs if d.file and os.path.splitext(d.file.name)[1].lower() in PDF_EXTENSIONS]
-    non_pdf_docs = [d for d in all_docs if not d.file or os.path.splitext(d.file.name)[1].lower() not in PDF_EXTENSIONS]
+    pdf_files = list(all_docs.filter(document_type='pdf_catalog'))
+    non_pdf_docs = list(all_docs.filter(document_type='document'))
 
     if request.method == 'POST':
         if 'note_submit' in request.POST:

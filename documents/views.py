@@ -17,7 +17,7 @@ from .forms import DocumentForm, CommonDocumentForm, CategoryForm
 
 @login_required
 def document_list(request):
-    documents = Document.objects.select_related('project').all()
+    documents = Document.objects.select_related('project').filter(document_type='document')
     query = request.GET.get('q', '')
     sort = request.GET.get('sort', 'created_desc')
     if query:
@@ -113,12 +113,13 @@ def document_save(request, project_slug):
                     if root_path:
                         os.makedirs(os.path.join(root_path, project_folder, subfolder), exist_ok=True)
         category = form.cleaned_data.get('category')
+        document_type = form.cleaned_data.get('document_type', 'document')
         if up_files:
             for f in up_files:
                 if f:
-                    Document.objects.create(project=project, number=form.cleaned_data.get('number', ''), file=f, category=category)
+                    Document.objects.create(project=project, number=form.cleaned_data.get('number', ''), file=f, category=category, document_type=document_type)
         else:
-            Document.objects.create(project=project, number=form.cleaned_data.get('number', ''), category=category)
+            Document.objects.create(project=project, number=form.cleaned_data.get('number', ''), category=category, document_type=document_type)
         if request.headers.get('HX-Request'):
             response = HttpResponse()
             response['HX-Refresh'] = 'true'
@@ -154,12 +155,13 @@ def document_common_save(request):
                     if root_path:
                         os.makedirs(os.path.join(root_path, project_folder, subfolder), exist_ok=True)
         category = form.cleaned_data.get('category')
+        document_type = form.cleaned_data.get('document_type', 'document')
         if up_files:
             for f in up_files:
                 if f:
-                    Document.objects.create(project=project, number=form.cleaned_data.get('number', ''), file=f, category=category)
+                    Document.objects.create(project=project, number=form.cleaned_data.get('number', ''), file=f, category=category, document_type=document_type)
         else:
-            Document.objects.create(project=project, number=form.cleaned_data.get('number', ''), category=category)
+            Document.objects.create(project=project, number=form.cleaned_data.get('number', ''), category=category, document_type=document_type)
         if request.headers.get('HX-Request'):
             response = HttpResponse()
             response['HX-Refresh'] = 'true'
