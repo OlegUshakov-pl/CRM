@@ -148,9 +148,8 @@ PROVIDER_ENDPOINTS = {
         'headers': lambda key: {'Authorization': f'Bearer {key}'},
     },
     'google': {
-        'url': f'https://generativelanguage.googleapis.com/v1beta/models?key=',
-        'headers': lambda key: {},
-        'key_in_url': True,
+        'url': 'https://generativelanguage.googleapis.com/v1beta/models',
+        'headers': lambda key: {'x-goog-api-key': key},
     },
     'mistral': {
         'url': 'https://api.mistral.ai/v1/models',
@@ -240,8 +239,6 @@ def ai_fetch_models(request):
 
     endpoint = PROVIDER_ENDPOINTS[provider]
     url = endpoint['url']
-    if endpoint.get('key_in_url'):
-        url += api_key
     headers = endpoint['headers'](api_key)
 
     req = urllib.request.Request(url, headers=headers, method='GET')
@@ -332,8 +329,6 @@ def api_provider_verify(request, provider_id):
             return JsonResponse({'ok': False, 'error': 'Unknown provider.'}, status=400)
         endpoint = PROVIDER_ENDPOINTS[provider_id]
         url = endpoint['url']
-        if endpoint.get('key_in_url'):
-            url += api_key
         req = urllib.request.Request(url, headers=endpoint['headers'](api_key), method='GET')
 
     try:
@@ -373,8 +368,6 @@ def api_provider_sync_models(request, provider_id):
             return JsonResponse({'ok': False, 'error': 'Unknown provider.'}, status=400)
         endpoint = PROVIDER_ENDPOINTS[provider_id]
         url = endpoint['url']
-        if endpoint.get('key_in_url'):
-            url += api_key
         req = urllib.request.Request(url, headers=endpoint['headers'](api_key), method='GET')
 
     try:

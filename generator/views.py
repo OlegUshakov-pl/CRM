@@ -22,7 +22,7 @@ def deal_list(request):
     paginator = Paginator(deals, 12)
     page = request.GET.get('page', 1)
     deals_page = paginator.get_page(page)
-    return render(request, 'generators/deal_list.html', {
+    return render(request, 'generator/deal_list.html', {
         'deals': deals_page,
         'query': query,
         'status_filter': status_filter,
@@ -33,7 +33,7 @@ def deal_list(request):
 @login_required
 def deal_detail(request, slug):
     deal = get_object_or_404(Deal.objects.select_related('company', 'assigned_to'), slug=slug)
-    return render(request, 'generators/deal_detail.html', {'deal': deal})
+    return render(request, 'generator/deal_detail.html', {'deal': deal})
 
 
 @login_required
@@ -49,7 +49,7 @@ def deal_create(request):
             log_activity(request.user, 'created', f'Deal "{deal.name}"', deal)
             messages.success(request, 'Deal created successfully.')
             return redirect('generators:list')
-    return render(request, 'generators/deal_create_page.html', {'form': form, 'title': 'Add Deal', 'is_page': True})
+    return render(request, 'generator/deal_create_page.html', {'form': form, 'title': 'Add Deal', 'is_page': True})
 
 
 @login_required
@@ -63,7 +63,7 @@ def deal_edit(request, slug):
             log_activity(request.user, 'updated', f'Deal "{deal.name}"', deal)
             messages.success(request, 'Deal updated successfully.')
             return redirect('generators:detail', slug=deal.slug)
-    return render(request, 'generators/deal_edit_page.html', {
+    return render(request, 'generator/deal_edit_page.html', {
         'form': form,
         'title': 'Edit Deal',
         'deal': deal,
@@ -85,11 +85,11 @@ def deal_delete(request, slug):
 @login_required
 def deal_create_slide(request):
     form = DealForm()
-    return render(request, 'generators/deal_form.html', {'form': form, 'title': 'Add Deal'})
+    return render(request, 'generator/deal_form.html', {'form': form, 'title': 'Add Deal'})
 
 
 @login_required
 def deal_edit_slide(request, slug):
     deal = get_object_or_404(Deal, slug=slug)
     form = DealForm(instance=deal)
-    return render(request, 'generators/deal_form.html', {'form': form, 'title': 'Edit Deal', 'deal': deal})
+    return render(request, 'generator/deal_form.html', {'form': form, 'title': 'Edit Deal', 'deal': deal})

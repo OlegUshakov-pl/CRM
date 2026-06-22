@@ -91,7 +91,7 @@ def _provider_chat(text: str, model: str, user) -> Dict[str, Any]:
     provider_endpoints = {
         'anthropic': {'url': 'https://api.anthropic.com/v1/messages', 'headers': lambda k: {'x-api-key': k, 'anthropic-version': '2023-06-01', 'content-type': 'application/json'}},
         'openai': {'url': 'https://api.openai.com/v1/chat/completions', 'headers': lambda k: {'Authorization': f'Bearer {k}', 'Content-Type': 'application/json'}},
-        'google': {'url': f'https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}', 'headers': lambda k: {'Content-Type': 'application/json'}},
+        'google': {'url': f'https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent', 'headers': lambda k: {'Content-Type': 'application/json', 'x-goog-api-key': k}},
         'mistral': {'url': 'https://api.mistral.ai/v1/chat/completions', 'headers': lambda k: {'Authorization': f'Bearer {k}', 'Content-Type': 'application/json'}},
         'groq': {'url': 'https://api.groq.com/openai/v1/chat/completions', 'headers': lambda k: {'Authorization': f'Bearer {k}', 'Content-Type': 'application/json'}},
         'deepseek': {'url': 'https://api.deepseek.com/chat/completions', 'headers': lambda k: {'Authorization': f'Bearer {k}', 'Content-Type': 'application/json'}},
