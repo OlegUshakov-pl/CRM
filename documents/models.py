@@ -17,14 +17,26 @@ def get_project_folder_name(project):
     return f'{safe_number}_{safe_name}_Project'
 
 
+def get_document_subfolder(project_number, document_type):
+    if document_type == 'pdf_catalog':
+        return get_subfolder_name(project_number, 'subfolder_pdf_catalog', 'PDF Catalog')
+    return get_subfolder_name(project_number, 'subfolder_documents', 'documents')
+
+
 def document_upload_to(instance, filename):
     if instance.project:
         folder = get_project_folder_name(instance.project)
-        ext = os.path.splitext(filename)[1].lower()
-        if ext in PDF_EXTENSIONS or ext in IMAGE_EXTENSIONS:
-            subfolder = get_subfolder_name(instance.project.number, 'subfolder_pdf', 'PDF')
-        else:
+        doc_type = getattr(instance, 'document_type', None)
+        if doc_type == 'pdf_catalog':
+            subfolder = get_subfolder_name(instance.project.number, 'subfolder_pdf_catalog', 'PDF Catalog')
+        elif doc_type == 'document':
             subfolder = get_subfolder_name(instance.project.number, 'subfolder_documents', 'documents')
+        else:
+            ext = os.path.splitext(filename)[1].lower()
+            if ext in PDF_EXTENSIONS or ext in IMAGE_EXTENSIONS:
+                subfolder = get_subfolder_name(instance.project.number, 'subfolder_pdf_catalog', 'PDF Catalog')
+            else:
+                subfolder = get_subfolder_name(instance.project.number, 'subfolder_documents', 'documents')
         return os.path.join(folder, subfolder, filename)
     return os.path.join('_no_project', filename)
 

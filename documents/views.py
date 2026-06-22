@@ -9,9 +9,9 @@ from django.core.paginator import Paginator
 from django.db.models import Count
 from django.utils.http import url_has_allowed_host_and_scheme
 from projects.models import Project
-from projects.utils import ensure_project_subfolder, sanitize_folder_name, get_subfolder_name, get_project_root_path, cleanup_empty_dirs
+from projects.utils import ensure_project_subfolder, sanitize_folder_name, get_project_root_path, cleanup_empty_dirs
 from core.models import log_activity
-from .models import Document, Category
+from .models import Document, Category, get_document_subfolder
 from .forms import DocumentForm, CommonDocumentForm, CategoryForm
 
 
@@ -102,28 +102,24 @@ def document_save(request, project_slug):
     project = get_object_or_404(Project, slug=project_slug)
     form = DocumentForm(request.POST, request.FILES)
     if form.is_valid():
+        document_type = form.cleaned_data.get('document_type', 'document')
+        category = form.cleaned_data.get('category')
+        number = form.cleaned_data.get('number', '')
         up_files = request.FILES.getlist('file')
         if up_files and project.number:
-            from documents.models import get_project_folder_name, PDF_EXTENSIONS, IMAGE_EXTENSIONS
+            from documents.models import get_project_folder_name
             project_folder = get_project_folder_name(project)
             root_path = get_project_root_path()
+            subfolder = get_document_subfolder(project.number, document_type)
             for f in up_files:
                 if f:
-                    ext = os.path.splitext(f.name)[1].lower()
-                    if ext in PDF_EXTENSIONS or ext in IMAGE_EXTENSIONS:
-                        subfolder = get_subfolder_name(project.number, 'subfolder_pdf', 'PDF')
-                    else:
-                        subfolder = get_subfolder_name(project.number, 'subfolder_documents', 'documents')
                     if root_path:
                         os.makedirs(os.path.join(root_path, project_folder, subfolder), exist_ok=True)
-        category = form.cleaned_data.get('category')
-        document_type = form.cleaned_data.get('document_type', 'document')
-        if up_files:
-            for f in up_files:
-                if f:
-                    Document.objects.create(project=project, number=form.cleaned_data.get('number', ''), file=f, category=category, document_type=document_type)
+                    doc = Document(project=project, number=number, category=category, document_type=document_type)
+                    doc.file = f
+                    doc.save()
         else:
-            Document.objects.create(project=project, number=form.cleaned_data.get('number', ''), category=category, document_type=document_type)
+            Document.objects.create(project=project, number=number, category=category, document_type=document_type)
         if request.headers.get('HX-Request'):
             response = HttpResponse()
             response['HX-Refresh'] = 'true'
@@ -144,28 +140,24 @@ def document_common_save(request):
     form = CommonDocumentForm(request.POST, request.FILES)
     if form.is_valid():
         project = form.cleaned_data.get('project')
+        document_type = form.cleaned_data.get('document_type', 'document')
+        category = form.cleaned_data.get('category')
+        number = form.cleaned_data.get('number', '')
         up_files = request.FILES.getlist('file')
         if up_files and project and project.number:
-            from documents.models import get_project_folder_name, PDF_EXTENSIONS, IMAGE_EXTENSIONS
+            from documents.models import get_project_folder_name
             project_folder = get_project_folder_name(project)
             root_path = get_project_root_path()
+            subfolder = get_document_subfolder(project.number, document_type)
             for f in up_files:
                 if f:
-                    ext = os.path.splitext(f.name)[1].lower()
-                    if ext in PDF_EXTENSIONS or ext in IMAGE_EXTENSIONS:
-                        subfolder = get_subfolder_name(project.number, 'subfolder_pdf', 'PDF')
-                    else:
-                        subfolder = get_subfolder_name(project.number, 'subfolder_documents', 'documents')
                     if root_path:
                         os.makedirs(os.path.join(root_path, project_folder, subfolder), exist_ok=True)
-        category = form.cleaned_data.get('category')
-        document_type = form.cleaned_data.get('document_type', 'document')
-        if up_files:
-            for f in up_files:
-                if f:
-                    Document.objects.create(project=project, number=form.cleaned_data.get('number', ''), file=f, category=category, document_type=document_type)
+                    doc = Document(project=project, number=number, category=category, document_type=document_type)
+                    doc.file = f
+                    doc.save()
         else:
-            Document.objects.create(project=project, number=form.cleaned_data.get('number', ''), category=category, document_type=document_type)
+            Document.objects.create(project=project, number=number, category=category, document_type=document_type)
         if request.headers.get('HX-Request'):
             response = HttpResponse()
             response['HX-Refresh'] = 'true'
@@ -179,10 +171,12 @@ def document_common_save(request):
 def document_update(request, pk):
     document = get_object_or_404(Document, pk=pk)
     old_file = document.file
+    old_doc_type = document.document_type
     form = DocumentForm(request.POST, request.FILES, instance=document)
     if form.is_valid():
         doc = form.save(commit=False)
         up_files = request.FILES.getlist('file')
+        new_doc_type = form.cleaned_data.get('document_type', old_doc_type)
         if up_files:
             for f in up_files:
                 if f:
@@ -190,6 +184,22 @@ def document_update(request, pk):
                     break
         if not doc.file and old_file:
             doc.file = old_file
+        if old_file and old_doc_type != new_doc_type and doc.file and doc.project and doc.project.number:
+            from documents.models import get_project_folder_name
+            old_dir = os.path.dirname(doc.file.path)
+            project_folder = get_project_folder_name(doc.project)
+            new_subfolder = get_document_subfolder(doc.project.number, new_doc_type)
+            root_path = get_project_root_path()
+            if root_path:
+                new_dir = os.path.join(root_path, project_folder, new_subfolder)
+                os.makedirs(new_dir, exist_ok=True)
+                old_filename = os.path.basename(doc.file.name)
+                new_path = os.path.join(new_dir, old_filename)
+                if old_dir != new_dir and os.path.exists(doc.file.path):
+                    import shutil
+                    shutil.move(doc.file.path, new_path)
+                    cleanup_empty_dirs(old_dir)
+                doc.file.name = os.path.join(project_folder, new_subfolder, old_filename)
         doc.save()
         if request.headers.get('HX-Request'):
             response = HttpResponse()
