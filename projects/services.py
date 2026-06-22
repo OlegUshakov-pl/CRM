@@ -106,6 +106,7 @@ class ExportService:
                 'number': d.number or '',
                 'size': d.size,
                 'file_name': d.file.name if d.file else None,
+                'document_type': d.document_type,
             }
             if d.file and d.file.name:
                 self._copy_file_to_export(d.file.path, d.file.name)
@@ -302,6 +303,7 @@ class ImportService:
                 project=project,
                 number=d_data.get('number') or None,
                 size=d_data.get('size'),
+                document_type=d_data.get('document_type', 'document'),
             )
             if file_name:
                 src = files_dir / file_name
