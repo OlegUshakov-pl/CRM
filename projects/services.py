@@ -56,6 +56,7 @@ class ExportService:
             'materials': self._serialize_materials(),
             'tasks': self._serialize_tasks(),
             'notes': self._serialize_notes(),
+            'contacts': self._serialize_contacts(),
             'documents': self._serialize_documents(),
             'parts': self._serialize_parts(),
             'images': self._serialize_images(),
@@ -96,6 +97,22 @@ class ExportService:
                 'title': n.title,
                 'content': n.content,
                 'date': n.date.isoformat() if n.date else None,
+                'company': n.company.name if n.company else None,
+                'contact': n.contact.get_full_name() if n.contact else None,
+            })
+        return result
+
+    def _serialize_contacts(self):
+        result = []
+        for c in self.project.contacts.all():
+            result.append({
+                'first_name': c.first_name,
+                'last_name': c.last_name,
+                'email': c.email or '',
+                'phone': c.phone or '',
+                'position': c.position or '',
+                'company': c.company.name if c.company else None,
+                'notes': c.notes or '',
             })
         return result
 
@@ -240,6 +257,8 @@ class ImportService:
         from tasks.models import Task
         from notes.models import Note
         from parts.models import Part, Category as PartCategory
+        from contacts.models import Contact
+        from companies.models import Company
 
         project_data = self.export_data['project']
         project = Project.objects.create(
@@ -290,12 +309,59 @@ class ImportService:
             )
 
         for n_data in self.export_data.get('notes', []):
+            company = None
+            if n_data.get('company'):
+                company, _ = Company.objects.get_or_create(name=n_data['company'])
+            contact = None
+            if n_data.get('contact'):
+                parts = n_data['contact'].split(' ', 1)
+                first_name = parts[0]
+                last_name = parts[1] if len(parts) > 1 else ''
+                contact, _ = Contact.objects.get_or_create(first_name=first_name, last_name=last_name)
             Note.objects.create(
                 project=project,
                 title=n_data['title'],
                 content=n_data['content'],
                 date=n_data.get('date'),
+                company=company,
+                contact=contact,
             )
+
+        for c_data in self.export_data.get('contacts', []):
+            company = None
+            if c_data.get('company'):
+                company, _ = Company.objects.get_or_create(name=c_data['company'])
+            first_name = c_data.get('first_name', '')
+            last_name = c_data.get('last_name', '')
+            email = c_data.get('email', '')
+            contact = None
+            if email:
+                contact = Contact.objects.filter(email=email).first()
+            if not contact:
+                contact = Contact.objects.filter(first_name=first_name, last_name=last_name).first()
+            if contact:
+                if email:
+                    contact.email = email
+                if c_data.get('phone'):
+                    contact.phone = c_data['phone']
+                if c_data.get('position'):
+                    contact.position = c_data['position']
+                if company:
+                    contact.company = company
+                if c_data.get('notes'):
+                    contact.notes = c_data['notes']
+                contact.save()
+            else:
+                contact = Contact.objects.create(
+                    first_name=first_name,
+                    last_name=last_name,
+                    email=email,
+                    phone=c_data.get('phone', ''),
+                    position=c_data.get('position', ''),
+                    company=company,
+                    notes=c_data.get('notes', ''),
+                )
+            project.contacts.add(contact)
 
         for d_data in self.export_data.get('documents', []):
             file_name = d_data.get('file_name')
