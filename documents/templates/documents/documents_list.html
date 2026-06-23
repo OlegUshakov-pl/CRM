@@ -11,6 +11,8 @@
                         class="px-3 py-2 border border-[#e8e8e8] text-sm text-gray-600 outline-none cursor-pointer bg-white">
                     <option value="created_desc" {% if current_sort == 'created_desc' %}selected{% endif %}>Newest</option>
                     <option value="created" {% if current_sort == 'created' %}selected{% endif %}>Oldest</option>
+                    <option value="file" {% if current_sort == 'file' %}selected{% endif %}>File A-Z</option>
+                    <option value="file_desc" {% if current_sort == 'file_desc' %}selected{% endif %}>File Z-A</option>
                     <option value="size_desc" {% if current_sort == 'size_desc' %}selected{% endif %}>Size</option>
                     <option value="project" {% if current_sort == 'project' %}selected{% endif %}>Project</option>
                 </select>
@@ -74,7 +76,7 @@
                         <td class="py-2 text-gray-600">
                             {% if doc.project %}<a href="{% url 'projects:detail' doc.project.slug %}" class="text-indigo-600 hover:underline">{{ doc.project.name }}</a>{% else %}—{% endif %}
                         </td>
-                        <td class="py-2 text-gray-600 max-w-[100px] truncate" title="{{ doc.filename }}">{{ doc.filename|truncatechars:10 }}</td>
+                        <td class="py-2 text-gray-600 break-all">{{ doc.filename }}</td>
                         <td class="py-2 text-gray-600">{% if doc.size %}{{ doc.size|filesizeformat }}{% else %}—{% endif %}</td>
                         <td class="py-2 text-gray-600">{% if doc.file_created %}{{ doc.file_created|date:'M d, Y' }}{% else %}{{ doc.created_at|date:'M d, Y' }}{% endif %}</td>
                         <td class="py-2">
