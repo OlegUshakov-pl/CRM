@@ -46,6 +46,7 @@ class ExportService:
             'created_at': timezone.localtime(p.created_at).isoformat() if p.created_at else None,
             'created_by_username': p.created_by.username if p.created_by else None,
             'image_name': p.image.name if p.image else None,
+            'company': self._serialize_company(p.company) if p.company else None,
         }
         if p.image and p.image.name:
             self._copy_file_to_export(p.image.path, p.image.name)
@@ -64,6 +65,16 @@ class ExportService:
         (self.export_dir / 'export.json').write_text(
             json.dumps(data, ensure_ascii=False, indent=2), encoding='utf-8'
         )
+
+    def _serialize_company(self, company):
+        return {
+            'name': company.name,
+            'email': company.email or '',
+            'phone': company.phone or '',
+            'website': company.website or '',
+            'address': company.address or '',
+            'notes': company.notes or '',
+        }
 
     def _serialize_materials(self):
         result = []
@@ -281,6 +292,34 @@ class ImportService:
             src = files_dir / image_name
             if src.exists():
                 project.image.save(os.path.basename(image_name), open(str(src), 'rb'), save=True)
+
+        company_data = project_data.get('company')
+        if company_data:
+            company_name = company_data.get('name', '')
+            company = Company.objects.filter(name=company_name).first()
+            if company:
+                if company_data.get('email'):
+                    company.email = company_data['email']
+                if company_data.get('phone'):
+                    company.phone = company_data['phone']
+                if company_data.get('website'):
+                    company.website = company_data['website']
+                if company_data.get('address'):
+                    company.address = company_data['address']
+                if company_data.get('notes'):
+                    company.notes = company_data['notes']
+                company.save()
+            else:
+                company = Company.objects.create(
+                    name=company_name,
+                    email=company_data.get('email', ''),
+                    phone=company_data.get('phone', ''),
+                    website=company_data.get('website', ''),
+                    address=company_data.get('address', ''),
+                    notes=company_data.get('notes', ''),
+                )
+            project.company = company
+            project.save()
 
         for m_data in self.export_data.get('materials', []):
             category = None
