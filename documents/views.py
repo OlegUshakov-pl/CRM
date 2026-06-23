@@ -71,6 +71,10 @@ def document_project(request, project_slug):
         documents = documents.order_by('size')
     elif sort == 'size_desc':
         documents = documents.order_by('-size')
+    elif sort == 'file':
+        documents = documents.order_by('file')
+    elif sort == 'file_desc':
+        documents = documents.order_by('-file')
     elif sort == 'created':
         documents = documents.order_by('created_at')
     else:
