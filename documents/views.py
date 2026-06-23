@@ -1,4 +1,5 @@
 import os
+from datetime import date
 from django.conf import settings
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse, FileResponse, Http404
@@ -7,12 +8,24 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db.models import Count
+from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 from projects.models import Project
 from projects.utils import ensure_project_subfolder, sanitize_folder_name, get_project_root_path, cleanup_empty_dirs
 from core.models import log_activity
 from .models import Document, Category, get_document_subfolder
 from .forms import DocumentForm, CommonDocumentForm, CategoryForm
+
+
+def _file_date(f):
+    try:
+        if hasattr(f, 'temporary_file_path'):
+            tp = f.temporary_file_path()
+            if tp and os.path.exists(tp):
+                return date.fromtimestamp(os.path.getmtime(tp))
+    except Exception:
+        pass
+    return timezone.now().date()
 
 
 @login_required
@@ -115,7 +128,8 @@ def document_save(request, project_slug):
                 if f:
                     if root_path:
                         os.makedirs(os.path.join(root_path, project_folder, subfolder), exist_ok=True)
-                    doc = Document(project=project, number=number, category=category, document_type=document_type)
+                    fd = _file_date(f)
+                    doc = Document(project=project, number=number, category=category, document_type=document_type, file_created=fd, file_updated=fd)
                     doc.file = f
                     doc.save()
         else:
@@ -153,7 +167,8 @@ def document_common_save(request):
                 if f:
                     if root_path:
                         os.makedirs(os.path.join(root_path, project_folder, subfolder), exist_ok=True)
-                    doc = Document(project=project, number=number, category=category, document_type=document_type)
+                    fd = _file_date(f)
+                    doc = Document(project=project, number=number, category=category, document_type=document_type, file_created=fd, file_updated=fd)
                     doc.file = f
                     doc.save()
         else:

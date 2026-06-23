@@ -66,6 +66,8 @@ class Document(models.Model):
     file = models.FileField(upload_to=document_upload_to, storage=ProjectFileSystemStorage())
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, related_name='documents', db_index=True)
     document_type = models.CharField(max_length=20, choices=DOCUMENT_TYPE_CHOICES, default='document', db_index=True)
+    file_created = models.DateField(blank=True, null=True)
+    file_updated = models.DateField(blank=True, null=True)
 
     class Meta:
         ordering = ['-created_at']

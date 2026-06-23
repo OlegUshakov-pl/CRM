@@ -62,7 +62,7 @@
                         </td>
                         <td class="py-2 text-gray-600 max-w-[100px] truncate" title="{{ doc.filename }}">{{ doc.filename|truncatechars:10 }}</td>
                         <td class="py-2 text-gray-600">{% if doc.size %}{{ doc.size|filesizeformat }}{% else %}—{% endif %}</td>
-                        <td class="py-2 text-gray-600">{{ doc.created_at|date:'M d, Y' }}</td>
+                        <td class="py-2 text-gray-600">{% if doc.file_created %}{{ doc.file_created|date:'M d, Y' }}{% else %}{{ doc.created_at|date:'M d, Y' }}{% endif %}</td>
                         <td class="py-2">
                             {% if doc.file %}
                             <a href="{% url 'documents:view' doc.pk %}" class="inline-flex items-center"><i data-lucide="eye" class="w-4 h-4 text-indigo-600"></i></a>

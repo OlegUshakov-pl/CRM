@@ -1,8 +1,10 @@
 import os
+from datetime import date
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.contrib import messages
+from django.utils import timezone
 from core.models import log_activity
 from projects.utils import ensure_project_subfolder, sanitize_folder_name, cleanup_empty_dirs
 from .models import Part, Category
@@ -13,6 +15,17 @@ def _number_from_file(number, f):
     if not number and f:
         return os.path.splitext(f.name)[0]
     return number or ''
+
+
+def _file_date(f):
+    try:
+        if hasattr(f, 'temporary_file_path'):
+            tp = f.temporary_file_path()
+            if tp and os.path.exists(tp):
+                return date.fromtimestamp(os.path.getmtime(tp))
+    except Exception:
+        pass
+    return timezone.now().date()
 
 
 def _format_size(size_bytes):
@@ -141,7 +154,8 @@ def part_create(request, project_slug):
         if up_files:
             for f in up_files:
                 if f:
-                    Part.objects.create(project=project, number=_number_from_file(form.cleaned_data.get('number'), f), category=form.cleaned_data.get('category'), size=_format_size(f.size), rev=form.cleaned_data.get('rev'), created=form.cleaned_data.get('created'), updated=form.cleaned_data.get('updated'), file=f)
+                    fd = _file_date(f)
+                    Part.objects.create(project=project, number=_number_from_file(form.cleaned_data.get('number'), f), category=form.cleaned_data.get('category'), size=_format_size(f.size), rev=form.cleaned_data.get('rev'), created=fd, updated=fd, file=f)
         else:
             part = form.save(commit=False)
             part.number = _number_from_file(form.cleaned_data.get('number'), None)
@@ -247,7 +261,8 @@ def common_save(request):
         if up_files:
             for f in up_files:
                 if f:
-                    Part.objects.create(number=_number_from_file(form.cleaned_data.get('number'), f), category=form.cleaned_data.get('category'), size=_format_size(f.size), rev=form.cleaned_data.get('rev'), created=form.cleaned_data.get('created'), updated=form.cleaned_data.get('updated'), file=f)
+                    fd = _file_date(f)
+                    Part.objects.create(number=_number_from_file(form.cleaned_data.get('number'), f), category=form.cleaned_data.get('category'), size=_format_size(f.size), rev=form.cleaned_data.get('rev'), created=fd, updated=fd, file=f)
         else:
             part = form.save(commit=False)
             part.number = _number_from_file(form.cleaned_data.get('number'), None)
