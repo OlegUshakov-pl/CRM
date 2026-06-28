@@ -202,6 +202,10 @@ def _normalize_models(provider, raw_data):
     elif provider == 'opencode':
         for m in raw_data.get('data', []):
             models.append({'id': m.get('id', ''), 'name': m.get('id', '')})
+    elif provider == 'ollama':
+        for m in raw_data.get('models', []):
+            model_id = m.get('model', '') or m.get('name', '')
+            models.append({'id': model_id, 'name': m.get('name', model_id)})
     return models
 
 
@@ -392,6 +396,11 @@ def api_provider_sync_models(request, provider_id):
                         is_custom=False,
                         tags=[],
                     )
+
+            fetched_ids = {fm['id'] for fm in fetched_models}
+            stale_ids = [mid for mid, obj in existing.items() if mid not in fetched_ids]
+            if stale_ids:
+                AIModel.objects.filter(provider=provider, model_id__in=stale_ids, is_custom=False).delete()
 
             provider.models_synced_at = timezone.now()
             provider.save(update_fields=['models_synced_at', 'updated_at'])
