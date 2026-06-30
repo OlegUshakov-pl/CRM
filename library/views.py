@@ -85,6 +85,8 @@ def library_create(request):
             item.created_by = request.user
             item.save()
             form._save_tags(item)
+            for f in request.FILES.getlist('additional_files'):
+                LibraryAttachment.objects.create(item=item, file=f)
             log_activity(request.user, 'created', f'Library item "{item.title}"', item)
             messages.success(request, 'Document created successfully.')
             return redirect('library:detail', slug=item.slug)
