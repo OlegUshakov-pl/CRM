@@ -125,22 +125,22 @@
 
             <!-- Global items -->
             <div class="border-t border-[#e8e8e8] dark:border-[#222] pt-3 mt-3 space-y-3 text-[13px]">
-                <a href="{% url 'assistant:ai_files' %}" class="flex items-center gap-2">
+                <a href="{% url 'assistant:ai_files' %}" class="flex items-center p-2 gap-2">
                     <i data-lucide="folder-sync" class="w-4 h-4 flex-shrink-0"></i>
                     <span class="sidebar-text">AI Files</span>
                 </a>
 
-                <a href="{% url 'core:settings_page' %}" class="flex items-center gap-2">
+                <a href="{% url 'core:settings_page' %}" class="flex items-center p-2 gap-2">
                     <i data-lucide="settings" class="w-4 h-4 flex-shrink-0"></i>
                     <span class="sidebar-text">Settings</span>
                 </a>
 
-                <button onclick="openChatModal()" class="flex items-center gap-2 p-2 hover:bg-gray-100 dark:hover:bg-[#1a1a1a] rounded pl-0">
+                <button onclick="openChatModal()" class="flex items-center gap-2 p-2 hover:bg-gray-100 dark:hover:bg-[#1a1a1a] rounded">
                     <i data-lucide="sparkles" class="w-4 h-4 flex-shrink-0 text-indigo-500"></i>
                     <span class="sidebar-text">AI Chat</span>
                 </button>
 
-                <button id="sidebar-toggle-btn" onclick="toggleSidebar()" class="p-2 hover:bg-gray-100 dark:hover:bg-[#1a1a1a] rounded flex items-center gap-2 mt-2 pl-0">
+                <button id="sidebar-toggle-btn" onclick="toggleSidebar()" class="p-2 hover:bg-gray-100 dark:hover:bg-[#1a1a1a] rounded flex items-center gap-2 mt-2">
                     <i data-lucide="panel-left-close" id="toggle-icon" class="w-4 h-4 flex-shrink-0 dark:text-gray-400"></i>
                 </button>
             </div>
