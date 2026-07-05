@@ -1,0 +1,33 @@
+<nav class="space-y-3 text-[13px] flex-1">
+    <a href="{% url 'library:dashboard' %}">
+        <i data-lucide="layout-dashboard" class="w-4 h-4 flex-shrink-0"></i>
+        <span class="sidebar-text">Dashboard</span>
+    </a>
+
+    <a href="{% url 'library:list' %}">
+        <i data-lucide="book-open" class="w-4 h-4 flex-shrink-0"></i>
+        <span class="sidebar-text">All Documents</span>
+    </a>
+
+    <a href="{% url 'library:list' %}?favorites=1">
+        <i data-lucide="star" class="w-4 h-4 flex-shrink-0" style="color: #FFA84C"></i>
+        <span class="sidebar-text">Favorites</span>
+    </a>
+
+    <a href="{% url 'library:category_list' %}">
+        <i data-lucide="folder" class="w-4 h-4 flex-shrink-0"></i>
+        <span class="sidebar-text">Categories</span>
+    </a>
+
+    <a href="{% url 'library:create' %}">
+        <i data-lucide="plus" class="w-4 h-4 flex-shrink-0"></i>
+        <span class="sidebar-text">New Document</span>
+    </a>
+
+    <div class="relative group">
+        <a href="{% url 'core:search' %}?type=library" class="flex items-center gap-2 w-full">
+            <i data-lucide="search" class="w-4 h-4 flex-shrink-0"></i>
+            <span class="sidebar-text flex-1">Search</span>
+        </a>
+    </div>
+</nav>

@@ -57,6 +57,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'core.context_processors.app_version',
                 'core.context_processors.sidebar_projects',
+                'core.context_processors.current_workspace',
             ],
         },
     },

@@ -138,6 +138,21 @@ def help_page(request):
     return render(request, 'core/help.html')
 
 
+@login_required
+@require_POST
+def workspace_switch(request):
+    workspace = request.POST.get('workspace', 'projects')
+    if workspace not in ('projects', 'collections'):
+        workspace = 'projects'
+    request.session['workspace'] = workspace
+    from django.http import HttpResponseRedirect
+    redirect_url = '/library/' if workspace == 'collections' else '/'
+    if request.headers.get('HX-Request'):
+        from django.http import HttpResponse
+        return HttpResponse(status=204, headers={'HX-Redirect': redirect_url})
+    return HttpResponseRedirect(redirect_url)
+
+
 PROVIDER_ENDPOINTS = {
     'anthropic': {
         'url': 'https://api.anthropic.com/v1/models',
