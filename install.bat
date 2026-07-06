@@ -49,16 +49,56 @@ if exist "!CD!\CRM\manage.py" (
 echo  [DIR] !PROJECT_DIR!
 echo.
 
-:: Step 2: Check Python
-where python >nul 2>&1
-if !errorlevel! neq 0 (
-    echo  [ERROR] Python not found.
-    echo  Install Python 3.10+ from https://python.org and add to PATH.
+:: Step 2: Find proper Python (skip Inkscape/minimal Pythons)
+set "PYTHON_EXE="
+
+:: Try py launcher first (most reliable)
+where py >nul 2>&1
+if !errorlevel! equ 0 (
+    for /f "tokens=*" %%p in ('py -3 --version 2^>^&1') do set "PY_CHECK=%%p"
+    echo !PY_CHECK! | findstr /r "Python 3\." >nul 2>&1
+    if !errorlevel! equ 0 (
+        set "PYTHON_EXE=py -3"
+    )
+)
+
+:: Fallback: search PATH for python with pip support
+if not defined PYTHON_EXE (
+    for /f "tokens=*" %%p in ('where python 2^>nul') do (
+        if not defined PYTHON_EXE (
+            "%%p" -m pip --version >nul 2>&1
+            if !errorlevel! equ 0 (
+                set "PYTHON_EXE=%%p"
+            )
+        )
+    )
+)
+
+:: Fallback: try python3
+if not defined PYTHON_EXE (
+    where python3 >nul 2>&1
+    if !errorlevel! equ 0 (
+        python3 -m pip --version >nul 2>&1
+        if !errorlevel! equ 0 (
+            set "PYTHON_EXE=python3"
+        )
+    )
+)
+
+if not defined PYTHON_EXE (
+    echo  [ERROR] Python 3.10+ with pip not found.
+    echo  Install Python from https://python.org and make sure to check
+    echo  "Add Python to PATH" during installation.
+    echo.
+    echo  If you have multiple Python versions, uninstall the old one or
+    echo  make sure the Python.org version comes first in PATH.
     pause
     exit /b 1
 )
-for /f "tokens=2 delims= " %%v in ('python --version 2^>^&1') do set "PY_VER=%%v"
-echo  [OK] Python !PY_VER!
+
+for /f "tokens=2 delims= " %%v in ('!PYTHON_EXE! --version 2^>^&1') do set "PY_VER=%%v"
+echo  [OK] Python !PY_VER! ^(!PYTHON_EXE!^)
+echo.
 
 :: Step 3: Check Node.js
 where node >nul 2>&1
@@ -76,7 +116,7 @@ if exist "!PROJECT_DIR!\venv\Scripts\python.exe" (
     echo  [OK] Virtual environment already exists.
 ) else (
     echo  [*] Creating virtual environment...
-    python -m venv "!PROJECT_DIR!\venv"
+    !PYTHON_EXE! -m venv "!PROJECT_DIR!\venv"
     if !errorlevel! neq 0 (
         echo  [ERROR] Failed to create virtual environment.
         pause
@@ -86,15 +126,30 @@ if exist "!PROJECT_DIR!\venv\Scripts\python.exe" (
 )
 
 set "PYTHON=!PROJECT_DIR!\venv\Scripts\python.exe"
-set "PIP=!PROJECT_DIR!\venv\Scripts\pip.exe"
 echo.
 
-:: Step 5: Install Python dependencies
+:: Step 5: Ensure pip is available in venv
+"!PYTHON!" -m pip --version >nul 2>&1
+if !errorlevel! neq 0 (
+    echo  [*] pip not found in venv, installing via ensurepip...
+    "!PYTHON!" -m ensurepip --upgrade
+    if !errorlevel! neq 0 (
+        echo  [ERROR] Failed to install pip.
+        pause
+        exit /b 1
+    )
+    echo  [OK] pip installed.
+)
+
+:: Step 6: Install Python dependencies
 echo  [*] Upgrading pip...
-"!PYTHON!" -m pip install --upgrade pip >nul 2>&1
+"!PYTHON!" -m pip install --upgrade pip
+if !errorlevel! neq 0 (
+    echo  [WARNING] pip upgrade failed, continuing...
+)
 
 echo  [*] Installing Python dependencies...
-"!PIP!" install -r "!PROJECT_DIR!\requirements.txt"
+"!PYTHON!" -m pip install -r "!PROJECT_DIR!\requirements.txt"
 if !errorlevel! neq 0 (
     echo  [ERROR] pip install failed.
     pause
@@ -103,7 +158,7 @@ if !errorlevel! neq 0 (
 echo  [OK] Python dependencies installed.
 echo.
 
-:: Step 6: Install Node dependencies
+:: Step 7: Install Node dependencies
 cd /d "!PROJECT_DIR!"
 echo  [*] Installing Node dependencies...
 call npm install
@@ -115,7 +170,7 @@ if !errorlevel! neq 0 (
 echo  [OK] Node dependencies installed.
 echo.
 
-:: Step 7: Build Tailwind CSS
+:: Step 8: Build Tailwind CSS
 echo  [*] Building Tailwind CSS...
 call npm run build
 if !errorlevel! neq 0 (
@@ -126,7 +181,7 @@ if !errorlevel! neq 0 (
 echo  [OK] Tailwind CSS built.
 echo.
 
-:: Step 8: Database migrations
+:: Step 9: Database migrations
 echo  [*] Running database migrations...
 "!PYTHON!" "!PROJECT_DIR!\manage.py" migrate
 if !errorlevel! neq 0 (
@@ -137,7 +192,7 @@ if !errorlevel! neq 0 (
 echo  [OK] Database migrated.
 echo.
 
-:: Step 9: Seed AI providers
+:: Step 10: Seed AI providers
 echo  [*] Seeding AI providers...
 "!PYTHON!" "!PROJECT_DIR!\manage.py" seed_ai_providers
 if !errorlevel! neq 0 (
@@ -148,7 +203,7 @@ if !errorlevel! neq 0 (
 echo  [OK] AI providers seeded.
 echo.
 
-:: Step 10: Collect static files
+:: Step 11: Collect static files
 echo  [*] Collecting static files...
 "!PYTHON!" "!PROJECT_DIR!\manage.py" collectstatic --noinput
 if !errorlevel! neq 0 (
@@ -159,7 +214,7 @@ if !errorlevel! neq 0 (
 echo  [OK] Static files collected.
 echo.
 
-:: Step 11: Create superuser and set password
+:: Step 12: Create superuser and set password
 echo  [*] Creating superuser...
 "!PYTHON!" "!PROJECT_DIR!\manage.py" createsuperuser --noinput --username admin --email admin@example.com 2>nul
 
