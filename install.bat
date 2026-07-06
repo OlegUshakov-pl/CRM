@@ -28,7 +28,7 @@ if exist "!PROJECT_DIR!\CRM\manage.py" (
 
 :: Try to clone
 echo  [*] Cloning repository...
-git clone https://github.com/OlegUhakov/CRM.git
+git clone https://github.com/OlegUshakov-pl/CRM.git
 if !errorlevel! neq 0 (
     echo  [ERROR] Git clone failed. Make sure Git is installed.
     echo  Try deleting the CRM folder and running again.
