@@ -234,6 +234,34 @@ function switchTab(tab) {
         }
     });
 
+    var toolbar = quill.getModule('toolbar');
+    toolbar.addHandler('image', function() {
+        var input = document.createElement('input');
+        input.setAttribute('type', 'file');
+        input.setAttribute('accept', 'image/*');
+        input.click();
+        input.onchange = function() {
+            var file = input.files[0];
+            if (file) {
+                var formData = new FormData();
+                formData.append('image', file);
+                fetch('{% url "library:upload_image" %}', {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-CSRFToken': getCSRFToken() }
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.url) {
+                        var range = quill.getSelection(true);
+                        quill.insertEmbed(range.index, 'image', data.url);
+                        quill.setSelection(range.index + 1);
+                    }
+                });
+            }
+        };
+    });
+
     var form = document.querySelector('form');
     var hiddenInput = document.querySelector('[name="content"]');
     quill.on('text-change', function() {

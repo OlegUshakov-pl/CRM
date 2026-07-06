@@ -119,61 +119,59 @@ def library_import_url(request):
         url = request.POST.get('url', '').strip()
         if not url:
             messages.error(request, 'Please provide a URL.')
-            return render(request, 'library/import_url.html', {'url': url})
+            return render(request, 'library/form.html', {'url': url, 'categories': Category.objects.filter(is_active=True), 'active_tab': 'import'})
 
         try:
             import urllib.request
-            from html.parser import HTMLParser
+            from bs4 import BeautifulSoup
 
-            class ContentParser(HTMLParser):
-                def __init__(self):
-                    super().__init__()
-                    self.title = ''
-                    self.in_title = False
-                    self.content = []
-                    self.in_body = False
-                    self.images = []
-
-                def handle_starttag(self, tag, attrs):
-                    if tag == 'title':
-                        self.in_title = True
-                    elif tag == 'body':
-                        self.in_body = True
-                    elif tag == 'img' and self.in_body:
-                        attrs_dict = dict(attrs)
-                        if 'src' in attrs_dict:
-                            self.images.append(attrs_dict['src'])
-                    if self.in_body and tag in ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li', 'blockquote', 'div']:
-                        self.content.append(f'<{tag}>')
-
-                def handle_endtag(self, tag):
-                    if tag == 'title':
-                        self.in_title = False
-                    elif tag == 'body':
-                        self.in_body = False
-                    if self.in_body and tag in ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li', 'blockquote', 'div']:
-                        self.content.append(f'</{tag}>')
-
-                def handle_data(self, data):
-                    if self.in_title:
-                        self.title += data.strip()
-                    elif self.in_body and data.strip():
-                        self.content.append(data.strip())
-
-            req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-            with urllib.request.urlopen(req, timeout=10) as response:
+            req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'})
+            with urllib.request.urlopen(req, timeout=15) as response:
                 html_content = response.read().decode('utf-8', errors='ignore')
 
-            parser = ContentParser()
-            parser.feed(html_content)
+            soup = BeautifulSoup(html_content, 'html.parser')
 
-            title = parser.title or url.split('/')[-1].replace('-', ' ').replace('_', ' ')
-            content = ' '.join(parser.content)
-            summary = content[:300] + '...' if len(content) > 300 else content
+            title_tag = soup.find('title')
+            title = title_tag.get_text(strip=True) if title_tag else url.split('/')[-1].replace('-', ' ').replace('_', ' ')
+
+            for script in soup(['script', 'style', 'nav', 'footer', 'header']):
+                script.decompose()
+
+            meta_desc = soup.find('meta', attrs={'name': 'description'})
+            summary = meta_desc['content'].strip() if meta_desc and meta_desc.get('content') else ''
+
+            body = soup.find('body')
+            if body:
+                text = body.get_text(separator=' ', strip=True)
+                if not summary:
+                    summary = text[:300] + '...' if len(text) > 300 else text
+            else:
+                text = soup.get_text(separator=' ', strip=True)
+                if not summary:
+                    summary = text[:300] + '...' if len(text) > 300 else text
+
+            content_html = ''
+            if body:
+                for tag in body.find_all(['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li', 'blockquote', 'pre', 'code', 'img', 'a']):
+                    if tag.name == 'img':
+                        src = tag.get('src', '')
+                        alt = tag.get('alt', '')
+                        if src:
+                            content_html += f'<p><img src="{src}" alt="{alt}"></p>'
+                    elif tag.name == 'a':
+                        href = tag.get('href', '')
+                        link_text = tag.get_text(strip=True)
+                        if href and link_text:
+                            content_html += f'<p><a href="{href}" target="_blank">{link_text}</a></p>'
+                    else:
+                        content_html += str(tag)
+
+            if not content_html:
+                content_html = f'<p>{text}</p>'
 
             item = LibraryItem(
                 title=title,
-                content=bleach.clean(content, tags=['p', 'br', 'strong', 'em', 'u', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'a', 'img', 'blockquote', 'pre', 'code', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'span', 'div'], attributes={'a': ['href', 'target'], 'img': ['src', 'alt', 'width', 'height'], 'span': ['style'], 'div': ['style']}, strip=True),
+                content=bleach.clean(content_html, tags=['p', 'br', 'strong', 'em', 'u', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'a', 'img', 'blockquote', 'pre', 'code', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'span', 'div'], attributes={'a': ['href', 'target'], 'img': ['src', 'alt', 'width', 'height'], 'span': ['style'], 'div': ['style']}, strip=True),
                 summary=summary,
                 source_url=url,
                 created_by=request.user,
@@ -201,7 +199,7 @@ def library_import_url(request):
 
         except Exception as e:
             messages.error(request, f'Failed to import URL: {str(e)}')
-            return render(request, 'library/form.html', {'url': url, 'categories': Category.objects.filter(is_active=True)})
+            return render(request, 'library/form.html', {'url': url, 'categories': Category.objects.filter(is_active=True), 'active_tab': 'import'})
 
     categories = Category.objects.filter(is_active=True)
     return render(request, 'library/form.html', {
@@ -291,6 +289,17 @@ def library_toggle_favorite(request, slug):
     item.is_favorite = not item.is_favorite
     item.save()
     return JsonResponse({'is_favorite': item.is_favorite})
+
+
+@login_required
+def library_upload_image(request):
+    if request.method == 'POST' and request.FILES.get('image'):
+        image = request.FILES['image']
+        from django.core.files.storage import default_storage
+        path = default_storage.save(f'library/content/{image.name}', image)
+        url = default_storage.url(path)
+        return JsonResponse({'url': url})
+    return JsonResponse({'error': 'No image provided'}, status=400)
 
 
 @login_required
