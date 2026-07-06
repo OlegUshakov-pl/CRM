@@ -28,15 +28,15 @@
         <div class="flex flex-col sm:flex-row gap-3">
             <div class="flex-1 relative">
                 <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"></i>
-                <input type="text" placeholder="Search documents..." value="{{ query }}" hx-get="{% url 'library:list' %}" hx-trigger="keyup changed delay:500ms" hx-target="#library-items" hx-swap="innerHTML" hx-include="#filter-form" name="q" onkeydown="if(event.key==='Enter')event.preventDefault()" class="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-600 text-[14px] outline-none focus:border-violet-300 transition-colors">
+                <input type="text" id="search-input" placeholder="Search documents..." value="{{ query }}" name="q" class="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-600 text-[14px] outline-none focus:border-violet-300 transition-colors">
             </div>
             <div class="flex items-center gap-2">
-                <select id="search-engine" onchange="updateSearchEngine(this.value)" class="px-3 py-2.5 border border-gray-200 dark:border-gray-600 dark:bg-gray-900 text-[14px] outline-none focus:border-violet-300 transition-colors">
+                <select id="search-engine" class="px-3 py-2.5 border border-gray-200 dark:border-gray-600 dark:bg-gray-900 text-[14px] outline-none focus:border-violet-300 transition-colors">
                     <option value="crm">In Articles (CRM)</option>
                     <option value="google">Google</option>
                     <option value="duckduckgo">DuckDuckGo</option>
                 </select>
-                <button onclick="performExternalSearch()" class="px-4 py-2.5 bg-violet-500 hover:bg-violet-600 text-white text-[14px] font-medium rounded transition-colors">
+                <button type="button" onclick="performExternalSearch()" class="px-4 py-2.5 bg-violet-500 hover:bg-violet-600 text-white text-[14px] font-medium rounded transition-colors">
                     Search
                 </button>
             </div>
@@ -113,20 +113,46 @@
 
 {% block extra_scripts %}
 <script>
-function updateSearchEngine(engine) {
-    document.getElementById('search-engine').value = engine;
-}
+var searchDebounce = null;
+
+document.getElementById('search-input').addEventListener('input', function() {
+    var query = this.value;
+    var engine = document.getElementById('search-engine').value;
+
+    if (engine !== 'crm') return;
+
+    clearTimeout(searchDebounce);
+    searchDebounce = setTimeout(function() {
+        var params = new URLSearchParams();
+        params.set('q', query);
+        params.set('view', '{{ view_mode }}');
+        {% if current_category %}params.set('category', '{{ current_category }}');{% endif %}
+        {% if current_type %}params.set('type', '{{ current_type }}');{% endif %}
+        {% if favorites_only %}params.set('favorites', '1');{% endif %}
+        {% if current_tag %}params.set('tag', '{{ current_tag }}');{% endif %}
+        {% if current_date %}params.set('date', '{{ current_date }}');{% endif %}
+
+        htmx.ajax('GET', '{% url "library:list" %}?' + params.toString(), {target: '#library-items', swap: 'innerHTML'});
+    }, 400);
+});
+
+document.getElementById('search-input').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        performExternalSearch();
+    }
+});
 
 function performExternalSearch() {
-    var query = document.querySelector('[name="q"]').value;
+    var query = document.getElementById('search-input').value;
     var engine = document.getElementById('search-engine').value;
 
     if (engine === 'crm') {
-        document.querySelector('[name="q"]').dispatchEvent(new Event('keyup'));
+        document.getElementById('search-input').dispatchEvent(new Event('input'));
         return;
     }
 
-    if (!query) return;
+    if (!query.trim()) return;
 
     var url;
     if (engine === 'google') {
@@ -135,13 +161,20 @@ function performExternalSearch() {
         url = 'https://duckduckgo.com/?q=' + encodeURIComponent(query);
     }
 
-    if (url) window.open(url, '_blank');
+    if (url) {
+        var win = window.open(url, '_blank');
+        if (!win) {
+            alert('Please allow popups for this site');
+        }
+    }
 }
 
 document.getElementById('filter-form').addEventListener('submit', function(e) {
     e.preventDefault();
     var form = e.target;
     var formData = new FormData(form);
+    formData.set('q', document.getElementById('search-input').value);
+    formData.set('view', '{{ view_mode }}');
     var params = new URLSearchParams(formData).toString();
     var hxGet = '{% url "library:list" %}?' + params;
 
