@@ -84,11 +84,16 @@
 <body x-data="chatApp()">
     <div class="max-w-[1280px] mx-auto py-6 px-4 flex gap-5">
         <!-- Sidebar -->
-        <aside id="sidebar" class="bg-white border border-light min-h-[900px] px-5 py-5 flex flex-col transition-all duration-300" style="width: 210px; min-width: 210px; max-width: 210px;">
+        <aside id="sidebar" class="collapsed bg-white border border-light min-h-[900px] px-5 py-5 flex flex-col transition-all duration-300" style="width: 210px; min-width: 210px; max-width: 210px;">
             <!-- Logo -->
             <a href="{% url 'core:dashboard' %}" class="flex items-center gap-2 mb-7 hover:opacity-80 transition-opacity">
                 <i data-lucide="shell" class="w-5 h-5 text-violet-400 flex-shrink-0"></i>
                 <span class="sidebar-text text-[14px] font-semibold tracking-wide dark:text-white">CRM</span>
+            </a>
+
+            <a href="{% url 'core:dashboard' %}" class="flex items-center gap-2 p-2 hover:bg-gray-50 dark:hover:bg-[#1a1a1a] rounded transition-colors dark:text-gray-300 text-[13px]">
+                <i data-lucide="layout-dashboard" class="w-4 h-4 flex-shrink-0"></i>
+                <span class="sidebar-text">Dashboard</span>
             </a>
 
             <!-- Nav Links -->
@@ -136,7 +141,7 @@
                 </button>
 
                 <button id="sidebar-toggle-btn" onclick="toggleSidebar()" class="p-2 hover:bg-gray-100 dark:hover:bg-[#1a1a1a] rounded flex items-center gap-2 mt-2">
-                    <i data-lucide="panel-left-close" id="toggle-icon" class="w-4 h-4 flex-shrink-0 dark:text-gray-400"></i>
+                    <i data-lucide="panel-left-open" id="toggle-icon" class="w-4 h-4 flex-shrink-0 dark:text-gray-400"></i>
                 </button>
             </div>
         </aside>
@@ -268,11 +273,23 @@
         }
         document.addEventListener('htmx:afterSettle', function() { lucide.createIcons(); });
 
+        (function() {
+            var sidebar = document.getElementById("sidebar");
+            var icon = document.getElementById("toggle-icon");
+            var saved = localStorage.getItem('sidebar_collapsed');
+            if (saved === 'false') {
+                sidebar.classList.remove("collapsed");
+                icon.setAttribute("data-lucide", "panel-left-close");
+                lucide.createIcons();
+            }
+        })();
+
         function toggleSidebar() {
             var sidebar = document.getElementById("sidebar");
             var icon = document.getElementById("toggle-icon");
             sidebar.classList.toggle("collapsed");
             icon.setAttribute("data-lucide", sidebar.classList.contains("collapsed") ? "panel-left-open" : "panel-left-close");
+            localStorage.setItem('sidebar_collapsed', sidebar.classList.contains("collapsed"));
             lucide.createIcons();
         }
 
