@@ -55,6 +55,8 @@ class LibraryItem(TimeStampedModel):
     slug = models.SlugField(max_length=255, unique=True, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     content = models.TextField(blank=True, null=True)
+    summary = models.TextField(blank=True, null=True, help_text='Auto-generated or manual summary')
+    source_url = models.URLField(blank=True, null=True, help_text='Original URL if imported')
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, related_name='items')
     tags = models.ManyToManyField(Tag, blank=True, related_name='items')
     file = models.FileField(upload_to='library/files/', blank=True, null=True)

@@ -7,81 +7,180 @@
         <div class="p-6 border-b border-gray-100 dark:border-gray-700">
             <h1 class="text-xl font-bold text-gray-900 dark:text-white">{{ title }}</h1>
         </div>
-        <form method="post" enctype="multipart/form-data" class="p-6 space-y-4">
-            {% csrf_token %}
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ form.title.label }}</label>
-                {{ form.title }}
-                {% if form.title.errors %}<p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.title.errors.0 }}</p>{% endif %}
-            </div>
+        <div class="border-b border-gray-100 dark:border-gray-700">
+            <nav class="flex gap-6 px-6" role="tablist">
+                <button onclick="switchTab('editor')" id="tab-editor" class="py-3 text-sm font-medium border-b-2 {% if active_tab == 'editor' %}border-violet-500 text-violet-600{% else %}border-transparent text-gray-500 hover:text-gray-700{% endif %}" role="tab">
+                    <i data-lucide="edit-3" class="w-4 h-4 inline mr-1"></i>
+                    Manual Editor
+                </button>
+                <button onclick="switchTab('import')" id="tab-import" class="py-3 text-sm font-medium border-b-2 {% if active_tab == 'import' %}border-violet-500 text-violet-600{% else %}border-transparent text-gray-500 hover:text-gray-700{% endif %}" role="tab">
+                    <i data-lucide="link" class="w-4 h-4 inline mr-1"></i>
+                    Import by URL
+                </button>
+            </nav>
+        </div>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ form.description.label }}</label>
-                {{ form.description }}
-                {% if form.description.errors %}<p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.description.errors.0 }}</p>{% endif %}
-            </div>
+        <div id="tab-content-editor" class="p-6 {% if active_tab != 'editor' %}hidden{% endif %}">
+            <form method="post" enctype="multipart/form-data" class="space-y-4">
+                {% csrf_token %}
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ form.category.label }}</label>
-                {{ form.category }}
-                {% if form.category.errors %}<p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.category.errors.0 }}</p>{% endif %}
-            </div>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ form.title.label }}</label>
+                            {{ form.title }}
+                            {% if form.title.errors %}<p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.title.errors.0 }}</p>{% endif %}
+                        </div>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Content</label>
-                <div id="editor-container" style="height: 400px;" class="border border-[#e8e8e8] dark:border-gray-600 dark:bg-gray-900">{{ form.content.value|default:''|safe }}</div>
-                {{ form.content }}
-                {% if form.content.errors %}<p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.content.errors.0 }}</p>{% endif %}
-            </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ form.description.label }}</label>
+                            {{ form.description }}
+                            {% if form.description.errors %}<p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.description.errors.0 }}</p>{% endif %}
+                        </div>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Main File</label>
-                {{ form.file }}
-                {% if form.file.errors %}<p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.file.errors.0 }}</p>{% endif %}
-                {% if item and item.file %}
-                <p class="mt-1 text-xs text-gray-500">Current: {{ item.file.name }}</p>
-                {% endif %}
-            </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Content</label>
+                            <div id="editor-container" style="height: 400px;" class="border border-[#e8e8e8] dark:border-gray-600 dark:bg-gray-900">{{ form.content.value|default:''|safe }}</div>
+                            {{ form.content }}
+                            {% if form.content.errors %}<p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.content.errors.0 }}</p>{% endif %}
+                        </div>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Additional Files</label>
-                <div id="drop-zone" class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded p-6 text-center cursor-pointer hover:border-indigo-400 transition-colors" onclick="document.getElementById('file-input').click()">
-                    <i data-lucide="upload" class="w-8 h-8 text-gray-400 mx-auto mb-2"></i>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">{% if item %}Drop files here or click to upload{% else %}Drop files here — they will be saved with the document{% endif %}</p>
-                </div>
-                <input type="file" id="file-input" multiple class="hidden" onchange="uploadFiles(this.files)">
-                <input type="file" id="additional-files" name="additional_files" multiple class="hidden">
-                <div id="attachment-list" class="mt-2 space-y-1">
-                    {% if item %}
-                    {% for att in item.attachments.all %}
-                    <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                        <i data-lucide="paperclip" class="w-4 h-4"></i>
-                        <span>{{ att.name }}</span>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Main File</label>
+                            {{ form.file }}
+                            {% if form.file.errors %}<p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.file.errors.0 }}</p>{% endif %}
+                            {% if item and item.file %}
+                            <p class="mt-1 text-xs text-gray-500">Current: {{ item.file.name }}</p>
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Additional Files</label>
+                            <div id="drop-zone" class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded p-6 text-center cursor-pointer hover:border-indigo-400 transition-colors" onclick="document.getElementById('file-input').click()">
+                                <i data-lucide="upload" class="w-8 h-8 text-gray-400 mx-auto mb-2"></i>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">{% if item %}Drop files here or click to upload{% else %}Drop files here — they will be saved with the document{% endif %}</p>
+                            </div>
+                            <input type="file" id="file-input" multiple class="hidden" onchange="uploadFiles(this.files)">
+                            <input type="file" id="additional-files" name="additional_files" multiple class="hidden">
+                            <div id="attachment-list" class="mt-2 space-y-1">
+                                {% if item %}
+                                {% for att in item.attachments.all %}
+                                <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                                    <i data-lucide="paperclip" class="w-4 h-4"></i>
+                                    <span>{{ att.name }}</span>
+                                </div>
+                                {% endfor %}
+                                {% endif %}
+                            </div>
+                        </div>
                     </div>
-                    {% endfor %}
-                    {% endif %}
+
+                    <div class="space-y-4">
+                        <div class="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4">
+                            <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-3">Metadata</h3>
+
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ form.category.label }}</label>
+                                    <div class="flex gap-2">
+                                        {{ form.category }}
+                                        <button type="button" onclick="openCategoryModal()" class="px-3 py-1.5 bg-violet-100 hover:bg-violet-200 text-violet-700 rounded text-sm transition-colors" title="Create new category">
+                                            <i data-lucide="plus" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+                                    {% if form.category.errors %}<p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.category.errors.0 }}</p>{% endif %}
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ form.tags_input.label }}</label>
+                                    {{ form.tags_input }}
+                                    {% if form.tags_input.errors %}<p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.tags_input.errors.0 }}</p>{% endif %}
+                                    <p class="text-xs text-gray-400 mt-1">Separate tags with commas</p>
+                                </div>
+
+                                <div>
+                                    <label class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                                        {{ form.is_favorite }}
+                                        {{ form.is_favorite.label }}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if item and item.source_url %}
+                        <div class="bg-violet-50 dark:bg-violet-900/20 rounded-lg p-4">
+                            <h3 class="text-sm font-semibold text-violet-900 dark:text-violet-300 mb-2">Source</h3>
+                            <a href="{{ item.source_url }}" target="_blank" class="text-sm text-violet-600 dark:text-violet-400 hover:underline break-all">{{ item.source_url }}</a>
+                        </div>
+                        {% endif %}
+                    </div>
                 </div>
-            </div>
 
+                <div class="flex gap-3 pt-4 border-t border-gray-100 dark:border-gray-700">
+                    <button type="submit" class="px-4 py-2.5 bg-indigo-500 hover:bg-indigo-600 rounded-[20px] text-white shadow-[0_2px_2px_rgba(0,0,0,0.25)] text-[14px] font-medium transition-colors">
+                        {% if item %}Save Changes{% else %}Create{% endif %}
+                    </button>
+                    <a href="{% if item %}{% url 'library:detail' item.slug %}{% else %}{% url 'library:list' %}{% endif %}" class="px-4 py-2.5 text-[#666] bg-gray-100 hover:bg-gray-200 transition-colors text-[14px] rounded-[20px]">Cancel</a>
+                </div>
+            </form>
+        </div>
+
+        <div id="tab-content-import" class="p-6 {% if active_tab != 'import' %}hidden{% endif %}">
+            <form method="post" action="{% url 'library:import_url' %}" class="space-y-4">
+                {% csrf_token %}
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">URL to Import</label>
+                    <div class="flex gap-2">
+                        <input type="url" name="url" placeholder="https://example.com/article" required class="flex-1 px-4 py-2.5 border border-[#e8e8e8] text-[14px] outline-none focus:border-violet-300 transition-colors">
+                        <button type="submit" class="inline-flex items-center gap-2 px-4 py-2.5 bg-violet-500 hover:bg-violet-600 text-white text-[14px] font-medium rounded transition-colors">
+                            <i data-lucide="download" class="w-4 h-4"></i>
+                            Extract
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
+                    <select name="category" class="w-full px-4 py-2.5 border border-[#e8e8e8] text-[14px] outline-none focus:border-violet-300 transition-colors">
+                        <option value="">Select category (optional)</option>
+                        {% for cat in categories %}
+                        <option value="{{ cat.id }}">{{ cat.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tags</label>
+                    <input type="text" name="tags_input" placeholder="Enter tags separated by commas" class="w-full px-4 py-2.5 border border-[#e8e8e8] text-[14px] outline-none focus:border-violet-300 transition-colors">
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div id="category-modal" class="fixed inset-0 z-50 bg-black/50 hidden items-center justify-center">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-sm w-full mx-4" onclick="event.stopPropagation()">
+        <div class="p-6 border-b border-gray-100 dark:border-gray-700">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Quick Create Category</h2>
+        </div>
+        <form id="quick-category-form" class="p-6 space-y-4">
             <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ form.tags_input.label }}</label>
-                {{ form.tags_input }}
-                {% if form.tags_input.errors %}<p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ form.tags_input.errors.0 }}</p>{% endif %}
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
+                <input type="text" name="name" required placeholder="Category name" class="w-full px-4 py-2.5 border border-[#e8e8e8] text-[14px] outline-none focus:border-violet-300 transition-colors">
             </div>
-
             <div>
-                <label class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
-                    {{ form.is_favorite }}
-                    {{ form.is_favorite.label }}
-                </label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Color</label>
+                <input type="color" name="color" value="#8B5CF6" class="w-full h-10 border border-[#e8e8e8] cursor-pointer">
             </div>
-
             <div class="flex gap-3 pt-2">
                 <button type="submit" class="px-4 py-2.5 bg-indigo-500 hover:bg-indigo-600 rounded-[20px] text-white shadow-[0_2px_2px_rgba(0,0,0,0.25)] text-[14px] font-medium transition-colors">
-                    {% if item %}Save Changes{% else %}Create{% endif %}
+                    Create
                 </button>
-                <a href="{% if item %}{% url 'library:detail' item.slug %}{% else %}{% url 'library:list' %}{% endif %}" class="px-4 py-2.5 text-[#666] bg-gray-100 hover:bg-gray-200 transition-colors text-[14px] rounded-[20px]">Cancel</a>
+                <button type="button" onclick="closeCategoryModal()" class="px-4 py-2.5 text-[#666] bg-gray-100 hover:bg-gray-200 transition-colors text-[14px] rounded-[20px]">
+                    Cancel
+                </button>
             </div>
         </form>
     </div>
@@ -92,6 +191,19 @@
 <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
 <script>
+function switchTab(tab) {
+    document.getElementById('tab-content-editor').classList.toggle('hidden', tab !== 'editor');
+    document.getElementById('tab-content-import').classList.toggle('hidden', tab !== 'import');
+    document.getElementById('tab-editor').classList.toggle('border-violet-500', tab === 'editor');
+    document.getElementById('tab-editor').classList.toggle('text-violet-600', tab === 'editor');
+    document.getElementById('tab-editor').classList.toggle('border-transparent', tab !== 'editor');
+    document.getElementById('tab-editor').classList.toggle('text-gray-500', tab !== 'editor');
+    document.getElementById('tab-import').classList.toggle('border-violet-500', tab === 'import');
+    document.getElementById('tab-import').classList.toggle('text-violet-600', tab === 'import');
+    document.getElementById('tab-import').classList.toggle('border-transparent', tab !== 'import');
+    document.getElementById('tab-import').classList.toggle('text-gray-500', tab !== 'import');
+}
+
 (function() {
     var quill = new Quill('#editor-container', {
         theme: 'snow',
@@ -164,5 +276,52 @@ function getCSRFToken() {
     }
     return '';
 }
+
+function openCategoryModal() {
+    var modal = document.getElementById('category-modal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+
+function closeCategoryModal() {
+    var modal = document.getElementById('category-modal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+
+document.getElementById('category-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeCategoryModal();
+});
+
+document.getElementById('quick-category-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    var form = e.target;
+    var formData = new FormData(form);
+
+    fetch('{% url "library:category_create_api" %}', {
+        method: 'POST',
+        body: JSON.stringify({
+            name: formData.get('name'),
+            color: formData.get('color')
+        }),
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCSRFToken()
+        }
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.id) {
+            var select = document.querySelector('[name="category"]');
+            var option = document.createElement('option');
+            option.value = data.id;
+            option.textContent = data.name;
+            option.selected = true;
+            select.appendChild(option);
+            closeCategoryModal();
+            form.reset();
+        }
+    });
+});
 </script>
 {% endblock %}
