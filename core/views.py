@@ -23,6 +23,7 @@ from projects.utils import get_project_root_path
 
 @login_required
 def dashboard(request):
+    request.session.pop('workspace', None)
     context = {
         'project_count': Project.objects.filter(is_active=True).count(),
         'active_projects': Project.objects.filter(is_active=True, status='active').count(),

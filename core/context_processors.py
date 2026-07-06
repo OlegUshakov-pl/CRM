@@ -15,7 +15,12 @@ def current_workspace(request):
     path = request.path
     if path.startswith('/library/') or path.startswith('/workspace/collections'):
         ws = 'collections'
-    else:
+    elif path.startswith('/workspace/projects'):
         ws = 'projects'
-    request.session['workspace'] = ws
+    elif path == '/' and request.session.get('workspace'):
+        ws = request.session['workspace']
+    elif path == '/':
+        ws = 'none'
+    else:
+        ws = 'none'
     return {'current_workspace': ws}

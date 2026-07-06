@@ -119,7 +119,7 @@
 
             {% if current_workspace == 'collections' %}
                 {% include 'includes/sidebar_collections.html' %}
-            {% else %}
+            {% elif current_workspace == 'projects' %}
                 {% include 'includes/sidebar_projects.html' %}
             {% endif %}
 
