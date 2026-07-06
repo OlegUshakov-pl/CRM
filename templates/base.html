@@ -34,7 +34,7 @@
         }
         nav a:hover { background: #efefef; }
 
-        #sidebar.collapsed { width: 60px; padding-left: 12px; padding-right: 12px; }
+        #sidebar.collapsed { width: 60px !important; min-width: 60px !important; max-width: 60px !important; padding-left: 12px; padding-right: 12px; }
         #sidebar.collapsed .sidebar-text,
         #sidebar.collapsed .flex.items-center.gap-2.mb-7 span { display: none; }
         #sidebar.collapsed .flex.items-center.gap-2.mb-7 { justify-content: center; margin-bottom: 28px; }
@@ -84,7 +84,7 @@
 <body x-data="chatApp()">
     <div class="max-w-[1280px] mx-auto py-6 px-4 flex gap-5">
         <!-- Sidebar -->
-        <aside id="sidebar" class="w-[210px] bg-white border border-light min-h-[900px] px-5 py-5 flex flex-col transition-all duration-300">
+        <aside id="sidebar" class="bg-white border border-light min-h-[900px] px-5 py-5 flex flex-col transition-all duration-300" style="width: 210px; min-width: 210px; max-width: 210px;">
             <!-- Logo -->
             <a href="{% url 'core:dashboard' %}" class="flex items-center gap-2 mb-7 hover:opacity-80 transition-opacity">
                 <i data-lucide="shell" class="w-5 h-5 text-violet-400 flex-shrink-0"></i>
@@ -109,6 +109,7 @@
                         <span class="sidebar-text">Library</span>
                     </button>
                 </form>
+                <hr class="border-light dark:border-[#222]">
             </nav>
 
             {% if current_workspace == 'collections' %}
