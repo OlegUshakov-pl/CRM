@@ -1,22 +1,19 @@
 @echo off
+chcp 65001 >nul 2>&1
+cd /d "%~dp0"
 echo ========================================
 echo     Starting Django Development Server
 echo ========================================
 
-:: Activate virtual environment
-call venv\Scripts\activate.bat
-
-:: Check if activation was successful
-if errorlevel 1 (
-    echo Error: Could not activate virtual environment!
+:: Check venv exists
+if not exist "venv\Scripts\python.exe" (
+    echo Error: Virtual environment not found!
+    echo Run install.bat first.
     pause
     exit /b 1
 )
 
-echo Virtual environment activated successfully.
-echo Starting Django server...
-
 :: Run the server
-python manage.py runserver
+venv\Scripts\python.exe manage.py runserver
 
 pause
