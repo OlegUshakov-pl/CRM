@@ -114,33 +114,6 @@ def library_detail(request, slug):
 
 
 @login_required
-def library_create(request):
-    if request.method == 'POST':
-        form = LibraryItemForm(request.POST, request.FILES)
-        if form.is_valid():
-            item = form.save(commit=False)
-            if item.content:
-                item.content = bleach.clean(item.content, tags=['p', 'br', 'strong', 'em', 'u', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'a', 'img', 'blockquote', 'pre', 'code', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'span', 'div'], attributes={'a': ['href', 'target'], 'img': ['src', 'alt', 'width', 'height'], 'span': ['style'], 'div': ['style']}, strip=True)
-            item.created_by = request.user
-            item.save()
-            form._save_tags(item)
-            for f in request.FILES.getlist('additional_files'):
-                LibraryAttachment.objects.create(item=item, file=f)
-            log_activity(request.user, 'created', f'Library item "{item.title}"', item)
-            messages.success(request, 'Document created successfully.')
-            return redirect('library:detail', slug=item.slug)
-    else:
-        form = LibraryItemForm()
-    categories = Category.objects.filter(is_active=True)
-    return render(request, 'library/form.html', {
-        'form': form,
-        'title': 'Create Document',
-        'categories': categories,
-        'active_tab': 'editor',
-    })
-
-
-@login_required
 def library_import_url(request):
     if request.method == 'POST':
         url = request.POST.get('url', '').strip()
@@ -159,7 +132,6 @@ def library_import_url(request):
                     self.in_title = False
                     self.content = []
                     self.in_body = False
-                    self.current_tag = None
                     self.images = []
 
                 def handle_starttag(self, tag, attrs):
@@ -171,8 +143,6 @@ def library_import_url(request):
                         attrs_dict = dict(attrs)
                         if 'src' in attrs_dict:
                             self.images.append(attrs_dict['src'])
-                    if tag in ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li', 'blockquote']:
-                        self.current_tag = tag
                     if self.in_body and tag in ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li', 'blockquote', 'div']:
                         self.content.append(f'<{tag}>')
 
@@ -226,16 +196,44 @@ def library_import_url(request):
                     pass
 
             log_activity(request.user, 'created', f'Library item "{item.title}" (imported from URL)', item)
-            messages.success(request, f'Document imported successfully from URL.')
+            messages.success(request, 'Document imported successfully from URL.')
             return redirect('library:detail', slug=item.slug)
 
         except Exception as e:
             messages.error(request, f'Failed to import URL: {str(e)}')
-            return render(request, 'library/import_url.html', {'url': url})
+            return render(request, 'library/form.html', {'url': url, 'categories': Category.objects.filter(is_active=True)})
 
     categories = Category.objects.filter(is_active=True)
-    return render(request, 'library/import_url.html', {
+    return render(request, 'library/form.html', {
         'categories': categories,
+        'active_tab': 'import',
+    })
+
+
+@login_required
+def library_create(request):
+    if request.method == 'POST':
+        form = LibraryItemForm(request.POST, request.FILES)
+        if form.is_valid():
+            item = form.save(commit=False)
+            if item.content:
+                item.content = bleach.clean(item.content, tags=['p', 'br', 'strong', 'em', 'u', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'a', 'img', 'blockquote', 'pre', 'code', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'span', 'div'], attributes={'a': ['href', 'target'], 'img': ['src', 'alt', 'width', 'height'], 'span': ['style'], 'div': ['style']}, strip=True)
+            item.created_by = request.user
+            item.save()
+            form._save_tags(item)
+            for f in request.FILES.getlist('additional_files'):
+                LibraryAttachment.objects.create(item=item, file=f)
+            log_activity(request.user, 'created', f'Library item "{item.title}"', item)
+            messages.success(request, 'Document created successfully.')
+            return redirect('library:detail', slug=item.slug)
+    else:
+        form = LibraryItemForm()
+    categories = Category.objects.filter(is_active=True)
+    return render(request, 'library/form.html', {
+        'form': form,
+        'title': 'Create Document',
+        'categories': categories,
+        'active_tab': 'editor',
     })
 
 
@@ -464,21 +462,3 @@ def category_create_api(request):
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)
     return JsonResponse({'error': 'POST required'}, status=400)
-
-
-@login_required
-def library_search_external(request):
-    query = request.GET.get('q', '')
-    engine = request.GET.get('engine', 'google')
-
-    if not query:
-        return JsonResponse({'error': 'Query required'}, status=400)
-
-    if engine == 'google':
-        url = f'https://www.google.com/search?q={query}'
-    elif engine == 'duckduckgo':
-        url = f'https://duckduckgo.com/?q={query}'
-    else:
-        url = f'https://www.google.com/search?q={query}'
-
-    return JsonResponse({'url': url})

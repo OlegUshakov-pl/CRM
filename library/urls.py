@@ -7,6 +7,7 @@ urlpatterns = [
     path('dashboard/', views.library_dashboard, name='dashboard'),
     path('create/', views.library_create, name='create'),
     path('import-url/', views.library_import_url, name='import_url'),
+
     path('gallery/', views.library_gallery, name='gallery'),
     path('files/', views.library_files, name='files'),
     path('categories/', views.category_list, name='category_list'),
@@ -15,7 +16,6 @@ urlpatterns = [
     path('categories/<slug:slug>/edit/', views.category_edit, name='category_edit'),
     path('categories/<slug:slug>/delete/', views.category_delete, name='category_delete'),
     path('api/category/create/', views.category_create_api, name='category_create_api'),
-    path('api/search-external/', views.library_search_external, name='search_external'),
     path('<slug:slug>/', views.library_detail, name='detail'),
     path('<slug:slug>/edit/', views.library_edit, name='edit'),
     path('<slug:slug>/delete/', views.library_delete, name='delete'),
