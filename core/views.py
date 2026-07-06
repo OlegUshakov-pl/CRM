@@ -23,7 +23,6 @@ from projects.utils import get_project_root_path
 
 @login_required
 def dashboard(request):
-    request.session.pop('workspace', None)
     context = {
         'project_count': Project.objects.filter(is_active=True).count(),
         'active_projects': Project.objects.filter(is_active=True, status='active').count(),
@@ -147,7 +146,7 @@ def workspace_switch(request):
         workspace = 'projects'
     request.session['workspace'] = workspace
     from django.http import HttpResponseRedirect
-    redirect_url = '/library/' if workspace == 'collections' else '/'
+    redirect_url = '/library/' if workspace == 'collections' else '/projects/'
     if request.headers.get('HX-Request'):
         from django.http import HttpResponse
         return HttpResponse(status=204, headers={'HX-Redirect': redirect_url})
