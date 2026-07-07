@@ -44,6 +44,12 @@ def library_list(request):
     if category_slug:
         items = items.filter(category__slug=category_slug)
 
+    content_type = request.GET.get('content_type', 'article')
+    if content_type == 'article':
+        items = items.filter(Q(content__isnull=False) | Q(content__gt=''))
+    elif content_type == 'file':
+        items = items.filter(file__isnull=False).exclude(file='')
+
     file_type = request.GET.get('type', '')
     if file_type:
         items = items.filter(file_type=file_type)
@@ -86,6 +92,7 @@ def library_list(request):
             'tags': tags,
             'current_category': category_slug,
             'current_type': file_type,
+            'current_content_type': content_type,
             'favorites_only': favorites_only,
             'view_mode': view_mode,
             'current_tag': tag_slug,
@@ -100,6 +107,7 @@ def library_list(request):
         'tags': tags,
         'current_category': category_slug,
         'current_type': file_type,
+        'current_content_type': content_type,
         'favorites_only': favorites_only,
         'view_mode': view_mode,
         'current_tag': tag_slug,
@@ -520,6 +528,22 @@ def category_create_api(request):
                 created_by=request.user,
             )
             return JsonResponse({'id': category.pk, 'name': category.name, 'slug': category.slug})
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+    return JsonResponse({'error': 'POST required'}, status=400)
+
+
+@login_required
+def tag_create_api(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            name = data.get('name', '').strip()
+            if not name:
+                return JsonResponse({'error': 'Name is required'}, status=400)
+
+            tag, created = Tag.objects.get_or_create(name=name)
+            return JsonResponse({'id': tag.pk, 'name': tag.name, 'slug': tag.slug, 'created': created})
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)
     return JsonResponse({'error': 'POST required'}, status=400)

@@ -44,7 +44,21 @@
     </div>
 
     <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-4">
-        <form id="filter-form" class="flex flex-wrap items-center gap-3">
+        <div class="flex flex-wrap items-center gap-3">
+            <div class="flex border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden">
+                <button onclick="filterByContentType('article')" class="px-4 py-2 text-sm font-medium {% if current_content_type == 'article' or not current_content_type %}bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400{% else %}bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700{% endif %} transition-colors">
+                    <i data-lucide="file-text" class="w-4 h-4 inline mr-1"></i>Articles
+                </button>
+                <button onclick="filterByContentType('file')" class="px-4 py-2 text-sm font-medium {% if current_content_type == 'file' %}bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400{% else %}bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700{% endif %} transition-colors">
+                    <i data-lucide="file" class="w-4 h-4 inline mr-1"></i>Files
+                </button>
+                <button onclick="filterByContentType('all')" class="px-4 py-2 text-sm font-medium {% if current_content_type == 'all' %}bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400{% else %}bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700{% endif %} transition-colors">
+                    <i data-lucide="layers" class="w-4 h-4 inline mr-1"></i>All
+                </button>
+            </div>
+
+            <div class="h-6 w-px bg-gray-200 dark:bg-gray-700"></div>
+
             <div class="flex items-center gap-2">
                 <label class="text-xs text-gray-500 dark:text-gray-400">Category:</label>
                 <select name="category" onchange="submitFilters()" class="px-3 py-1.5 text-sm border border-[#e8e8e8] dark:border-gray-600 dark:bg-gray-800 dark:text-white outline-none focus:border-violet-300 transition-colors">
@@ -81,8 +95,9 @@
                 Favorites
             </label>
 
+            <input type="hidden" name="content_type" value="{{ current_content_type|default:'article' }}">
             <input type="hidden" name="view" value="{{ view_mode }}">
-        </form>
+        </div>
 
         {% if tags %}
         <div class="flex flex-wrap items-center gap-1.5 mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
@@ -157,16 +172,30 @@ function buildParams() {
     if (q) params.set('q', q);
     params.set('view', '{{ view_mode }}');
 
-    var form = document.getElementById('filter-form');
-    var formData = new FormData(form);
-    for (var [key, value] of formData.entries()) {
-        if (value) params.set(key, value);
-    }
+    var ct = document.querySelector('[name="content_type"]').value || 'article';
+    params.set('content_type', ct);
+
+    var category = document.querySelector('[name="category"]').value;
+    if (category) params.set('category', category);
+
+    var type = document.querySelector('[name="type"]').value;
+    if (type) params.set('type', type);
+
+    var date = document.querySelector('[name="date"]').value;
+    if (date) params.set('date', date);
+
+    var fav = document.querySelector('[name="favorites"]');
+    if (fav && fav.checked) params.set('favorites', '1');
 
     var currentTag = '{{ current_tag|default:"" }}';
     if (currentTag) params.set('tag', currentTag);
 
     return params;
+}
+
+function filterByContentType(type) {
+    document.querySelector('[name="content_type"]').value = type;
+    submitFilters();
 }
 
 function submitFilters() {
