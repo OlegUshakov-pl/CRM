@@ -303,6 +303,31 @@ def library_upload_image(request):
 
 
 @login_required
+def library_quick_upload(request):
+    if request.method == 'POST' and request.FILES.get('file'):
+        uploaded_file = request.FILES['file']
+        ext = uploaded_file.name.split('.')[-1].lower() if '.' in uploaded_file.name else ''
+        type_mapping = {
+            'pdf': 'pdf', 'djvu': 'djvu', 'docx': 'docx',
+            'txt': 'txt', 'rtf': 'rtf', 'md': 'md',
+            'jpg': 'image', 'jpeg': 'image', 'png': 'image',
+            'webp': 'image', 'gif': 'image',
+        }
+        file_type = type_mapping.get(ext, 'other')
+
+        item = LibraryItem(
+            title=uploaded_file.name.rsplit('.', 1)[0] if '.' in uploaded_file.name else uploaded_file.name,
+            file=uploaded_file,
+            file_type=file_type,
+            created_by=request.user,
+        )
+        item.save()
+        log_activity(request.user, 'created', f'Library item "{item.title}" (quick upload)', item)
+        return JsonResponse({'success': True, 'slug': item.slug})
+    return JsonResponse({'error': 'No file provided'}, status=400)
+
+
+@login_required
 def library_upload_attachment(request, slug):
     item = get_object_or_404(LibraryItem, slug=slug, is_active=True)
     if request.method == 'POST' and request.FILES.get('file'):
@@ -336,9 +361,10 @@ def library_gallery(request):
 @login_required
 def library_files(request):
     items = LibraryItem.objects.filter(
-        is_active=True
+        is_active=True,
+        file__isnull=False,
     ).exclude(
-        file_type='image'
+        file=''
     ).select_related('category').order_by('-created_at')
 
     query = request.GET.get('q', '')

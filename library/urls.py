@@ -17,6 +17,7 @@ urlpatterns = [
     path('categories/<slug:slug>/delete/', views.category_delete, name='category_delete'),
     path('api/category/create/', views.category_create_api, name='category_create_api'),
     path('api/upload-image/', views.library_upload_image, name='upload_image'),
+    path('api/quick-upload/', views.library_quick_upload, name='quick_upload'),
     path('<slug:slug>/', views.library_detail, name='detail'),
     path('<slug:slug>/edit/', views.library_edit, name='edit'),
     path('<slug:slug>/delete/', views.library_delete, name='delete'),

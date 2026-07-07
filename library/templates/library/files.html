@@ -8,37 +8,42 @@
             <h1 class="text-xl font-bold text-gray-900 dark:text-white">Files Catalog</h1>
             <p class="text-gray-500 dark:text-gray-400 mt-1">All uploaded files and documents</p>
         </div>
-        <a href="{% url 'library:create' %}" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white text-[14px] font-medium rounded-[20px] shadow-[0_2px_2px_rgba(0,0,0,0.25)] transition-colors">
-            <i data-lucide="upload" class="w-4 h-4"></i>
-            Upload File
-        </a>
     </div>
 
-    <div id="drop-zone" class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center cursor-pointer hover:border-violet-400 hover:bg-violet-50/50 dark:hover:bg-violet-900/10 transition-colors" onclick="document.getElementById('file-upload-input').click()">
-        <i data-lucide="cloud-upload" class="w-12 h-12 text-gray-400 mx-auto mb-3"></i>
-        <p class="text-gray-600 dark:text-gray-400 font-medium">Drag & drop files here</p>
-        <p class="text-sm text-gray-400 dark:text-gray-500 mt-1">or click to browse</p>
-    </div>
-    <input type="file" id="file-upload-input" multiple class="hidden" onchange="handleFileUpload(this.files)">
-
-    <div class="flex flex-col sm:flex-row gap-4">
-        <div class="w-full sm:w-56 flex-shrink-0">
-            <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-4">
-                <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-3">Filter by Type</h3>
-                <select onchange="filterByType(this.value)" class="w-full px-3 py-1.5 text-sm border border-[#e8e8e8] dark:border-gray-600 dark:bg-gray-800 dark:text-white outline-none focus:border-violet-300 transition-colors">
-                    <option value="">All Types</option>
-                    {% for key, label in file_types %}
-                    <option value="{{ key }}" {% if current_type == key %}selected{% endif %}>{{ label }}</option>
-                    {% endfor %}
-                </select>
+    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-4">
+        <div class="flex items-center gap-3 mb-4">
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Filter by Type:</span>
+            <div class="flex flex-wrap gap-2">
+                <button onclick="filterByType('')" class="px-3 py-1.5 text-sm rounded-full {% if not current_type %}bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400{% else %}bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600{% endif %} transition-colors">
+                    All
+                </button>
+                {% for key, label in file_types %}
+                <button onclick="filterByType('{{ key }}')" class="px-3 py-1.5 text-sm rounded-full {% if current_type == key %}bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400{% else %}bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600{% endif %} transition-colors">
+                    {{ label }}
+                </button>
+                {% endfor %}
             </div>
         </div>
 
-        <div class="flex-1 min-w-0">
-            <div id="files-container">
-                {% include 'library/files_partial.html' %}
+        <div id="drop-zone" class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center cursor-pointer hover:border-violet-400 hover:bg-violet-50/50 dark:hover:bg-violet-900/10 transition-colors">
+            <i data-lucide="cloud-upload" class="w-12 h-12 text-gray-400 mx-auto mb-3"></i>
+            <p class="text-gray-600 dark:text-gray-400 font-medium">Drag & drop files here</p>
+            <p class="text-sm text-gray-400 dark:text-gray-500 mt-1">or click to browse</p>
+        </div>
+        <input type="file" id="file-upload-input" multiple class="hidden" onchange="handleFileUpload(this.files)">
+    </div>
+
+    <div id="upload-progress" class="hidden">
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-4">
+            <div class="flex items-center gap-3">
+                <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-violet-500"></div>
+                <span class="text-sm text-gray-600 dark:text-gray-400">Uploading files...</span>
             </div>
         </div>
+    </div>
+
+    <div id="files-container">
+        {% include 'library/files_partial.html' %}
     </div>
 </div>
 {% endblock %}
@@ -49,37 +54,67 @@ var dropZone = document.getElementById('drop-zone');
 
 dropZone.addEventListener('dragover', function(e) {
     e.preventDefault();
-    dropZone.classList.add('border-violet-400', 'bg-violet-50/50');
+    e.stopPropagation();
+    dropZone.classList.add('border-violet-400', 'bg-violet-50/50', 'dark:bg-violet-900/10');
 });
 
 dropZone.addEventListener('dragleave', function(e) {
     e.preventDefault();
-    dropZone.classList.remove('border-violet-400', 'bg-violet-50/50');
+    e.stopPropagation();
+    dropZone.classList.remove('border-violet-400', 'bg-violet-50/50', 'dark:bg-violet-900/10');
 });
 
 dropZone.addEventListener('drop', function(e) {
     e.preventDefault();
-    dropZone.classList.remove('border-violet-400', 'bg-violet-50/50');
-    handleFileUpload(e.dataTransfer.files);
+    e.stopPropagation();
+    dropZone.classList.remove('border-violet-400', 'bg-violet-50/50', 'dark:bg-violet-900/10');
+    if (e.dataTransfer.files.length > 0) {
+        handleFileUpload(e.dataTransfer.files);
+    }
+});
+
+dropZone.addEventListener('click', function(e) {
+    if (e.target === dropZone || e.target.closest('#drop-zone')) {
+        document.getElementById('file-upload-input').click();
+    }
 });
 
 function handleFileUpload(files) {
+    if (files.length === 0) return;
+
+    var progress = document.getElementById('upload-progress');
+    progress.classList.remove('hidden');
+
+    var uploaded = 0;
+    var total = files.length;
+
     for (var i = 0; i < files.length; i++) {
         var formData = new FormData();
         formData.append('file', files[i]);
 
-        fetch('{% url "library:create" %}', {
+        fetch('{% url "library:quick_upload" %}', {
             method: 'POST',
             body: formData,
             headers: {
                 'X-CSRFToken': getCSRFToken()
             }
-        }).then(function(response) {
-            if (response.ok) {
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            uploaded++;
+            if (uploaded === total) {
+                window.location.reload();
+            }
+        })
+        .catch(function() {
+            uploaded++;
+            if (uploaded === total) {
                 window.location.reload();
             }
         });
     }
+
+    document.getElementById('file-upload-input').value = '';
 }
 
 function filterByType(type) {
