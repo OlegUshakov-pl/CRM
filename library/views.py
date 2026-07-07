@@ -365,7 +365,7 @@ def library_files(request):
         file__isnull=False,
     ).exclude(
         file=''
-    ).select_related('category').order_by('-created_at')
+    ).select_related('category')
 
     query = request.GET.get('q', '')
     if query:
@@ -377,6 +377,18 @@ def library_files(request):
     file_type = request.GET.get('type', '')
     if file_type:
         items = items.filter(file_type=file_type)
+
+    sort = request.GET.get('sort', '-created_at')
+    valid_sorts = {
+        'date': 'created_at',
+        '-date': '-created_at',
+        'name': 'title',
+        '-name': '-title',
+        'type': 'file_type',
+        '-type': '-file_type',
+    }
+    sort_field = valid_sorts.get(sort, '-created_at')
+    items = items.order_by(sort_field)
 
     paginator = Paginator(items, 20)
     page = request.GET.get('page', 1)
@@ -390,6 +402,7 @@ def library_files(request):
             'query': query,
             'current_type': file_type,
             'file_types': file_types,
+            'current_sort': sort,
         })
 
     return render(request, 'library/files.html', {
@@ -397,6 +410,7 @@ def library_files(request):
         'query': query,
         'current_type': file_type,
         'file_types': file_types,
+        'current_sort': sort,
     })
 
 

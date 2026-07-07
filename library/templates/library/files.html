@@ -42,6 +42,26 @@
         </div>
     </div>
 
+    <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+            <span class="text-sm text-gray-500 dark:text-gray-400">Sort by:</span>
+            <div class="flex gap-1">
+                <button onclick="sortBy('date')" class="px-3 py-1.5 text-sm rounded {% if current_sort == 'date' or current_sort == '-date' or not current_sort %}bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400{% else %}bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600{% endif %} transition-colors">
+                    <i data-lucide="calendar" class="w-3.5 h-3.5 inline mr-1"></i>Date
+                </button>
+                <button onclick="sortBy('name')" class="px-3 py-1.5 text-sm rounded {% if current_sort == 'name' or current_sort == '-name' %}bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400{% else %}bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600{% endif %} transition-colors">
+                    <i data-lucide="arrow-down-a-z" class="w-3.5 h-3.5 inline mr-1"></i>Name
+                </button>
+                <button onclick="sortBy('type')" class="px-3 py-1.5 text-sm rounded {% if current_sort == 'type' or current_sort == '-type' %}bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400{% else %}bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600{% endif %} transition-colors">
+                    <i data-lucide="file" class="w-3.5 h-3.5 inline mr-1"></i>Type
+                </button>
+            </div>
+            <button onclick="toggleSortDirection()" class="p-1.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors" title="Toggle direction">
+                <i data-lucide="{% if current_sort == '-date' or current_sort == '-name' or current_sort == '-type' or not current_sort %}arrow-down-wide-narrow{% else %}arrow-up-narrow-wide{% endif %}" class="w-4 h-4"></i>
+            </button>
+        </div>
+    </div>
+
     <div id="files-container">
         {% include 'library/files_partial.html' %}
     </div>
@@ -118,9 +138,80 @@ function handleFileUpload(files) {
 }
 
 function filterByType(type) {
-    var url = '{% url "library:files" %}';
-    if (type) url += '?type=' + type;
+    var url = buildUrl({type: type});
     htmx.ajax('GET', url, {target: '#files-container', swap: 'innerHTML'});
+}
+
+var currentSort = '{{ current_sort|default:"-created_at" }}';
+
+function sortBy(field) {
+    var desc = currentSort === field || currentSort === '-' + field + '_unused';
+    var isDesc = currentSort.startsWith('-');
+    var currentField = currentSort.replace('-', '');
+
+    if (currentField === field) {
+        if (isDesc) {
+            currentSort = field;
+        } else {
+            currentSort = '-' + field;
+        }
+    } else {
+        if (field === 'date') {
+            currentSort = '-created_at';
+        } else if (field === 'name') {
+            currentSort = 'name';
+        } else if (field === 'type') {
+            currentSort = 'file_type';
+        }
+    }
+
+    var url = buildUrl({sort: currentSort});
+    htmx.ajax('GET', url, {target: '#files-container', swap: 'innerHTML'});
+    updateSortButtons();
+}
+
+function toggleSortDirection() {
+    if (currentSort.startsWith('-')) {
+        currentSort = currentSort.substring(1);
+    } else {
+        currentSort = '-' + currentSort;
+    }
+    var url = buildUrl({sort: currentSort});
+    htmx.ajax('GET', url, {target: '#files-container', swap: 'innerHTML'});
+    updateSortButtons();
+}
+
+function updateSortButtons() {
+    var sortField = currentSort.replace('-', '');
+    var buttons = document.querySelectorAll('[onclick^="sortBy"]');
+    buttons.forEach(function(btn) {
+        var field = btn.getAttribute('onclick').match(/sortBy\('(\w+)'\)/)[1];
+        if (field === sortField) {
+            btn.classList.add('bg-violet-100', 'text-violet-700', 'dark:bg-violet-900/30', 'dark:text-violet-400');
+            btn.classList.remove('bg-gray-100', 'text-gray-600', 'dark:bg-gray-700', 'dark:text-gray-400');
+        } else {
+            btn.classList.remove('bg-violet-100', 'text-violet-700', 'dark:bg-violet-900/30', 'dark:text-violet-400');
+            btn.classList.add('bg-gray-100', 'text-gray-600', 'dark:bg-gray-700', 'dark:text-gray-400');
+        }
+    });
+}
+
+function buildUrl(params) {
+    var url = '{% url "library:files" %}';
+    var queryParts = [];
+    if (params.type !== undefined && params.type !== '') {
+        queryParts.push('type=' + params.type);
+    } else {
+        var currentType = '{{ current_type|default:"" }}';
+        if (currentType) queryParts.push('type=' + currentType);
+    }
+    if (params.sort !== undefined) {
+        queryParts.push('sort=' + params.sort);
+    } else {
+        queryParts.push('sort=' + currentSort);
+    }
+    if (queryParts.length > 0) url += '?' + queryParts.join('&');
+    return url;
 }
 
 function getCSRFToken() {
