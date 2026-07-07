@@ -416,7 +416,9 @@ def library_files(request):
 
 @login_required
 def category_list(request):
-    categories = Category.objects.filter(is_active=True).annotate(item_count=Count('items')).order_by('name')
+    categories = Category.objects.filter(is_active=True).annotate(
+        item_count=Count('items', filter=Q(items__is_active=True))
+    ).order_by('name')
 
     if request.headers.get('HX-Request'):
         return render(request, 'library/category_list_partial.html', {'categories': categories})
@@ -427,10 +429,20 @@ def category_list(request):
 @login_required
 def category_detail(request, slug):
     category = get_object_or_404(Category, slug=slug, is_active=True)
-    items = LibraryItem.objects.filter(is_active=True, category=category).order_by('-created_at')
+    items = LibraryItem.objects.filter(
+        is_active=True,
+        category=category,
+    ).select_related('category').prefetch_related('tags').order_by('-created_at')
     paginator = Paginator(items, 24)
     page = request.GET.get('page', 1)
     items_page = paginator.get_page(page)
+
+    if request.headers.get('HX-Request'):
+        return render(request, 'library/category_detail_partial.html', {
+            'category': category,
+            'items': items_page,
+        })
+
     return render(request, 'library/category_detail.html', {
         'category': category,
         'items': items_page,
