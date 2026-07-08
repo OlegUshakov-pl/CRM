@@ -19,8 +19,15 @@
         <span class="sidebar-text flex-1">New Document</span>
     </a>
 
-    <a href="{% url 'core:search' %}?type=library" class="flex items-center gap-2 w-full">
-        <i data-lucide="search" class="w-4 h-4 flex-shrink-0"></i>
-        <span class="sidebar-text flex-1">Search</span>
+
+
+    <a href="{% url 'library:gallery' %}" class="flex items-center gap-2 w-full">
+        <i data-lucide="image" class="w-4 h-4 flex-shrink-0"></i>
+        <span class="sidebar-text flex-1">Photo Gallery</span>
+    </a>
+
+    <a href="{% url 'library:files' %}" class="flex items-center gap-2 w-full">
+        <i data-lucide="folder-open" class="w-4 h-4 flex-shrink-0"></i>
+        <span class="sidebar-text flex-1">Files Catalog</span>
     </a>
 </nav>

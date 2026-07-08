@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% block title %}Photo Gallery - Library{% endblock %}
+{% block breadcrumb %}Library / Photo Gallery{% endblock %}
+{% block content %}
+<div class="space-y-6">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-xl font-bold text-gray-900 dark:text-white">Photo Gallery</h1>
+            <p class="text-gray-500 dark:text-gray-400 mt-1">All images from your library</p>
+        </div>
+    </div>
+
+    <div id="gallery-container">
+        {% if items %}
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+            {% for item in items %}
+            <div class="group relative aspect-square bg-gray-100 dark:bg-gray-700 rounded overflow-hidden cursor-pointer" onclick="openLightbox('{{ item.file.url }}', '{{ item.title }}', '{% url 'library:detail' item.slug %}')">
+                {% if item.file %}
+                    <img src="{{ item.file.url }}" alt="{{ item.title }}" class="w-full h-full object-cover transition-transform group-hover:scale-105">
+                {% elif item.preview_image %}
+                    <img src="{{ item.preview_image.url }}" alt="{{ item.title }}" class="w-full h-full object-cover transition-transform group-hover:scale-105">
+                {% else %}
+                    <div class="w-full h-full flex items-center justify-center">
+                        <i data-lucide="image" class="w-8 h-8 text-gray-400"></i>
+                    </div>
+                {% endif %}
+                <div class="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-end">
+                    <div class="w-full p-2 text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                        <p class="text-xs font-medium truncate">{{ item.title }}</p>
+                        <p class="text-[10px] opacity-75">{{ item.created_at|date:'M d, Y' }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% include 'includes/pagination.html' with page_obj=items %}
+        {% else %}
+        <div class="text-center py-16 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+            <i data-lucide="image" class="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4"></i>
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">No images found</h3>
+            <p class="text-gray-500 dark:text-gray-400 mb-4">Import or upload images to see them here</p>
+            <a href="{% url 'library:create' %}" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white text-[14px] font-medium rounded-[20px] shadow-[0_2px_2px_rgba(0,0,0,0.25)] transition-colors">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                Add Document
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div id="lightbox" class="fixed inset-0 z-50 bg-black/90 hidden items-center justify-center" onclick="closeLightbox()">
+    <button class="absolute top-4 right-4 text-white/70 hover:text-white" onclick="closeLightbox()">
+        <i data-lucide="x" class="w-8 h-8"></i>
+    </button>
+    <div class="max-w-4xl max-h-[90vh] p-4" onclick="event.stopPropagation()">
+        <img id="lightbox-img" src="" alt="" class="max-w-full max-h-[80vh] object-contain mx-auto">
+        <div class="text-center mt-4">
+            <p id="lightbox-title" class="text-white font-medium"></p>
+            <a id="lightbox-link" href="" class="text-violet-400 text-sm hover:underline mt-1 inline-block">View Document</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function openLightbox(url, title, link) {
+    var lightbox = document.getElementById('lightbox');
+    document.getElementById('lightbox-img').src = url;
+    document.getElementById('lightbox-title').textContent = title;
+    document.getElementById('lightbox-link').href = link;
+    lightbox.classList.remove('hidden');
+    lightbox.classList.add('flex');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeLightbox() {
+    var lightbox = document.getElementById('lightbox');
+    lightbox.classList.add('hidden');
+    lightbox.classList.remove('flex');
+    document.body.style.overflow = '';
+}
+</script>
+{% endblock %}

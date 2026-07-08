@@ -8,44 +8,73 @@
             <h1 class="text-xl font-bold text-gray-900 dark:text-white">Categories</h1>
             <p class="text-gray-500 dark:text-gray-400 mt-1">Organize your documents</p>
         </div>
-        <a href="{% url 'library:category_create' %}" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white text-[14px] font-medium rounded-[20px] shadow-[0_2px_2px_rgba(0,0,0,0.25)] transition-colors">
+        <button onclick="openModal('create-category-modal')" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white text-[14px] font-medium rounded-[20px] shadow-[0_2px_2px_rgba(0,0,0,0.25)] transition-colors">
             <i data-lucide="plus" class="w-4 h-4"></i>
             New Category
-        </a>
+        </button>
     </div>
 
-    {% if categories %}
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {% for cat in categories %}
-        <a href="{% url 'library:category_detail' cat.slug %}" class="block bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow p-5">
-            <div class="flex items-center gap-3 mb-3">
-                {% if cat.color %}<span class="w-3 h-3 rounded-full inline-block flex-shrink-0" style="background-color:{{ cat.color }}"></span>{% endif %}
-                {% if cat.icon %}<i data-lucide="{{ cat.icon }}" class="w-5 h-5 text-gray-500 flex-shrink-0"></i>{% endif %}
-                <h3 class="font-medium text-gray-900 dark:text-white">{{ cat.name }}</h3>
-            </div>
-            {% if cat.parent %}
-            <p class="text-xs text-gray-400 mb-2">Parent: {{ cat.parent.name }}</p>
-            {% endif %}
-            <div class="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700">
-                <span class="text-sm text-gray-500">{{ cat.item_count }} document{{ cat.item_count|pluralize }}</span>
-                <div class="flex gap-2">
-                    <a href="{% url 'library:category_edit' cat.slug %}" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline" onclick="event.stopPropagation()">Edit</a>
-                    <a href="{% url 'library:category_delete' cat.slug %}" class="text-xs text-red-600 dark:text-red-400 hover:underline" onclick="event.stopPropagation()">Delete</a>
-                </div>
-            </div>
-        </a>
-        {% endfor %}
+    <div id="categories-container">
+        {% include 'library/category_list_partial.html' %}
     </div>
-    {% else %}
-    <div class="text-center py-16 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-        <i data-lucide="folder-open" class="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4"></i>
-        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">No categories yet</h3>
-        <p class="text-gray-500 dark:text-gray-400 mb-4">Create categories to organize your documents</p>
-        <a href="{% url 'library:category_create' %}" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white text-[14px] font-medium rounded-[20px] shadow-[0_2px_2px_rgba(0,0,0,0.25)] transition-colors">
-            <i data-lucide="plus" class="w-4 h-4"></i>
-            Create Category
-        </a>
-    </div>
-    {% endif %}
 </div>
+
+<div id="create-category-modal" class="fixed inset-0 z-50 bg-black/50 hidden items-center justify-center">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4" onclick="event.stopPropagation()">
+        <div class="p-6 border-b border-gray-100 dark:border-gray-700">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Create Category</h2>
+        </div>
+        <form id="category-create-form" hx-post="{% url 'library:category_create' %}" hx-target="#categories-container" hx-swap="innerHTML" class="p-6 space-y-4">
+            {% csrf_token %}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
+                <input type="text" name="name" required placeholder="Category name" class="w-full px-4 py-2.5 border border-[#e8e8e8] text-[14px] outline-none focus:border-violet-300 transition-colors">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Color</label>
+                <input type="color" name="color" value="#8B5CF6" class="w-full h-10 border border-[#e8e8e8] cursor-pointer">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Icon (Lucide)</label>
+                <input type="text" name="icon" placeholder="e.g. folder, tag, book" class="w-full px-4 py-2.5 border border-[#e8e8e8] text-[14px] outline-none focus:border-violet-300 transition-colors">
+            </div>
+            <div class="flex gap-3 pt-2">
+                <button type="submit" class="px-4 py-2.5 bg-indigo-500 hover:bg-indigo-600 rounded-[20px] text-white shadow-[0_2px_2px_rgba(0,0,0,0.25)] text-[14px] font-medium transition-colors">
+                    Create
+                </button>
+                <button type="button" onclick="closeModal('create-category-modal')" class="px-4 py-2.5 text-[#666] bg-gray-100 hover:bg-gray-200 transition-colors text-[14px] rounded-[20px]">
+                    Cancel
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function openModal(id) {
+    var modal = document.getElementById(id);
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeModal(id) {
+    var modal = document.getElementById(id);
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    document.body.style.overflow = '';
+}
+
+document.getElementById('create-category-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal('create-category-modal');
+});
+
+document.getElementById('category-create-form').addEventListener('htmx:after-request', function(evt) {
+    if (evt.detail.successful) {
+        closeModal('create-category-modal');
+    }
+});
+</script>
 {% endblock %}
