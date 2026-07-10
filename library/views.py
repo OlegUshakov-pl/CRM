@@ -577,3 +577,17 @@ def tag_create_api(request):
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)
     return JsonResponse({'error': 'POST required'}, status=400)
+
+
+@login_required
+def tag_detail(request, slug):
+    tag = get_object_or_404(Tag, slug=slug)
+    items = LibraryItem.objects.filter(tags=tag, is_active=True)
+    categories = Category.objects.filter(is_active=True)
+    existing_tags = Tag.objects.all().order_by('name')
+    return render(request, 'library/tag_detail.html', {
+        'tag': tag,
+        'items': items,
+        'categories': categories,
+        'existing_tags': existing_tags,
+    })
