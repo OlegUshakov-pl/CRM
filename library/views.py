@@ -159,12 +159,15 @@ def library_import_url(request):
                     summary = text[:300] + '...' if len(text) > 300 else text
 
             content_html = ''
+            first_image_url = None
             if body:
                 for tag in body.find_all(['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li', 'blockquote', 'pre', 'code', 'img', 'a']):
                     if tag.name == 'img':
                         src = tag.get('src', '')
                         alt = tag.get('alt', '')
                         if src:
+                            if not first_image_url:
+                                first_image_url = src
                             content_html += f'<p><img src="{src}" alt="{alt}"></p>'
                     elif tag.name == 'a':
                         href = tag.get('href', '')
@@ -185,6 +188,26 @@ def library_import_url(request):
                 created_by=request.user,
             )
             item.save()
+
+            if first_image_url:
+                try:
+                    import urllib.parse
+                    if first_image_url.startswith('//'):
+                        first_image_url = 'https:' + first_image_url
+                    elif first_image_url.startswith('/'):
+                        parsed_url = urllib.parse.urlparse(url)
+                        first_image_url = f'{parsed_url.scheme}://{parsed_url.netloc}{first_image_url}'
+
+                    img_req = urllib.request.Request(first_image_url, headers={'User-Agent': 'Mozilla/5.0'})
+                    with urllib.request.urlopen(img_req, timeout=10) as img_response:
+                        from django.core.files.base import ContentFile
+                        img_data = img_response.read()
+                        img_name = urllib.parse.urlparse(first_image_url).path.split('/')[-1]
+                        if not img_name or '.' not in img_name:
+                            img_name = 'preview.jpg'
+                        item.preview_image.save(img_name, ContentFile(img_data), save=True)
+                except Exception:
+                    pass
 
             tags_input = request.POST.get('tags_input', '')
             if tags_input:
@@ -235,10 +258,12 @@ def library_create(request):
     else:
         form = LibraryItemForm()
     categories = Category.objects.filter(is_active=True)
+    existing_tags = Tag.objects.all().order_by('name')
     return render(request, 'library/form.html', {
         'form': form,
         'title': 'Create Document',
         'categories': categories,
+        'existing_tags': existing_tags,
         'active_tab': 'editor',
     })
 
@@ -253,17 +278,20 @@ def library_edit(request, slug):
             if item.content:
                 item.content = bleach.clean(item.content, tags=['p', 'br', 'strong', 'em', 'u', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'a', 'img', 'blockquote', 'pre', 'code', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'span', 'div'], attributes={'a': ['href', 'target'], 'img': ['src', 'alt', 'width', 'height'], 'span': ['style'], 'div': ['style']}, strip=True)
             item.save()
+            form._save_tags(item)
             log_activity(request.user, 'updated', f'Library item "{item.title}"', item)
             messages.success(request, 'Document updated successfully.')
             return redirect('library:detail', slug=item.slug)
     else:
         form = LibraryItemForm(instance=item)
     categories = Category.objects.filter(is_active=True)
+    existing_tags = Tag.objects.all().order_by('name')
     return render(request, 'library/form.html', {
         'form': form,
         'title': 'Edit Document',
         'item': item,
         'categories': categories,
+        'existing_tags': existing_tags,
         'active_tab': 'editor',
     })
 
@@ -373,6 +401,8 @@ def library_files(request):
         file__isnull=False,
     ).exclude(
         file=''
+    ).exclude(
+        Q(content__isnull=False) & ~Q(content='')
     ).select_related('category')
 
     query = request.GET.get('q', '')

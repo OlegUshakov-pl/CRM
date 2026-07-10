@@ -39,14 +39,6 @@
         </div>
 
         <div class="p-6 space-y-6">
-            {% if item.tags.all %}
-            <div class="flex flex-wrap gap-2">
-                {% for tag in item.tags.all %}
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300">{{ tag.name }}</span>
-                {% endfor %}
-            </div>
-            {% endif %}
-
             {% if item.file and item.file_type == 'pdf' %}
             <div class="border border-gray-200 dark:border-gray-700 rounded overflow-hidden" style="height: 80vh;">
                 <iframe src="{{ item.file.url }}" class="w-full h-full" frameborder="0"></iframe>
@@ -95,6 +87,17 @@
                         <span class="flex-1 text-sm text-gray-700 dark:text-gray-300 truncate">{{ att.name }}</span>
                         <a href="{{ att.file.url }}" download class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline">Download</a>
                     </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if item.tags.all %}
+            <div class="border-t border-gray-100 dark:border-gray-700 pt-4">
+                <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-3">Tags</h3>
+                <div class="flex flex-wrap gap-2">
+                    {% for tag in item.tags.all %}
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300">{{ tag.name }}</span>
                     {% endfor %}
                 </div>
             </div>

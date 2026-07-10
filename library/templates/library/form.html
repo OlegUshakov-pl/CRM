@@ -88,6 +88,12 @@
                     {% endif %}
                 </div>
 
+                <datalist id="existing-tags">
+                    {% for tag in existing_tags %}
+                    <option value="{{ tag.name }}">
+                    {% endfor %}
+                </datalist>
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Additional Files</label>
                     <div id="drop-zone" class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded p-6 text-center cursor-pointer hover:border-indigo-400 transition-colors" onclick="document.getElementById('file-input').click()">
