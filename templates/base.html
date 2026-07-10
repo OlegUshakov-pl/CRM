@@ -110,7 +110,7 @@
                     {% csrf_token %}
                     <input type="hidden" name="workspace" value="collections">
                     <button type="submit" class="flex items-center gap-2 w-full p-2 hover:bg-gray-50 dark:hover:bg-[#1a1a1a] rounded transition-colors dark:text-gray-300 {% if current_workspace == 'collections' %}font-medium text-violet-600 dark:text-violet-400{% endif %}">
-                        <i data-lucide="book-open" class="w-4 h-4 flex-shrink-0"></i>
+                        <i data-lucide="landmark" class="w-4 h-4 flex-shrink-0"></i>
                         <span class="sidebar-text">Library</span>
                     </button>
                 </form>
