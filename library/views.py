@@ -48,7 +48,7 @@ def library_list(request):
     if content_type == 'article':
         items = items.filter(Q(content__isnull=False) | Q(content__gt=''))
     elif content_type == 'file':
-        items = items.filter(file__isnull=False).exclude(file='')
+        items = items.filter(file__isnull=False).exclude(file='').filter(Q(content__isnull=True) | Q(content=''))
 
     file_type = request.GET.get('type', '')
     if file_type:
@@ -81,7 +81,7 @@ def library_list(request):
 
     categories = Category.objects.filter(is_active=True).annotate(item_count=Count('items'))
     file_types = LibraryItem.FILE_TYPE_CHOICES
-    tags = Tag.objects.annotate(item_count=Count('items')).filter(item_count__gt=0).order_by('-item_count')[:20]
+    tags = Tag.objects.annotate(item_count=Count('items', filter=Q(items__is_active=True))).filter(item_count__gt=0).order_by('-item_count')[:20]
 
     if request.headers.get('HX-Request'):
         return render(request, 'library/list_partial.html', {
@@ -401,8 +401,8 @@ def library_files(request):
         file__isnull=False,
     ).exclude(
         file=''
-    ).exclude(
-        Q(content__isnull=False) & ~Q(content='')
+    ).filter(
+        Q(content__isnull=True) | Q(content='')
     ).select_related('category')
 
     query = request.GET.get('q', '')
