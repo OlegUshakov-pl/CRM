@@ -87,6 +87,14 @@ class LibraryItem(TimeStampedModel):
         }
         return mapping.get(ext, 'other')
 
+    def save_as_md(self, content, images=None):
+        from .utils import save_article_as_md
+        return save_article_as_md(self, content, images)
+
+    def delete_from_disk(self):
+        from .utils import delete_item_from_disk
+        delete_item_from_disk(self)
+
 
 class LibraryAttachment(models.Model):
     item = models.ForeignKey(LibraryItem, on_delete=models.CASCADE, related_name='attachments')

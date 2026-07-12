@@ -131,6 +131,7 @@ def library_import_url(request):
 
         try:
             import urllib.request
+            import urllib.parse
             from bs4 import BeautifulSoup
 
             req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'})
@@ -159,13 +160,24 @@ def library_import_url(request):
                     summary = text[:300] + '...' if len(text) > 300 else text
 
             content_html = ''
+            downloaded_images = {}
             if body:
                 for tag in body.find_all(['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li', 'blockquote', 'pre', 'code', 'img', 'a']):
                     if tag.name == 'img':
                         src = tag.get('src', '')
                         alt = tag.get('alt', '')
                         if src:
-                            content_html += f'<p><img src="{src}" alt="{alt}"></p>'
+                            try:
+                                abs_url = urllib.parse.urljoin(url, src)
+                                img_name = urllib.parse.urlparse(abs_url).path.split('/')[-1]
+                                if not img_name or '.' not in img_name:
+                                    img_name = f'img_{len(downloaded_images)+1}.jpg'
+                                img_req = urllib.request.Request(abs_url, headers={'User-Agent': 'Mozilla/5.0'})
+                                with urllib.request.urlopen(img_req, timeout=10) as img_resp:
+                                    downloaded_images[img_name] = img_resp.read()
+                                content_html += f'<p><img src="images/{img_name}" alt="{alt}"></p>'
+                            except Exception:
+                                content_html += f'<p><img src="{src}" alt="{alt}"></p>'
                     elif tag.name == 'a':
                         href = tag.get('href', '')
                         link_text = tag.get_text(strip=True)
@@ -201,6 +213,9 @@ def library_import_url(request):
                 except Category.DoesNotExist:
                     pass
 
+            if item.content:
+                item.save_as_md(item.content, images=downloaded_images if downloaded_images else None)
+
             log_activity(request.user, 'created', f'Library item "{item.title}" (imported from URL)', item)
             messages.success(request, 'Document imported successfully from URL.')
             return redirect('library:detail', slug=item.slug)
@@ -229,6 +244,8 @@ def library_create(request):
             form._save_tags(item)
             for f in request.FILES.getlist('additional_files'):
                 LibraryAttachment.objects.create(item=item, file=f)
+            if item.content:
+                item.save_as_md(item.content)
             log_activity(request.user, 'created', f'Library item "{item.title}"', item)
             messages.success(request, 'Document created successfully.')
             return redirect('library:detail', slug=item.slug)
@@ -253,6 +270,8 @@ def library_edit(request, slug):
             if item.content:
                 item.content = bleach.clean(item.content, tags=['p', 'br', 'strong', 'em', 'u', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'a', 'img', 'blockquote', 'pre', 'code', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'span', 'div'], attributes={'a': ['href', 'target'], 'img': ['src', 'alt', 'width', 'height'], 'span': ['style'], 'div': ['style']}, strip=True)
             item.save()
+            if item.content:
+                item.save_as_md(item.content)
             log_activity(request.user, 'updated', f'Library item "{item.title}"', item)
             messages.success(request, 'Document updated successfully.')
             return redirect('library:detail', slug=item.slug)
@@ -272,6 +291,7 @@ def library_edit(request, slug):
 def library_delete(request, slug):
     item = get_object_or_404(LibraryItem, slug=slug, is_active=True)
     if request.method == 'POST':
+        item.delete_from_disk()
         item.is_active = False
         item.save()
         log_activity(request.user, 'deleted', f'Library item "{item.title}"')
@@ -284,6 +304,7 @@ def library_delete(request, slug):
 def library_delete_htmx(request, slug):
     if request.method == 'DELETE':
         item = get_object_or_404(LibraryItem, slug=slug, is_active=True)
+        item.delete_from_disk()
         item.is_active = False
         item.save()
         log_activity(request.user, 'deleted', f'Library item "{item.title}"')
