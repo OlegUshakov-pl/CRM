@@ -2,10 +2,20 @@ import os
 import re
 import shutil
 from django.conf import settings
+from core.models import AppSetting, AppSettings
 
 
 def get_library_root():
-    return str(settings.LIBRARY_ROOT)
+    root = AppSettings.get_value('storage.project_path', '')
+    if root:
+        return os.path.join(root, 'library')
+    root = AppSetting.get_value('project_root_path', '')
+    if root:
+        AppSettings.set_value('storage.project_path', root)
+        return os.path.join(root, 'library')
+    if hasattr(settings, 'PROJECT_ROOT_PATH') and settings.PROJECT_ROOT_PATH:
+        return os.path.join(settings.PROJECT_ROOT_PATH, 'library')
+    return os.path.join(str(settings.MEDIA_ROOT), 'library')
 
 
 def sanitize_folder_name(name):
