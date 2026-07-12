@@ -1,4 +1,5 @@
 import json
+import os
 import bleach
 from datetime import datetime, timedelta
 from django.shortcuts import render, get_object_or_404, redirect
@@ -373,6 +374,23 @@ def library_upload_attachment(request, slug):
         )
         return JsonResponse({'id': attachment.pk, 'name': attachment.name})
     return JsonResponse({'error': 'No file provided'}, status=400)
+
+
+@login_required
+def library_delete_attachment(request, slug, att_id):
+    item = get_object_or_404(LibraryItem, slug=slug, is_active=True)
+    attachment = get_object_or_404(LibraryAttachment, pk=att_id, item=item)
+    if request.method == 'POST':
+        try:
+            if attachment.file and os.path.exists(attachment.file.path):
+                attachment.file.delete(save=False)
+        except Exception:
+            pass
+        attachment.delete()
+        if request.headers.get('HX-Request'):
+            return HttpResponse('')
+        return redirect('library:edit', slug=slug)
+    return HttpResponse(status=405)
 
 
 @login_required

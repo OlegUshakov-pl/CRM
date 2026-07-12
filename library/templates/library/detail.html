@@ -91,8 +91,21 @@
                 <div class="space-y-2">
                     {% for att in item.attachments.all %}
                     <div class="flex items-center gap-3 p-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded transition-colors">
-                        <i data-lucide="paperclip" class="w-4 h-4 text-gray-400"></i>
+                        {% with att_name=att.name|lower %}
+                        {% if '.jpg' in att_name or '.jpeg' in att_name or '.png' in att_name or '.gif' in att_name or '.webp' in att_name %}
+                            <i data-lucide="image" class="w-4 h-4 text-blue-400"></i>
+                        {% elif '.pdf' in att_name %}
+                            <i data-lucide="file-text" class="w-4 h-4 text-red-400"></i>
+                        {% elif '.txt' in att_name or '.md' in att_name %}
+                            <i data-lucide="file-type" class="w-4 h-4 text-gray-400"></i>
+                        {% else %}
+                            <i data-lucide="paperclip" class="w-4 h-4 text-gray-400"></i>
+                        {% endif %}
+                        {% endwith %}
                         <span class="flex-1 text-sm text-gray-700 dark:text-gray-300 truncate">{{ att.name }}</span>
+                        <button onclick="previewAttachment('{{ att.file.url }}', '{{ att.name }}')" class="p-1 text-gray-400 hover:text-indigo-500 transition-colors" title="Preview">
+                            <i data-lucide="eye" class="w-4 h-4"></i>
+                        </button>
                         <a href="{{ att.file.url }}" download class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline">Download</a>
                     </div>
                     {% endfor %}
@@ -143,5 +156,42 @@ function toggleFavorite(slug) {
             }
         });
 }
+
+function previewAttachment(url, name) {
+    var ext = name.split('.').pop().toLowerCase();
+    var modal = document.getElementById('preview-modal');
+    var content = document.getElementById('preview-content');
+    if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) {
+        content.innerHTML = '<img src="' + url + '" alt="' + name + '" class="max-w-full max-h-[80vh] object-contain mx-auto">';
+    } else if (ext === 'pdf') {
+        content.innerHTML = '<iframe src="' + url + '" class="w-full h-[80vh] border-0"></iframe>';
+    } else if (['txt', 'md'].includes(ext)) {
+        fetch(url).then(function(r) { return r.text(); }).then(function(text) {
+            content.innerHTML = '<pre class="p-4 bg-gray-50 dark:bg-gray-900 rounded overflow-auto max-h-[80vh] text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap">' + text.replace(/</g, '&lt;') + '</pre>';
+        });
+    } else {
+        content.innerHTML = '<div class="p-8 text-center text-gray-500"><p>Preview not available for this file type.</p><a href="' + url + '" download class="mt-2 inline-block text-indigo-600 hover:underline">Download instead</a></div>';
+    }
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    lucide.createIcons();
+}
+
+function closePreviewModal() {
+    var modal = document.getElementById('preview-modal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    document.getElementById('preview-content').innerHTML = '';
+}
 </script>
+
+<div id="preview-modal" class="hidden fixed inset-0 z-50 items-center justify-center">
+    <div class="fixed inset-0 bg-black/70" onclick="closePreviewModal()"></div>
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl z-10 max-w-4xl w-full mx-4 relative">
+        <button onclick="closePreviewModal()" class="absolute top-2 right-2 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 z-10">
+            <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+        <div id="preview-content" class="p-4"></div>
+    </div>
+</div>
 {% endblock %}

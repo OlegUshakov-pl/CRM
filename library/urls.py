@@ -25,4 +25,5 @@ urlpatterns = [
     path('<slug:slug>/delete-htmx/', views.library_delete_htmx, name='delete_htmx'),
     path('<slug:slug>/favorite/', views.library_toggle_favorite, name='favorite'),
     path('<slug:slug>/upload-attachment/', views.library_upload_attachment, name='upload_attachment'),
+    path('<slug:slug>/delete-attachment/<int:att_id>/', views.library_delete_attachment, name='delete_attachment'),
 ]
