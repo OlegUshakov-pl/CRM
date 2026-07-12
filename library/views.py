@@ -198,6 +198,13 @@ def library_import_url(request):
             )
             item.save()
 
+            if downloaded_images:
+                first_img_name = next(iter(downloaded_images))
+                first_img_data = downloaded_images[first_img_name]
+                from django.core.files.base import ContentFile
+                item.preview_image.save(first_img_name, ContentFile(first_img_data), save=False)
+                item.save()
+
             tags_input = request.POST.get('tags_input', '')
             if tags_input:
                 tag_names = [t.strip() for t in tags_input.split(',') if t.strip()]
