@@ -175,7 +175,7 @@ def library_import_url(request):
                                 img_req = urllib.request.Request(abs_url, headers={'User-Agent': 'Mozilla/5.0'})
                                 with urllib.request.urlopen(img_req, timeout=10) as img_resp:
                                     downloaded_images[img_name] = img_resp.read()
-                                content_html += f'<p><img src="images/{img_name}" alt="{alt}"></p>'
+                                content_html += f'<p><img src="{abs_url}" alt="{alt}"></p>'
                             except Exception:
                                 content_html += f'<p><img src="{src}" alt="{alt}"></p>'
                     elif tag.name == 'a':
@@ -244,8 +244,8 @@ def library_create(request):
             form._save_tags(item)
             for f in request.FILES.getlist('additional_files'):
                 LibraryAttachment.objects.create(item=item, file=f)
-            if item.content:
-                item.save_as_md(item.content)
+            if item.content or item.file:
+                item.save_as_md(item.content or '')
             log_activity(request.user, 'created', f'Library item "{item.title}"', item)
             messages.success(request, 'Document created successfully.')
             return redirect('library:detail', slug=item.slug)
@@ -270,8 +270,8 @@ def library_edit(request, slug):
             if item.content:
                 item.content = bleach.clean(item.content, tags=['p', 'br', 'strong', 'em', 'u', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'a', 'img', 'blockquote', 'pre', 'code', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'span', 'div'], attributes={'a': ['href', 'target'], 'img': ['src', 'alt', 'width', 'height'], 'span': ['style'], 'div': ['style']}, strip=True)
             item.save()
-            if item.content:
-                item.save_as_md(item.content)
+            if item.content or item.file:
+                item.save_as_md(item.content or '')
             log_activity(request.user, 'updated', f'Library item "{item.title}"', item)
             messages.success(request, 'Document updated successfully.')
             return redirect('library:detail', slug=item.slug)
