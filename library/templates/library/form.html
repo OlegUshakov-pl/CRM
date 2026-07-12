@@ -105,9 +105,12 @@
                     <div id="attachment-list" class="mt-2 space-y-1">
                         {% if item %}
                         {% for att in item.attachments.all %}
-                        <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                            <i data-lucide="paperclip" class="w-4 h-4"></i>
-                            <span>{{ att.name }}</span>
+                        <div id="att-{{ att.pk }}" class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                            <i data-lucide="paperclip" class="w-4 h-4 flex-shrink-0"></i>
+                            <span class="flex-1 truncate">{{ att.name }}</span>
+                            <button type="button" onclick="deleteAttachment({{ att.pk }}, '{{ att.name }}')" class="p-1 text-gray-400 hover:text-red-500 transition-colors flex-shrink-0" title="Delete">
+                                <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                            </button>
                         </div>
                         {% endfor %}
                         {% endif %}
@@ -332,6 +335,22 @@ function getCSRFToken() {
         if (c.startsWith('csrftoken=')) return c.substring(10);
     }
     return '';
+}
+
+function deleteAttachment(attId, name) {
+    if (!confirm('Delete "' + name + '"?')) return;
+    var slug = '{{ item.slug|default:"" }}';
+    if (!slug) return;
+    fetch('/library/' + slug + '/delete-attachment/' + attId + '/', {
+        method: 'POST',
+        headers: { 'X-CSRFToken': getCSRFToken() }
+    })
+    .then(function(r) {
+        if (r.ok) {
+            var el = document.getElementById('att-' + attId);
+            if (el) el.remove();
+        }
+    });
 }
 
 function openCategoryModal() {

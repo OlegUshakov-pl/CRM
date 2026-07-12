@@ -1,4 +1,5 @@
 import json
+import os
 import bleach
 from datetime import datetime, timedelta
 from django.shortcuts import render, get_object_or_404, redirect
@@ -131,6 +132,7 @@ def library_import_url(request):
 
         try:
             import urllib.request
+            import urllib.parse
             from bs4 import BeautifulSoup
 
             req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'})
@@ -159,16 +161,24 @@ def library_import_url(request):
                     summary = text[:300] + '...' if len(text) > 300 else text
 
             content_html = ''
-            first_image_url = None
+            downloaded_images = {}
             if body:
                 for tag in body.find_all(['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li', 'blockquote', 'pre', 'code', 'img', 'a']):
                     if tag.name == 'img':
                         src = tag.get('src', '')
                         alt = tag.get('alt', '')
                         if src:
-                            if not first_image_url:
-                                first_image_url = src
-                            content_html += f'<p><img src="{src}" alt="{alt}"></p>'
+                            try:
+                                abs_url = urllib.parse.urljoin(url, src)
+                                img_name = urllib.parse.urlparse(abs_url).path.split('/')[-1]
+                                if not img_name or '.' not in img_name:
+                                    img_name = f'img_{len(downloaded_images)+1}.jpg'
+                                img_req = urllib.request.Request(abs_url, headers={'User-Agent': 'Mozilla/5.0'})
+                                with urllib.request.urlopen(img_req, timeout=10) as img_resp:
+                                    downloaded_images[img_name] = img_resp.read()
+                                content_html += f'<p><img src="{abs_url}" alt="{alt}"></p>'
+                            except Exception:
+                                content_html += f'<p><img src="{src}" alt="{alt}"></p>'
                     elif tag.name == 'a':
                         href = tag.get('href', '')
                         link_text = tag.get_text(strip=True)
@@ -189,25 +199,12 @@ def library_import_url(request):
             )
             item.save()
 
-            if first_image_url:
-                try:
-                    import urllib.parse
-                    if first_image_url.startswith('//'):
-                        first_image_url = 'https:' + first_image_url
-                    elif first_image_url.startswith('/'):
-                        parsed_url = urllib.parse.urlparse(url)
-                        first_image_url = f'{parsed_url.scheme}://{parsed_url.netloc}{first_image_url}'
-
-                    img_req = urllib.request.Request(first_image_url, headers={'User-Agent': 'Mozilla/5.0'})
-                    with urllib.request.urlopen(img_req, timeout=10) as img_response:
-                        from django.core.files.base import ContentFile
-                        img_data = img_response.read()
-                        img_name = urllib.parse.urlparse(first_image_url).path.split('/')[-1]
-                        if not img_name or '.' not in img_name:
-                            img_name = 'preview.jpg'
-                        item.preview_image.save(img_name, ContentFile(img_data), save=True)
-                except Exception:
-                    pass
+            if downloaded_images:
+                first_img_name = next(iter(downloaded_images))
+                first_img_data = downloaded_images[first_img_name]
+                from django.core.files.base import ContentFile
+                item.preview_image.save(first_img_name, ContentFile(first_img_data), save=False)
+                item.save()
 
             tags_input = request.POST.get('tags_input', '')
             if tags_input:
@@ -223,6 +220,9 @@ def library_import_url(request):
                     item.save()
                 except Category.DoesNotExist:
                     pass
+
+            if item.content:
+                item.save_as_md(item.content, images=downloaded_images if downloaded_images else None)
 
             log_activity(request.user, 'created', f'Library item "{item.title}" (imported from URL)', item)
             messages.success(request, 'Document imported successfully from URL.')
@@ -252,6 +252,8 @@ def library_create(request):
             form._save_tags(item)
             for f in request.FILES.getlist('additional_files'):
                 LibraryAttachment.objects.create(item=item, file=f)
+            if item.content or item.file:
+                item.save_as_md(item.content or '')
             log_activity(request.user, 'created', f'Library item "{item.title}"', item)
             messages.success(request, 'Document created successfully.')
             return redirect('library:detail', slug=item.slug)
@@ -279,6 +281,8 @@ def library_edit(request, slug):
                 item.content = bleach.clean(item.content, tags=['p', 'br', 'strong', 'em', 'u', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'a', 'img', 'blockquote', 'pre', 'code', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'span', 'div'], attributes={'a': ['href', 'target'], 'img': ['src', 'alt', 'width', 'height'], 'span': ['style'], 'div': ['style']}, strip=True)
             item.save()
             form._save_tags(item)
+            if item.content or item.file:
+                item.save_as_md(item.content or '')
             log_activity(request.user, 'updated', f'Library item "{item.title}"', item)
             messages.success(request, 'Document updated successfully.')
             return redirect('library:detail', slug=item.slug)
@@ -300,6 +304,7 @@ def library_edit(request, slug):
 def library_delete(request, slug):
     item = get_object_or_404(LibraryItem, slug=slug, is_active=True)
     if request.method == 'POST':
+        item.delete_from_disk()
         item.is_active = False
         item.save()
         log_activity(request.user, 'deleted', f'Library item "{item.title}"')
@@ -312,6 +317,7 @@ def library_delete(request, slug):
 def library_delete_htmx(request, slug):
     if request.method == 'DELETE':
         item = get_object_or_404(LibraryItem, slug=slug, is_active=True)
+        item.delete_from_disk()
         item.is_active = False
         item.save()
         log_activity(request.user, 'deleted', f'Library item "{item.title}"')
@@ -373,6 +379,23 @@ def library_upload_attachment(request, slug):
         )
         return JsonResponse({'id': attachment.pk, 'name': attachment.name})
     return JsonResponse({'error': 'No file provided'}, status=400)
+
+
+@login_required
+def library_delete_attachment(request, slug, att_id):
+    item = get_object_or_404(LibraryItem, slug=slug, is_active=True)
+    attachment = get_object_or_404(LibraryAttachment, pk=att_id, item=item)
+    if request.method == 'POST':
+        try:
+            if attachment.file and os.path.exists(attachment.file.path):
+                attachment.file.delete(save=False)
+        except Exception:
+            pass
+        attachment.delete()
+        if request.headers.get('HX-Request'):
+            return HttpResponse('')
+        return redirect('library:edit', slug=slug)
+    return HttpResponse(status=405)
 
 
 @login_required

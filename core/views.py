@@ -13,6 +13,7 @@ from projects.models import Project
 from tasks.models import Task
 from companies.models import Company
 from contacts.models import Contact
+from library.models import LibraryItem
 from notes.models import Note
 from materials.models import Material
 from parts.models import Part
@@ -23,12 +24,17 @@ from projects.utils import get_project_root_path
 
 @login_required
 def dashboard(request):
+    from django.db.models import Q as QFilter
+    article_count = LibraryItem.objects.filter(is_active=True).exclude(QFilter(content__isnull=True) | QFilter(content='')).count()
+    file_count = LibraryItem.objects.filter(is_active=True, file__isnull=False).exclude(file='').exclude(QFilter(content__isnull=False) & ~QFilter(content='')).count()
     context = {
         'project_count': Project.objects.filter(is_active=True).count(),
         'active_projects': Project.objects.filter(is_active=True, status='active').count(),
         'company_count': Company.objects.filter(is_active=True).count(),
         'contact_count': Contact.objects.filter(is_active=True).count(),
         'task_count': Task.objects.filter(is_active=True).count(),
+        'article_count': article_count,
+        'file_count': file_count,
         'recent_projects': Project.objects.filter(is_active=True).select_related('company').order_by('-created_at')[:6],
         'today_tasks': Task.objects.filter(is_active=True).select_related('project').order_by('-created_at')[:10],
         'recent_notes': Note.objects.filter(is_active=True).select_related('project', 'company', 'contact').order_by('-created_at')[:5],

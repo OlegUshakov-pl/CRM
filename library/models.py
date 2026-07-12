@@ -1,3 +1,4 @@
+import os
 from django.db import models
 from django.utils.text import slugify
 from core.models import TimeStampedModel, generate_unique_slug
@@ -87,10 +88,24 @@ class LibraryItem(TimeStampedModel):
         }
         return mapping.get(ext, 'other')
 
+    def save_as_md(self, content, images=None):
+        from .utils import save_article_as_md
+        return save_article_as_md(self, content, images)
+
+    def delete_from_disk(self):
+        from .utils import delete_item_from_disk
+        delete_item_from_disk(self)
+
+
+def attachment_upload_to(instance, filename):
+    from .utils import get_article_folder_path
+    folder = get_article_folder_path(instance.item)
+    return os.path.join(folder, 'attachments', filename)
+
 
 class LibraryAttachment(models.Model):
     item = models.ForeignKey(LibraryItem, on_delete=models.CASCADE, related_name='attachments')
-    file = models.FileField(upload_to='library/attachments/')
+    file = models.FileField(upload_to=attachment_upload_to)
     name = models.CharField(max_length=500, blank=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
 

@@ -96,6 +96,8 @@ DOCUMENTS_URL = '/files/'
 
 PROJECT_ROOT_PATH = str(BASE_DIR / 'media')
 
+LIBRARY_ROOT = BASE_DIR / 'media' / 'library'
+
 AI_FILES_ROOT = BASE_DIR / 'ai_files'
 AI_FILES_URL = '/ai-files/'
 AI_FILES_MAX_SIZE = 50 * 1024 * 1024

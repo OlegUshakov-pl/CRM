@@ -58,6 +58,34 @@
         </a>
     </div>
 
+    <div>
+        <h2 class="text-[20px] font-semibold mb-4">Library</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <a href="{% url 'library:list' %}?content_type=article" class="border border-light p-5 block hover:border-violet-300 transition-colors">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-soft text-[12px]">Articles</p>
+                        <p class="text-2xl font-bold mt-1">{{ article_count }}</p>
+                    </div>
+                    <div class="w-10 h-10 bg-[#fef8e8] rounded flex items-center justify-center">
+                        <i data-lucide="file-text" class="w-5 h-5 text-amber-600"></i>
+                    </div>
+                </div>
+            </a>
+            <a href="{% url 'library:files' %}" class="border border-light p-5 block hover:border-violet-300 transition-colors">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-soft text-[12px]">Files</p>
+                        <p class="text-2xl font-bold mt-1">{{ file_count }}</p>
+                    </div>
+                    <div class="w-10 h-10 bg-[#f0eeff] rounded flex items-center justify-center">
+                        <i data-lucide="folder" class="w-5 h-5 purple"></i>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div class="border border-light">
             <div class="px-5 py-4 border-b border-light">
