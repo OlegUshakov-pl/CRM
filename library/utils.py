@@ -1,7 +1,9 @@
 import os
 import re
 import shutil
+import urllib.request
 from django.conf import settings
+from django.core.files.storage import default_storage
 from core.models import AppSetting, AppSettings
 
 
@@ -49,16 +51,40 @@ def save_article_as_md(item, content, images=None):
     folder_path = create_article_folder(item)
     md_filename = get_article_folder_name(item) + '.md'
     md_path = os.path.join(folder_path, md_filename)
-    with open(md_path, 'w', encoding='utf-8') as f:
-        f.write(content)
+    images_dir = os.path.join(folder_path, 'images')
+    os.makedirs(images_dir, exist_ok=True)
+
+    img_pattern = re.compile(r'<img\s+[^>]*src="([^"]+)"', re.IGNORECASE)
+    found_srcs = img_pattern.findall(content)
+    media_root = str(settings.MEDIA_ROOT)
+
+    for src in found_srcs:
+        try:
+            if src.startswith('/media/'):
+                local_path = os.path.join(media_root, src[len('/media/'):])
+                if os.path.exists(local_path):
+                    img_name = os.path.basename(src)
+                    dest = os.path.join(images_dir, img_name)
+                    shutil.copy2(local_path, dest)
+                    content = content.replace(src, f'images/{img_name}')
+            elif src.startswith('http'):
+                img_name = src.split('/')[-1].split('?')[0]
+                if not img_name or '.' not in img_name:
+                    img_name = f'img_{len(os.listdir(images_dir))+1}.jpg'
+                urllib.request.urlretrieve(src, os.path.join(images_dir, img_name))
+                content = content.replace(src, f'images/{img_name}')
+        except Exception:
+            pass
+
     if images:
-        images_dir = os.path.join(folder_path, 'images')
-        os.makedirs(images_dir, exist_ok=True)
         for img_name, img_data in images.items():
             img_path = os.path.join(images_dir, img_name)
             mode = 'wb' if isinstance(img_data, bytes) else 'w'
             with open(img_path, mode) as f:
                 f.write(img_data)
+
+    with open(md_path, 'w', encoding='utf-8') as f:
+        f.write(content)
     return md_path
 
 
