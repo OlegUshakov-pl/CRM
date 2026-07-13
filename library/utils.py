@@ -114,7 +114,7 @@ def save_article_as_md(item, content, images=None):
 
     with open(md_path, 'w', encoding='utf-8') as f:
         f.write(content)
-    return md_path
+    return md_path, content
 
 
 def delete_item_from_disk(item):

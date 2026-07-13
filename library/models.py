@@ -90,7 +90,11 @@ class LibraryItem(TimeStampedModel):
 
     def save_as_md(self, content, images=None):
         from .utils import save_article_as_md
-        return save_article_as_md(self, content, images)
+        md_path, updated_content = save_article_as_md(self, content, images)
+        if updated_content != content:
+            self.content = updated_content
+            self.save(update_fields=['content'])
+        return md_path
 
     def delete_from_disk(self):
         from .utils import delete_item_from_disk
