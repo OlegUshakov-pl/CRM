@@ -64,7 +64,7 @@ Or run `install.bat` for one-click setup. Default credentials: `admin` / `admin`
 ### Knowledge & AI
 | Module | Description |
 |--------|-------------|
-| **Library** | Rich-text knowledge base (Quill.js) with nested categories, tags, favorites, files |
+| **Library** | Knowledge base with rich-text editor (Quill.js), articles auto-saved as `.md` files on disk with images, nested categories, tags, favorites, file attachments |
 | **AI Assistant** | Multi-provider AI chat with CHAT/COMMANDS modes, browser agent, web search, file management |
 
 ### Tooling
@@ -124,7 +124,7 @@ CRM/
   tasks/             Task management
   notes/             Universal notes
   documents/         File upload/preview
-  library/           Knowledge base (rich text, categories, files)
+  library/           Knowledge base (articles saved as .md on disk, categories, tags, files)
   parts/             Drawings & 3D models
   assistant/         AI chat, LLM, browser agent, command handlers
   calendar_app/      Calendar view
@@ -173,7 +173,7 @@ All business models extend `TimeStampedModel` (`created_at`, `updated_at`, `crea
 | **Task** | title, slug, description, status, priority, due_date | FK→Project |
 | **Note** | title, slug, content, date | FK→Project / Company / Contact |
 | **Document** | number, size, file, file_type | FK→Project, Category |
-| **LibraryItem** | title, slug, content, file, is_favorite | FK→Category; M2M→Tag |
+| **LibraryItem** | title, slug, content (HTML), is_favorite, source_url, summary | FK→Category; M2M→Tag; auto-saved as `{slug}_{date}.md` on disk |
 | **Part** | number, size, rev, file | FK→Project, Category |
 | **Deal** (example) | name, slug, status, priority, value, due_date | FK→Company; M2M→Contact; FK→User |
 | **Category** | name, slug, color, icon, parent (self-referential) | Materials, Documents, Parts, Library |
@@ -224,6 +224,8 @@ Covers unit tests, navigation, and security (path traversal, SSRF, open redirect
 
 ## File Storage
 
+### Projects
+
 Projects store files in organized directories:
 
 ```
@@ -234,3 +236,20 @@ Projects store files in organized directories:
 ```
 
 Subfolder naming is configurable via `AppSetting`. Storage backend uses custom `ProjectFileSystemStorage`.
+
+### Library Articles
+
+Articles are auto-saved as Markdown (`.md`) files on disk for portability:
+
+```
+media/library/
+  {slug}_{YYYY-MM-DD}/
+    {slug}_{YYYY-MM-DD}.md    # Full article content in Markdown
+    images/                    # Downloaded/copied article images
+    attachments/               # Uploaded file attachments
+```
+
+- Content is stored both in the database (HTML) and as `.md` on disk
+- Article folders are created on create/edit/import and recursively deleted on delete
+- Images are served via a dedicated `/library/{slug}/image/{path}` view with path traversal protection
+- Storage root is configurable via `AppSetting` (falls back to `MEDIA_ROOT`)
