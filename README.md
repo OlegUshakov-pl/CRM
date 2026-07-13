@@ -242,7 +242,7 @@ Subfolder naming is configurable via `AppSetting`. Storage backend uses custom `
 Articles are auto-saved as Markdown (`.md`) files on disk for portability:
 
 ```
-media/library/
+{library_root}/
   {slug}_{YYYY-MM-DD}/
     {slug}_{YYYY-MM-DD}.md    # Full article content in Markdown
     images/                    # Downloaded/copied article images
@@ -250,6 +250,6 @@ media/library/
 ```
 
 - Content is stored both in the database (HTML) and as `.md` on disk
+- Storage root is configurable via `AppSetting` (falls back to `MEDIA_ROOT/library/`)
 - Article folders are created on create/edit/import and recursively deleted on delete
 - Images are served via a dedicated `/library/{slug}/image/{path}` view with path traversal protection
-- Storage root is configurable via `AppSetting` (falls back to `MEDIA_ROOT`)
