@@ -3,7 +3,7 @@ import os
 import bleach
 from datetime import datetime, timedelta
 from django.shortcuts import render, get_object_or_404, redirect
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, FileResponse, Http404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
@@ -12,7 +12,21 @@ from django.utils import timezone
 from django.template.loader import render_to_string
 from .models import LibraryItem, Category, Tag, LibraryAttachment
 from .forms import LibraryItemForm, CategoryForm
+from .utils import get_article_folder_path
 from core.models import log_activity
+
+
+@login_required
+def library_serve_image(request, slug, image_path):
+    item = get_object_or_404(LibraryItem, slug=slug, is_active=True)
+    folder_path = get_article_folder_path(item)
+    full_path = os.path.normpath(os.path.join(folder_path, 'images', image_path))
+    images_dir = os.path.normpath(os.path.join(folder_path, 'images'))
+    if not full_path.startswith(images_dir + os.sep) and full_path != images_dir:
+        raise Http404("Invalid path")
+    if not os.path.exists(full_path):
+        raise Http404("File not found")
+    return FileResponse(open(full_path, 'rb'), filename=os.path.basename(full_path))
 
 
 @login_required

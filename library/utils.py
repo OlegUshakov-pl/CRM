@@ -78,7 +78,7 @@ def save_article_as_md(item, content, images=None):
                     dest = os.path.join(images_dir, img_name)
                     if not os.path.exists(dest):
                         shutil.copy2(local_path, dest)
-                    content = content.replace(src, f'images/{img_name}')
+                    content = content.replace(src, f'/library/{item.slug}/image/{img_name}')
             elif src.startswith('http'):
                 img_name = src.split('/')[-1].split('?')[0]
                 if not img_name or '.' not in img_name:
@@ -86,7 +86,7 @@ def save_article_as_md(item, content, images=None):
                 dest = os.path.join(images_dir, img_name)
                 if not os.path.exists(dest):
                     urllib.request.urlretrieve(src, dest)
-                content = content.replace(src, f'images/{img_name}')
+                content = content.replace(src, f'/library/{item.slug}/image/{img_name}')
         except Exception:
             pass
 
