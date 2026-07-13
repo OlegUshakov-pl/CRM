@@ -10,14 +10,17 @@ from core.models import AppSetting, AppSettings
 def get_library_root():
     root = AppSettings.get_value('storage.project_path', '')
     if root:
-        return os.path.join(root, 'library')
-    root = AppSetting.get_value('project_root_path', '')
-    if root:
+        path = os.path.join(root, 'library')
+    elif AppSetting.get_value('project_root_path', ''):
+        root = AppSetting.get_value('project_root_path', '')
         AppSettings.set_value('storage.project_path', root)
-        return os.path.join(root, 'library')
-    if hasattr(settings, 'PROJECT_ROOT_PATH') and settings.PROJECT_ROOT_PATH:
-        return os.path.join(settings.PROJECT_ROOT_PATH, 'library')
-    return os.path.join(str(settings.MEDIA_ROOT), 'library')
+        path = os.path.join(root, 'library')
+    elif hasattr(settings, 'PROJECT_ROOT_PATH') and settings.PROJECT_ROOT_PATH:
+        path = os.path.join(settings.PROJECT_ROOT_PATH, 'library')
+    else:
+        path = os.path.join(str(settings.MEDIA_ROOT), 'library')
+    os.makedirs(path, exist_ok=True)
+    return path
 
 
 def sanitize_folder_name(name):
