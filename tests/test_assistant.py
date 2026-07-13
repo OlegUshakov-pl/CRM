@@ -3,8 +3,8 @@ from datetime import date
 from django.contrib.auth.models import User
 from django.test import TestCase
 
-from .services.commands import CommandContext, command_registry
-from .services.handlers import _find_contact, _find_project, register_all
+from assistant.services.commands import CommandContext, command_registry
+from assistant.services.handlers import _find_contact, _find_project, register_all
 
 
 class HandlersTest(TestCase):

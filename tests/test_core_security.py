@@ -4,8 +4,8 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.test import TestCase, RequestFactory, override_settings
 
-from .models import generate_unique_slug, Activity
-from .context_processors import app_version
+from core.models import generate_unique_slug, Activity
+from core.context_processors import app_version
 
 
 class GenerateUniqueSlugTest(TestCase):
