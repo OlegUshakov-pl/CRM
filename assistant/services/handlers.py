@@ -16,7 +16,7 @@ from typing import Any, Dict, List, Optional
 from django.conf import settings
 from django.db.models import Q
 from django.utils import timezone
-from django.utils.text import slugify
+from slugify import slugify
 
 from .commands import CommandContext, CommandResult
 from .i18n import detect_lang, t

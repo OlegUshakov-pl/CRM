@@ -1,6 +1,6 @@
 import os
 from django.db import models
-from django.utils.text import slugify
+from slugify import slugify
 from core.models import TimeStampedModel, generate_unique_slug
 
 

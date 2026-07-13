@@ -8,4 +8,5 @@ pillow==12.2.0
 pycparser==3.0
 sqlparse==0.5.5
 tzdata==2026.2
+python-slugify==8.0.4
 webencodings==0.5.1
