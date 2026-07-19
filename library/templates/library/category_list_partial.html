@@ -33,7 +33,7 @@
                         <a href="{% url 'library:category_edit' cat.slug %}" class="text-gray-400 hover:text-violet-500" title="Edit">
                             <i data-lucide="pencil" class="w-4 h-4"></i>
                         </a>
-                        <button hx-delete="{% url 'library:category_delete' cat.slug %}" hx-target="#category-row-{{ cat.pk }}" hx-swap="outerHTML swap:1s" hx-confirm="Delete category '{{ cat.name }}'? This will not delete documents." class="text-gray-400 hover:text-red-500" title="Delete">
+                        <button @click="$store.deleteModal.open('{% url 'library:category_delete' cat.slug %}', '{{ cat.name }}', '{% url 'library:category_list' %}')" class="text-gray-400 hover:text-red-500" title="Delete">
                             <i data-lucide="trash-2" class="w-4 h-4"></i>
                         </button>
                     </div>

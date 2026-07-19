@@ -574,8 +574,9 @@ def category_delete(request, slug):
         category.is_active = False
         category.save()
         messages.success(request, f'Category "{category.name}" deleted.')
-        if request.headers.get('HX-Request'):
-            return HttpResponse('')
+        next_url = request.POST.get('next') or request.GET.get('next')
+        if next_url:
+            return redirect(next_url)
         return redirect('library:category_list')
     return render(request, 'library/category_confirm_delete.html', {'category': category})
 
