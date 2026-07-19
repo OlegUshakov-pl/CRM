@@ -20,14 +20,33 @@
     {% if is_image %}
     <div class="bg-white border border-[#e8e8e8] p-6">
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-            <a href="{% url 'documents:show' doc.pk %}" target="_blank" class="block aspect-square overflow-hidden bg-gray-100 dark:bg-gray-700 hover:opacity-90 transition-opacity">
+            <div class="block aspect-square overflow-hidden bg-gray-100 dark:bg-gray-700 hover:opacity-90 transition-opacity cursor-pointer" onclick="openLightbox(0)">
                 <img src="{% url 'documents:show' doc.pk %}" alt="{{ doc.filename }}" class="w-full h-full object-cover">
-            </a>
+            </div>
             {% for photo in photos %}
-            <a href="{% url 'documents:show' photo.pk %}" target="_blank" class="block aspect-square overflow-hidden bg-gray-100 dark:bg-gray-700 hover:opacity-90 transition-opacity">
+            <div class="block aspect-square overflow-hidden bg-gray-100 dark:bg-gray-700 hover:opacity-90 transition-opacity cursor-pointer" onclick="openLightbox({{ forloop.counter }})">
                 <img src="{% url 'documents:show' photo.pk %}" alt="{{ photo.filename }}" class="w-full h-full object-cover">
-            </a>
+            </div>
             {% endfor %}
+        </div>
+    </div>
+
+    <div id="lightbox" class="fixed inset-0 z-50 bg-black/90 hidden items-center justify-center" onclick="closeLightbox()">
+        <button class="absolute top-4 right-4 text-white/70 hover:text-white z-10" onclick="closeLightbox()">
+            <i data-lucide="x" class="w-8 h-8"></i>
+        </button>
+        <button class="absolute left-4 top-1/2 -translate-y-1/2 text-white/70 hover:text-white z-10" onclick="event.stopPropagation(); lightboxPrev()">
+            <i data-lucide="chevron-left" class="w-10 h-10"></i>
+        </button>
+        <button class="absolute right-4 top-1/2 -translate-y-1/2 text-white/70 hover:text-white z-10" onclick="event.stopPropagation(); lightboxNext()">
+            <i data-lucide="chevron-right" class="w-10 h-10"></i>
+        </button>
+        <div class="max-w-5xl max-h-[90vh] p-4" onclick="event.stopPropagation()">
+            <img id="lightbox-img" src="" alt="" class="max-w-full max-h-[80vh] object-contain mx-auto">
+            <div class="text-center mt-4">
+                <p id="lightbox-title" class="text-white font-medium"></p>
+                <p id="lightbox-counter" class="text-white/50 text-sm mt-1"></p>
+            </div>
         </div>
     </div>
     {% elif is_pdf %}
@@ -56,4 +75,50 @@
 </div>
 {% endblock %}
 
-{% block extra_scripts %}{% endblock %}
+{% block extra_scripts %}
+<script>
+var lightboxImages = [
+    { url: "{% url 'documents:show' doc.pk %}", name: "{{ doc.filename|escapejs }}" }
+    {% for photo in photos %},{ url: "{% url 'documents:show' photo.pk %}", name: "{{ photo.filename|escapejs }}" }{% endfor %}
+];
+var lightboxIndex = 0;
+
+function openLightbox(index) {
+    lightboxIndex = index;
+    var img = lightboxImages[index];
+    document.getElementById('lightbox-img').src = img.url;
+    document.getElementById('lightbox-title').textContent = img.name;
+    document.getElementById('lightbox-counter').textContent = (index + 1) + ' / ' + lightboxImages.length;
+    var lb = document.getElementById('lightbox');
+    lb.classList.remove('hidden');
+    lb.classList.add('flex');
+    document.body.style.overflow = 'hidden';
+    lucide.createIcons();
+}
+
+function closeLightbox() {
+    var lb = document.getElementById('lightbox');
+    lb.classList.add('hidden');
+    lb.classList.remove('flex');
+    document.body.style.overflow = '';
+}
+
+function lightboxPrev() {
+    lightboxIndex = (lightboxIndex - 1 + lightboxImages.length) % lightboxImages.length;
+    openLightbox(lightboxIndex);
+}
+
+function lightboxNext() {
+    lightboxIndex = (lightboxIndex + 1) % lightboxImages.length;
+    openLightbox(lightboxIndex);
+}
+
+document.addEventListener('keydown', function(e) {
+    var lb = document.getElementById('lightbox');
+    if (lb.classList.contains('hidden')) return;
+    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowLeft') lightboxPrev();
+    if (e.key === 'ArrowRight') lightboxNext();
+});
+</script>
+{% endblock %}
