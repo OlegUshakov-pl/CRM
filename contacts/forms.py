@@ -1,5 +1,6 @@
 from django import forms
 from .models import Contact
+from companies.models import Company
 from projects.models import Project
 
 
@@ -26,6 +27,7 @@ class ContactForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['company'].queryset = Company.objects.filter(is_active=True)
         self.fields['projects'].queryset = Project.objects.filter(is_active=True)
         order = ['company', 'first_name', 'last_name', 'email', 'phone', 'position', 'projects', 'avatar', 'notes']
         self.fields = {f: self.fields[f] for f in order if f in self.fields}
