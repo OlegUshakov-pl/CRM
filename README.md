@@ -2,7 +2,7 @@
 
 # CRM
 
-##🎯 Description
+## Description
 
 This CRM system is designed around two primary goals that help keep engineering and project documentation structured, accessible, and easy to manage.
 
