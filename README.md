@@ -34,6 +34,7 @@ The CRM also provides a structured space for collecting various types of informa
 You can even save articles **directly from the internet using their URLs**.  
 All collected materials are stored in well‑organized folders, forming a clean and accessible knowledge base.
 
+## CRM
 
 **Django 6.0.7 + Tailwind CSS 4 + Alpine.js + HTMX + AI Assistant**
 
