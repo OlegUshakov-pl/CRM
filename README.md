@@ -2,37 +2,43 @@
 
 # CRM
 
-## Description
+# CRM Project Description
 
-This CRM system is designed around two primary goals that help keep engineering and project documentation structured, accessible, and easy to manage.
+## Overview
 
-## 1. Centralized storage for all project‑related documents
+This CRM is built for small and medium-sized businesses that need a reliable, organized way to manage project documentation and reference materials. Rather than scattering files across emails, cloud drives, and local folders, the system gives every project — and every piece of reference material — a single, structured home.
 
-Each project can contain everything required throughout its lifecycle:
+The CRM is built around two core goals.
 
-- photos  
-- technical drawings  
-- documentation  
-- notes  
-- any additional files  
+## Goal 1: Centralized Project Documentation
 
-When you save a project to a selected location, the system automatically creates a **project folder with a unique number**. Inside this folder, all files are neatly organized into dedicated subdirectories, ensuring a clean and consistent project structure.
+Every project gets its own dedicated space. As soon as a project is created, you can start adding everything related to it:
 
-If you need to archive or transfer a project, you can simply **export it as a ZIP file** and move it wherever necessary.
+- Photos
+- Drawings and technical documents
+- Notes
+- Any other supporting files
 
----
+Once the project is saved to a chosen location, the system automatically generates a numbered project folder. All documents belonging to that project are neatly organized inside, each type kept in its own subfolder — no manual sorting required.
 
-## 2. Unified library for general documentation
+When a project is finished, it can be archived and moved out of the active workspace, keeping the working area clean while preserving a complete, organized record for future reference.
 
-The CRM also provides a structured space for collecting various types of information:
+## Goal 2: A Central Library for Reference Materials
 
-- documents  
-- videos  
-- articles  
-- external resources  
+Beyond individual projects, the CRM also serves as a knowledge base for general documentation the business collects over time:
 
-You can even save articles **directly from the internet using their URLs**.  
-All collected materials are stored in well‑organized folders, forming a clean and accessible knowledge base.
+- Documents
+- Videos
+- Articles
+
+Articles can be saved directly from the internet via a link, making it easy to build a personal reference library without manual copy-pasting. As with projects, all saved materials are automatically organized into clearly structured folders.
+
+## Key Benefits
+
+- **One place for everything** — no more hunting across folders, drives, and inboxes
+- **Automatic organization** — numbered project folders and categorized subfolders are created without manual effort
+- **Clean lifecycle management** — active projects stay easy to find; finished projects can be archived without losing structure
+- **Built-in knowledge base** — a growing library of reference material, saved and organized alongside project work
 
 ---
 
