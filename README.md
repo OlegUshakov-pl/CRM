@@ -2,6 +2,39 @@
 
 # CRM
 
+##🎯 Description
+
+This CRM system is designed around two primary goals that help keep engineering and project documentation structured, accessible, and easy to manage.
+
+## 1. Centralized storage for all project‑related documents
+
+Each project can contain everything required throughout its lifecycle:
+
+- photos  
+- technical drawings  
+- documentation  
+- notes  
+- any additional files  
+
+When you save a project to a selected location, the system automatically creates a **project folder with a unique number**. Inside this folder, all files are neatly organized into dedicated subdirectories, ensuring a clean and consistent project structure.
+
+If you need to archive or transfer a project, you can simply **export it as a ZIP file** and move it wherever necessary.
+
+---
+
+## 2. Unified library for general documentation
+
+The CRM also provides a structured space for collecting various types of information:
+
+- documents  
+- videos  
+- articles  
+- external resources  
+
+You can even save articles **directly from the internet using their URLs**.  
+All collected materials are stored in well‑organized folders, forming a clean and accessible knowledge base.
+
+
 **Django 6.0.7 + Tailwind CSS 4 + Alpine.js + HTMX + AI Assistant**
 
 A project management, contractor and task tracking system for engineering and manufacturing businesses. Features 14 custom apps, an AI assistant with command mode, and a modular HTMX-driven UI.
