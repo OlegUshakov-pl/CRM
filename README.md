@@ -292,8 +292,6 @@ Articles are auto-saved as Markdown (`.md`) files on disk for portability:
 - Article folders are created on create/edit/import and recursively deleted on delete
 - Images are served via a dedicated `/library/{slug}/image/{path}` view with path traversal protection
 
-```
-
 ## License
 
 License: MIT
