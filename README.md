@@ -1,4 +1,5 @@
 ![CRM](CRM.png)
+![Dashboard](dashboard.png)
 
 > **Django 6.x + Tailwind CSS 4 + Alpine.js + HTMX + AI Assistant**
 
