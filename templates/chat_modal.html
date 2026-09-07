@@ -1,7 +1,7 @@
 {% load static %}
 <div id="chat-modal" class="fixed z-[9999] hidden" style="bottom: 20px; right: 20px; width: 580px; height: 340px; min-width: 350px; min-height: 200px;">
-    <div class="bg-white dark:bg-[#0a0a0a] border border-light dark:border-[#222] flex flex-col w-full h-full overflow-hidden relative"
-         style="border-radius: 0px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); resize: both;">
+    <div class="bg-white dark:bg-[#0a0a0a] border border-light dark:border-[#222] flex flex-col w-full h-full overflow-hidden relative font-semibold shadow-2xl"
+         style="border-radius: 0px; box-shadow: 0 10px 40px rgba(0,0,0,0.18); resize: both;">
         <style>
             #chat-modal .ui-resizable-handle {
                 position: absolute;
@@ -20,7 +20,7 @@
         <div class="ui-resizable-handle"></div>
 
         <!-- Header - Drag handle -->
-        <div id="chat-modal-header" class="flex items-center justify-between px-4 py-2 border-b border-light dark:border-[#222] flex-shrink-0 cursor-move select-none">
+        <div id="chat-modal-header" class="flex items-center justify-between px-5 py-3 border-b border-light dark:border-[#222] flex-shrink-0 cursor-move select-none font-semibold">
             <div class="flex items-center gap-2">
                 <div class="w-7 h-7 rounded-full bg-indigo-400 text-white flex items-center justify-center">
                     <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
@@ -47,7 +47,7 @@
         </div>
 
         <!-- Messages -->
-        <div class="flex-1 overflow-y-auto px-3 py-1 space-y-0.5" id="chat-modal-messages">
+        <div class="flex-1 overflow-y-auto px-5 py-4 space-y-2 font-semibold" id="chat-modal-messages">
             <template x-for="m in chatMessages" :key="m.id">
                 <div :class="m.role === 'user' ? 'flex justify-end' : 'flex justify-start'">
                     <div :class="m.role === 'user'
@@ -122,18 +122,89 @@
         </div>
 
         <!-- Input -->
-        <div class="border-t border-light dark:border-[#222] p-2 flex-shrink-0">
-            <div class="flex items-end gap-2">
-                <!-- Model selector -->
+        <div class="border-t border-light dark:border-[#222] px-5 pt-3 pb-2 flex-shrink-0 font-semibold">
+            <!-- Composer box -->
+            <div class="bg-gray-100 dark:bg-[#1a1a1a] rounded-lg px-4 pt-3 pb-2">
+                <!-- attachment chips -->
+                <div x-show="chatAttachments.length" class="flex flex-wrap gap-2 mb-2">
+                    <template x-for="(f,i) in chatAttachments" :key="i">
+                        <span class="inline-flex items-center gap-1.5 max-w-full bg-white dark:bg-black border border-light dark:border-[#333] rounded px-2 py-1 text-[12px] font-semibold text-gray-700 dark:text-gray-200">
+                            <template x-if="f.kind === 'image'"><img :src="f.preview" class="w-6 h-6 rounded object-cover" alt=""></template>
+                            <i x-show="f.kind !== 'image'" data-lucide="paperclip" class="w-3.5 h-3.5"></i>
+                            <span class="truncate max-w-[140px]" x-text="f.name"></span>
+                            <button @click="chatRemoveAttachment(i)" class="text-gray-400 hover:text-red-500"><i data-lucide="x" class="w-3 h-3"></i></button>
+                        </span>
+                    </template>
+                </div>
+                <div class="relative">
+                    <textarea x-ref="chatInput" x-model="chatText" @input="chatAutoresize()" @keydown.enter.prevent="if(!$event.shiftKey) chatSend()"
+                              rows="1" placeholder="Type your message here..."
+                              class="w-full resize-none bg-transparent outline-none text-[13px] font-semibold text-gray-900 dark:text-white placeholder-gray-400 max-h-32"></textarea>
+                    <ul x-show="!chatText" class="text-[12px] font-semibold text-gray-400 dark:text-gray-500 space-y-1 pb-1 pointer-events-none">
+                        <li class="flex gap-2"><span>•</span><span>Describe what you want the AI to do in detail...</span></li>
+                        <li class="flex gap-2"><span>•</span><span>You can include context, examples, or paste documents...</span></li>
+                        <li class="flex gap-2"><span>•</span><span>Supports markdown, code blocks, files, and images</span></li>
+                    </ul>
+                </div>
+                <!-- toolbar -->
+                <div class="flex items-center justify-between pt-1">
+                    <div class="flex items-center gap-1">
+                        <input type="file" x-ref="chatFileInput" class="hidden" @change="chatOnFile($event)">
+                        <input type="file" accept="image/*" x-ref="chatImageInput" class="hidden" @change="chatOnImage($event)">
+                        <button @click="$refs.chatFileInput.click()" title="Attach file" class="p-1.5 text-gray-500 hover:text-gray-800 dark:hover:text-gray-200"><i data-lucide="paperclip" class="w-4 h-4"></i></button>
+                        <div class="relative" x-data="{ emojiOpen: false }">
+                            <button @click="emojiOpen = !emojiOpen" title="Emoji" class="p-1.5 text-gray-500 hover:text-gray-800 dark:hover:text-gray-200"><i data-lucide="smile" class="w-4 h-4"></i></button>
+                            <div x-show="emojiOpen" @click.outside="emojiOpen = false" class="absolute bottom-full left-0 mb-1 bg-white dark:bg-black border border-light dark:border-[#333] shadow-xl p-2 grid grid-cols-6 gap-1 z-50 w-48">
+                                <template x-for="e in ['😀','👍','🎉','❤️','🔥','✅','👀','💡','⚠️','🚀','📌','💬']" :key="e">
+                                    <button @click="chatInsertEmoji(e); emojiOpen = false" class="text-lg hover:bg-gray-100 dark:hover:bg-[#222] rounded" x-text="e"></button>
+                                </template>
+                            </div>
+                        </div>
+                        <button @click="$refs.chatImageInput.click()" title="Attach image" class="p-1.5 text-gray-500 hover:text-gray-800 dark:hover:text-gray-200"><i data-lucide="image" class="w-4 h-4"></i></button>
+                        <button @click="chatInsertCode()" title="Insert code block" class="p-1.5 text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 font-bold text-[13px]">&lt;&gt;</button>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <!-- Mode selector -->
+                        <div class="relative flex-shrink-0" x-data="{ modeOpen: false }">
+                            <button @click="modeOpen = !modeOpen"
+                                    class="px-2 py-1.5 text-[11px] font-bold bg-white dark:bg-[#222] border border-light dark:border-[#333] rounded hover:bg-gray-50 text-gray-700 dark:text-gray-300 flex items-center gap-1 whitespace-nowrap">
+                                <i data-lucide="message-square" class="w-3.5 h-3.5" x-show="chatMode === 'chat'"></i>
+                                <i data-lucide="terminal" class="w-3.5 h-3.5" x-show="chatMode === 'commands'"></i>
+                                <span x-text="chatMode === 'chat' ? 'CHAT' : 'COMMANDS'"></span>
+                                <i data-lucide="chevron-down" class="w-3 h-3"></i>
+                            </button>
+                            <div x-show="modeOpen" @click.outside="modeOpen = false"
+                                 class="absolute bottom-full right-0 mb-1 w-36 bg-white dark:bg-black border border-light dark:border-[#222] rounded shadow-lg z-50">
+                                <button @click="chatSetMode('chat'); modeOpen = false"
+                                        :class="chatMode === 'chat' ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#1a1a1a]'"
+                                        class="w-full text-left px-3 py-2 text-[12px] flex items-center gap-2 transition-colors">
+                                    <i data-lucide="message-square" class="w-3 h-3"></i> Chat
+                                </button>
+                                <button @click="chatSetMode('commands'); modeOpen = false"
+                                        :class="chatMode === 'commands' ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#1a1a1a]'"
+                                        class="w-full text-left px-3 py-2 text-[12px] flex items-center gap-2 transition-colors">
+                                    <i data-lucide="terminal" class="w-3 h-3"></i> Commands
+                                </button>
+                            </div>
+                        </div>
+                        <button @click="chatSend()" :disabled="(!chatText.trim() && !chatAttachments.length) || chatLoading"
+                                class="w-9 h-9 rounded-full bg-violet-500 hover:bg-violet-600 text-white flex items-center justify-center disabled:opacity-50 shadow">
+                            <i data-lucide="send" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <!-- Provider row -->
+            <div class="flex items-center justify-between pt-2">
                 <div class="relative flex-shrink-0" x-data="{ modelsOpen: false, modelSearch: '' }">
                     <button @click="modelsOpen = !modelsOpen; if(modelsOpen) chatLoadModels()"
-                            class="px-2 py-2 text-[11px] bg-gray-100 dark:bg-[#1a1a1a] border border-light dark:border-[#222] rounded hover:bg-gray-200 dark:hover:bg-[#222] text-gray-700 dark:text-gray-300 flex items-center gap-1 whitespace-nowrap">
+                            class="text-[12px] font-semibold text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 flex items-center gap-1.5 whitespace-nowrap">
                         <i data-lucide="cpu" class="w-3.5 h-3.5"></i>
-                        <span x-text="chatCurrentModel || 'model'"></span>
-                        <i data-lucide="chevron-down" class="w-3 h-3"></i>
+                        <span x-text="chatCurrentModel || 'openrouter/free'"></span>
+                        <i data-lucide="settings" class="w-3.5 h-3.5"></i>
                     </button>
                     <div x-show="modelsOpen" @click.outside="modelsOpen = false; modelSearch = ''"
-                         class="absolute bottom-full left-0 mb-1 w-64 bg-white dark:bg-black border border-light dark:border-[#222] rounded shadow-lg z-50 max-h-64 overflow-hidden flex flex-col">
+                         class="absolute bottom-full left-0 mb-1 w-64 bg-white dark:bg-black border border-light dark:border-[#222] rounded shadow-xl z-50 max-h-64 overflow-hidden flex flex-col font-normal">
                         <div class="p-2 border-b border-light dark:border-[#222]">
                             <input x-model="modelSearch" type="text" placeholder="Search models..."
                                    class="w-full px-2 py-1.5 text-[12px] border border-light dark:border-[#222] dark:bg-[#111] dark:text-white rounded outline-none focus:border-indigo-400">
@@ -160,39 +231,6 @@
                         </div>
                     </div>
                 </div>
-
-                <textarea x-ref="chatInput" x-model="chatText" @keydown.enter.prevent="if(!$event.shiftKey) chatSend()"
-                          rows="1" placeholder="What are you looking for?"
-                          class="flex-1 resize-none border border-light dark:border-[#222] dark:bg-[#111] dark:text-white text-[13px] px-3 py-2 rounded outline-none focus:border-indigo-400 max-h-32"></textarea>
-
-                <!-- Mode selector -->
-                <div class="relative flex-shrink-0" x-data="{ modeOpen: false }">
-                    <button @click="modeOpen = !modeOpen"
-                            class="px-2 py-2 text-[11px] bg-gray-100 dark:bg-[#1a1a1a] border border-light dark:border-[#222] rounded hover:bg-gray-200 dark:hover:bg-[#222] text-gray-700 dark:text-gray-300 flex items-center gap-1 whitespace-nowrap">
-                        <i data-lucide="message-square" class="w-3.5 h-3.5" x-show="chatMode === 'chat'"></i>
-                        <i data-lucide="terminal" class="w-3.5 h-3.5" x-show="chatMode === 'commands'"></i>
-                        <span x-text="chatMode === 'chat' ? 'CHAT' : 'COMMANDS'"></span>
-                        <i data-lucide="chevron-down" class="w-3 h-3"></i>
-                    </button>
-                    <div x-show="modeOpen" @click.outside="modeOpen = false"
-                         class="absolute bottom-full right-0 mb-1 w-36 bg-white dark:bg-black border border-light dark:border-[#222] rounded shadow-lg z-50">
-                        <button @click="chatSetMode('chat'); modeOpen = false"
-                                :class="chatMode === 'chat' ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#1a1a1a]'"
-                                class="w-full text-left px-3 py-2 text-[12px] flex items-center gap-2 transition-colors">
-                            <i data-lucide="message-square" class="w-3 h-3"></i> Chat
-                        </button>
-                        <button @click="chatSetMode('commands'); modeOpen = false"
-                                :class="chatMode === 'commands' ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#1a1a1a]'"
-                                class="w-full text-left px-3 py-2 text-[12px] flex items-center gap-2 transition-colors">
-                            <i data-lucide="terminal" class="w-3 h-3"></i> Commands
-                        </button>
-                    </div>
-                </div>
-
-                <button @click="chatSend()" :disabled="!chatText.trim() || chatLoading"
-                        class="p-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded disabled:opacity-50">
-                    <i data-lucide="send" class="w-5 h-5"></i>
-                </button>
             </div>
         </div>
     </div>
@@ -278,6 +316,37 @@ function chatApp() {
         chatSUnit: 's',
         chatUndoTimers: {},
         chatShowClearModal: false,
+        chatAttachments: [],
+        chatAutoresize: function() {
+            var el = this.$refs.chatInput;
+            if (!el) return;
+            el.style.height = 'auto';
+            el.style.height = Math.min(el.scrollHeight, 128) + 'px';
+        },
+        chatInsertEmoji: function(e) { this.chatText += e; this.$nextTick(this.chatAutoresize.bind(this)); },
+        chatInsertCode: function() { this.chatText += (this.chatText && !this.chatText.endsWith('\n') ? '\n' : '') + '```\n\n```'; this.$nextTick(this.chatAutoresize.bind(this)); },
+        chatRemoveAttachment: function(i) { this.chatAttachments.splice(i, 1); },
+        chatOnFile: function(ev) { this.chatAddFiles(ev.target.files, false); ev.target.value = ''; },
+        chatOnImage: function(ev) { this.chatAddFiles(ev.target.files, true); ev.target.value = ''; },
+        chatAddFiles: function(files, onlyImages) {
+            var self = this;
+            Array.prototype.forEach.call(files || [], function(f) {
+                if (onlyImages && f.type.indexOf('image/') !== 0) return;
+                var entry = {name: f.name, kind: f.type.indexOf('image/') === 0 ? 'image' : 'file', text: '', preview: ''};
+                if (entry.kind === 'image') {
+                    var rd = new FileReader();
+                    rd.onload = function(e) { entry.preview = e.target.result; self.chatAttachments.push(entry); self.$nextTick(function(){ if(window.lucide) lucide.createIcons(); }); };
+                    rd.readAsDataURL(f);
+                } else {
+                    if (f.size < 200*1024) {
+                        var r2 = new FileReader();
+                        r2.onload = function(e) { entry.text = String(e.target.result || '').slice(0, 8000); self.chatAttachments.push(entry); self.$nextTick(function(){ if(window.lucide) lucide.createIcons(); }); };
+                        r2.readAsText(f);
+                    } else { self.chatAttachments.push(entry); }
+                    self.$nextTick(function(){ if(window.lucide) lucide.createIcons(); });
+                }
+            });
+        },
         chatSetMode: function(m) {
             this.chatMode = m;
             localStorage.setItem('ai_mode', m);
@@ -340,8 +409,16 @@ function chatApp() {
         },
         chatSend: function() {
             var msg = this.chatText.trim();
-            if (!msg) return;
+            if (!msg && !this.chatAttachments.length) return;
+            var extras = this.chatAttachments.map(function(a) {
+                if (a.kind === 'image') return '[image: ' + a.name + ']';
+                return '[file: ' + a.name + ']' + (a.text ? '\n' + a.text : '');
+            });
+            if (extras.length) msg = (msg ? msg + '\n' : '') + extras.join('\n');
+            if (!msg.trim()) return;
             this.chatText = '';
+            this.chatAttachments = [];
+            if (this.$refs.chatInput) this.$refs.chatInput.style.height = 'auto';
             this.chatMessages.push({id: 'tmp-' + Date.now(), role: 'user', content: msg, payload: {}, created_at: new Date().toISOString()});
             this.chatLoading = true;
             this.chatLoadingText = 'Thinking...';
