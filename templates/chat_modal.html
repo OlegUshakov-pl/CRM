@@ -137,10 +137,10 @@
                     </template>
                 </div>
                 <div class="relative">
-                    <textarea x-ref="chatInput" x-model="chatText" @input="chatAutoresize()" @keydown.enter.prevent="if(!$event.shiftKey) chatSend()"
-                              rows="1" placeholder="Type your message here..."
+                    <textarea x-ref="chatInput" x-model="chatText" @input="chatAutoresize()" @focus="chatFocused = true" @blur="chatFocused = false" @keydown.enter.prevent="if(!$event.shiftKey) chatSend()"
+                              rows="1" :placeholder="chatFocused ? '' : 'Type your message here...'"
                               class="w-full resize-none bg-transparent outline-none text-[13px] font-semibold text-gray-900 dark:text-white placeholder-gray-400 max-h-32"></textarea>
-                    <ul x-show="!chatText" class="text-[12px] font-semibold text-gray-400 dark:text-gray-500 space-y-1 pb-1 pointer-events-none">
+                    <ul x-show="!chatText && !chatFocused" class="text-[12px] font-semibold text-gray-400 dark:text-gray-500 space-y-1 pb-1 pointer-events-none">
                         <li class="flex gap-2"><span>•</span><span>Describe what you want the AI to do in detail...</span></li>
                         <li class="flex gap-2"><span>•</span><span>You can include context, examples, or paste documents...</span></li>
                         <li class="flex gap-2"><span>•</span><span>Supports markdown, code blocks, files, and images</span></li>
@@ -316,6 +316,7 @@ function chatApp() {
         chatSUnit: 's',
         chatUndoTimers: {},
         chatShowClearModal: false,
+        chatFocused: false,
         chatAttachments: [],
         chatAutoresize: function() {
             var el = this.$refs.chatInput;
