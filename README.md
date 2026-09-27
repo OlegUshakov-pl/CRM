@@ -80,9 +80,38 @@ python manage.py createsuperuser
 python manage.py runserver
 ```
 
-Or run [install.bat](https://github.com/OlegUshakov-pl/CRM/blob/main/install.bat) for one-click setup (creates venv, installs Python + Node dependencies, builds Tailwind, runs migrations, seeds AI providers, collects static files, and creates a superuser). Default credentials: `admin` / `admin`.
+Or run [install.bat](https://github.com/OlegUshakov-pl/CRM/blob/main/install.bat) for one-click setup (creates venv, installs Python + Node dependencies, builds Tailwind, creates a `.env` with a generated `SECRET_KEY`, runs migrations, seeds AI providers, collects static files, and creates a superuser). You choose the superuser username and password during setup — if you leave the password empty, a strong random one is generated and shown once.
 
 Run `update.bat` after pulling new code to refresh dependencies and rebuild the frontend. Start the server anytime with `runserver.bat`.
+
+---
+
+## Configuration and Security
+
+All local configuration lives in `.env` in the project root (never committed — it is in `.gitignore`). `install.bat` creates it with a randomly generated `SECRET_KEY`; if you run the manual setup above, Django generates the file on the first `manage.py` command.
+
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `DJANGO_SECRET_KEY` | generated into `.env` | Django signing key. Never commit it, never reuse it across installs. |
+| `DEBUG` | `False` | Django debug pages. They expose tracebacks, settings and the secret key — keep `False` outside local debugging. |
+| `ALLOWED_HOSTS` | `localhost,127.0.0.1` | Comma-separated hosts. Add your LAN IP (e.g. `192.168.1.50`) to reach the app from other machines. |
+| `SECURE_COOKIES` | `not DEBUG` | Set `True` when serving over HTTPS. Leave `False` for plain-HTTP LAN access, otherwise login will not work. |
+
+Example `.env`:
+
+```env
+DJANGO_SECRET_KEY=your-generated-key
+DEBUG=False
+ALLOWED_HOSTS=localhost,127.0.0.1,192.168.1.50
+SECURE_COOKIES=False
+```
+
+**Before exposing the app beyond this machine:**
+
+- Set `DEBUG=False` (already the default) — debug pages leak data on any error.
+- Change the superuser password (Settings → Profile, or `/admin/auth/user/`).
+- Put the app behind a real WSGI server (IIS + wfastcgi, or nginx + gunicorn/waitress) with HTTPS. `runserver.bat` starts Django's development server, which is for local use only and binds to `127.0.0.1`.
+- SQLite is fine for a single workstation; move to PostgreSQL if several people hit it at once.
 
 ---
 

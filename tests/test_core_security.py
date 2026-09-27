@@ -170,6 +170,81 @@ class SettingsSecurityTest(TestCase):
             os.environ.pop('DJANGO_SECRET_KEY', None)
             reload(config.settings)
 
+    def test_settings_has_no_committed_secret_key(self):
+        from pathlib import Path
+        src = (Path(__file__).resolve().parent.parent / 'config' / 'settings.py').read_text(encoding='utf-8')
+        self.assertNotIn('django-insecure-', src)
+        self.assertIn("DEBUG = _env_bool('DEBUG')", src)
+        self.assertIn("_env_bool(name, default='False')", src)
+
+    def test_debug_defaults_to_false(self):
+        import os
+        from importlib import reload
+        import config.settings
+        os.environ['DEBUG'] = ''
+        os.environ['DJANGO_SECRET_KEY'] = 'test-secret-key-12345'
+        try:
+            reload(config.settings)
+            self.assertFalse(config.settings.DEBUG)
+        finally:
+            os.environ.pop('DEBUG', None)
+            os.environ.pop('DJANGO_SECRET_KEY', None)
+            reload(config.settings)
+
+    def test_secure_cookies_env_override(self):
+        import os
+        from importlib import reload
+        import config.settings
+        os.environ['DEBUG'] = ''
+        os.environ['DJANGO_SECRET_KEY'] = 'test-secret-key-12345'
+        os.environ['SECURE_COOKIES'] = 'False'
+        try:
+            reload(config.settings)
+            self.assertFalse(config.settings.SESSION_COOKIE_SECURE)
+            self.assertFalse(config.settings.CSRF_COOKIE_SECURE)
+            os.environ['SECURE_COOKIES'] = 'True'
+            reload(config.settings)
+            self.assertTrue(config.settings.SESSION_COOKIE_SECURE)
+            self.assertTrue(config.settings.CSRF_COOKIE_SECURE)
+        finally:
+            os.environ.pop('DEBUG', None)
+            os.environ.pop('SECURE_COOKIES', None)
+            os.environ.pop('DJANGO_SECRET_KEY', None)
+            reload(config.settings)
+
+    def test_env_file_loader_parses_and_respects_real_env(self):
+        import os
+        import tempfile
+        from pathlib import Path
+        import config.settings
+        with tempfile.TemporaryDirectory() as tmp:
+            env_path = Path(tmp) / '.env'
+            env_path.write_text(
+                '# comment\n'
+                'LOAD_TEST_QUOTED="double value"\n'
+                "LOAD_TEST_SINGLE='single value'\n"
+                'LOAD_TEST_EMPTY=\n'
+                'LOAD_TEST_EXISTING=from-file\n',
+                encoding='utf-8',
+            )
+            os.environ['LOAD_TEST_EXISTING'] = 'from-real-env'
+            try:
+                config.settings._load_env_file(env_path)
+                self.assertEqual(os.environ['LOAD_TEST_QUOTED'], 'double value')
+                self.assertEqual(os.environ['LOAD_TEST_SINGLE'], 'single value')
+                self.assertNotIn('LOAD_TEST_EMPTY', os.environ)
+                self.assertEqual(os.environ['LOAD_TEST_EXISTING'], 'from-real-env')
+            finally:
+                for key in ('LOAD_TEST_QUOTED', 'LOAD_TEST_SINGLE', 'LOAD_TEST_EXISTING'):
+                    os.environ.pop(key, None)
+
+    def test_install_script_has_no_hardcoded_admin_password(self):
+        from pathlib import Path
+        src = (Path(__file__).resolve().parent.parent / 'install.bat').read_text(encoding='utf-8')
+        self.assertNotIn("set_password('admin')", src)
+        self.assertNotIn('--username admin --email admin@example.com', src)
+        self.assertIn('DJANGO_SUPERUSER_PASSWORD', src)
+
 
 class GenerateUniqueSlugRaceConditionTest(TestCase):
     def test_slug_generation_with_many_collisions(self):

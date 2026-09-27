@@ -1,11 +1,66 @@
 import os
+import sys
 from pathlib import Path
 
+from django.core.exceptions import ImproperlyConfigured
+from django.core.management.utils import get_random_secret_key
+
 BASE_DIR = Path(__file__).resolve().parent.parent
+ENV_FILE = BASE_DIR / '.env'
 
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-(5d+qcof*xrx0%nq4-xjhr$mj1@n75==ttb15-0e_uy!d(#h^-')
 
-DEBUG = os.environ.get('DEBUG', 'True').lower() in ('true', '1', 'yes')
+def _load_env_file(path=None):
+    """Load KEY=VALUE pairs from a local .env file.
+
+    Real environment variables always win over values from the file.
+    """
+    path = path or ENV_FILE
+    try:
+        raw = path.read_text(encoding='utf-8')
+    except OSError:
+        return
+    for line in raw.splitlines():
+        line = line.strip()
+        if not line or line.startswith('#') or '=' not in line:
+            continue
+        key, _, value = line.partition('=')
+        key, value = key.strip(), value.strip().strip('"').strip("'")
+        if key and value:
+            os.environ.setdefault(key, value)
+
+
+def _env_bool(name, default='False'):
+    return os.environ.get(name, default).lower() in ('true', '1', 'yes')
+
+
+_load_env_file()
+
+DEBUG = _env_bool('DEBUG')
+
+
+def _secret_key():
+    """Env key -> .env key -> generate and persist a random local key."""
+    if os.environ.get('DJANGO_SECRET_KEY'):
+        return os.environ['DJANGO_SECRET_KEY']
+    key = get_random_secret_key()
+    try:
+        current = ENV_FILE.read_text(encoding='utf-8') if ENV_FILE.exists() else ''
+        if current and not current.endswith('\n'):
+            current += '\n'
+        ENV_FILE.write_text(current + f'DJANGO_SECRET_KEY={key}\n', encoding='utf-8')
+    except OSError:
+        if not DEBUG:
+            raise ImproperlyConfigured(
+                'DJANGO_SECRET_KEY is not set and it could not be written to .env. '
+                'Set DJANGO_SECRET_KEY in the environment before running with DEBUG=False.'
+            )
+        sys.stderr.write('[config] Could not write .env, using an in-memory SECRET_KEY.\n')
+    else:
+        sys.stderr.write(f'[config] Generated a new SECRET_KEY in {ENV_FILE}\n')
+    return key
+
+
+SECRET_KEY = _secret_key()
 
 _hosts_raw = os.environ.get('ALLOWED_HOSTS', '')
 ALLOWED_HOSTS = [h.strip() for h in _hosts_raw.split(',') if h.strip()] if _hosts_raw else ['localhost', '127.0.0.1']
@@ -125,8 +180,10 @@ LOGOUT_REDIRECT_URL = 'accounts:login'
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # Session security
-SESSION_COOKIE_SECURE = not DEBUG
-CSRF_COOKIE_SECURE = not DEBUG
+# SECURE_COOKIES must be enabled behind HTTPS; keep it off for plain-HTTP LAN access.
+SECURE_COOKIES = _env_bool('SECURE_COOKIES', str(not DEBUG))
+SESSION_COOKIE_SECURE = SECURE_COOKIES
+CSRF_COOKIE_SECURE = SECURE_COOKIES
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 7  # 1 week
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False

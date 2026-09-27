@@ -13,6 +13,16 @@ if not exist "venv\Scripts\python.exe" (
     exit /b 1
 )
 
+:: Development server only: enable DEBUG for this process unless
+:: the environment (.env or system) explicitly defines it.
+if not defined DEBUG set "DEBUG=true"
+
+echo.
+echo  [!] Development server, bound to 127.0.0.1 only.
+echo  [!] Do not expose it to the network. For production set
+echo  [!] DEBUG=False in .env and run behind a WSGI server.
+echo.
+
 :: Run the server
 venv\Scripts\python.exe manage.py runserver
 
