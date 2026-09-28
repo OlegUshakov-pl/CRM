@@ -14,6 +14,7 @@ from .models import LibraryItem, Category, Tag, LibraryAttachment
 from .forms import LibraryItemForm, CategoryForm
 from .utils import get_article_folder_path, get_library_root
 from core.models import log_activity
+from core.url_guard import UnsafeURLError, safe_urlopen, validate_public_url
 
 
 @login_required
@@ -164,13 +165,18 @@ def library_import_url(request):
             return render(request, 'library/form.html', {'url': url, 'categories': Category.objects.filter(is_active=True), 'active_tab': 'import'})
 
         try:
+            validate_public_url(url)
+        except UnsafeURLError as exc:
+            messages.error(request, str(exc))
+            return render(request, 'library/form.html', {'url': url, 'categories': Category.objects.filter(is_active=True), 'active_tab': 'import'})
+
+        try:
             import urllib.request
             import urllib.parse
             from bs4 import BeautifulSoup
 
             req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'})
-            with urllib.request.urlopen(req, timeout=15) as response:
-                html_content = response.read().decode('utf-8', errors='ignore')
+            html_content = safe_urlopen(req, timeout=15).decode('utf-8', errors='ignore')
 
             soup = BeautifulSoup(html_content, 'html.parser')
 
@@ -207,8 +213,7 @@ def library_import_url(request):
                                 if not img_name or '.' not in img_name:
                                     img_name = f'img_{len(downloaded_images)+1}.jpg'
                                 img_req = urllib.request.Request(abs_url, headers={'User-Agent': 'Mozilla/5.0'})
-                                with urllib.request.urlopen(img_req, timeout=10) as img_resp:
-                                    downloaded_images[img_name] = img_resp.read()
+                                downloaded_images[img_name] = safe_urlopen(img_req, timeout=10, max_bytes=5 * 1024 * 1024)
                                 content_html += f'<p><img src="{abs_url}" alt="{alt}"></p>'
                             except Exception:
                                 content_html += f'<p><img src="{src}" alt="{alt}"></p>'

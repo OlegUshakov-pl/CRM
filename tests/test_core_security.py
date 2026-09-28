@@ -1,8 +1,10 @@
+import json
 from unittest.mock import patch
 
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.test import TestCase, RequestFactory, override_settings
+from django.urls import reverse
 
 from core.models import generate_unique_slug, Activity
 from core.context_processors import app_version
@@ -287,3 +289,51 @@ class FileMemoryOptimizationTest(TestCase):
             mock_ai.file.save.assert_called_once()
             call_args = mock_ai.file.save.call_args
             self.assertIs(call_args[0][1], mock_file)
+
+
+class StaticServeAuthTest(TestCase):
+    def test_files_route_requires_login(self):
+        response = self.client.get('/files/anything.txt')
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('/accounts/', response['Location'])
+
+    def test_ai_files_route_requires_login(self):
+        response = self.client.get('/ai-files/anything.txt')
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('/accounts/', response['Location'])
+
+    def test_authenticated_gets_404_for_missing_file(self):
+        User.objects.create_user(username='staticuser', password='testpass')
+        self.client.login(username='staticuser', password='testpass')
+        response = self.client.get('/files/does-not-exist.txt')
+        self.assertEqual(response.status_code, 404)
+
+
+class AiFetchModelsSecurityTest(TestCase):
+    def setUp(self):
+        User.objects.create_user(username='fetcher', password='testpass')
+        self.client.login(username='fetcher', password='testpass')
+
+    def _post(self, payload):
+        return self.client.post(
+            reverse('core:ai_fetch_models'),
+            data=json.dumps(payload),
+            content_type='application/json',
+        )
+
+    def test_file_scheme_rejected(self):
+        response = self._post({'provider': 'ollama', 'base_url': 'file:///C:/Windows'})
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(response.json()['ok'])
+
+    def test_link_local_metadata_rejected(self):
+        response = self._post({'provider': 'ollama', 'base_url': 'http://169.254.169.254'})
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(response.json()['ok'])
+
+    def test_local_ollama_allowed_when_fetch_mocked(self):
+        with patch('core.views.safe_urlopen', return_value=b'{"models": [{"model": "llama3"}]}'):
+            response = self._post({'provider': 'ollama', 'base_url': 'http://localhost:11434'})
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()['ok'])
+        self.assertEqual(response.json()['models'][0]['id'], 'llama3')

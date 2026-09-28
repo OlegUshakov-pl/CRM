@@ -17,6 +17,8 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_GET, require_POST
 
+from core.url_guard import safe_open, validate_service_url
+
 from .models import AIFile, AILog, ChatMessage, ChatSession
 from .services import AIFileService, BrowserService, LLMService
 from .services.i18n import detect_lang, t
@@ -80,8 +82,10 @@ def _provider_chat(text: str, model: str, user) -> Dict[str, Any]:
         payload = {'model': model, 'messages': [{'role': 'user', 'content': text}], 'stream': False}
         try:
             data = json.dumps(payload).encode('utf-8')
-            req = urllib.request.Request(f'{base_url}/api/chat', data=data, headers={'Content-Type': 'application/json'}, method='POST')
-            with urllib.request.urlopen(req, timeout=120) as resp:
+            url = f'{base_url}/api/chat'
+            validate_service_url(url)
+            req = urllib.request.Request(url, data=data, headers={'Content-Type': 'application/json'}, method='POST')
+            with safe_open(req, timeout=120, validator=validate_service_url) as resp:
                 result = json.loads(resp.read().decode())
                 msg = result.get('message', {}).get('content', '')
                 return {'ok': True, 'message': msg or 'Empty response from model.'}

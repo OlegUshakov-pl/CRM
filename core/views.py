@@ -19,6 +19,7 @@ from materials.models import Material
 from parts.models import Part
 from generator.models import Deal
 from .models import AppSetting, AIProvider, AIModel, AppSettings
+from .url_guard import UnsafeURLError, safe_urlopen, validate_service_url
 from projects.utils import get_project_root_path
 
 
@@ -247,15 +248,18 @@ def ai_fetch_models(request):
 
     if provider == 'ollama':
         url = f'{base_url}/api/tags'
+        try:
+            validate_service_url(url)
+        except UnsafeURLError as e:
+            return JsonResponse({'ok': False, 'error': str(e)}, status=400)
         headers = {}
         req = urllib.request.Request(url, headers=headers, method='GET')
         try:
-            with urllib.request.urlopen(req, timeout=10) as resp:
-                raw = json.loads(resp.read().decode())
-                models = []
-                for m in raw.get('models', []):
-                    models.append({'id': m.get('model', ''), 'name': m.get('name', m.get('model', ''))})
-                return JsonResponse({'ok': True, 'models': models})
+            raw = json.loads(safe_urlopen(req, timeout=10, validator=validate_service_url, max_bytes=5 * 1024 * 1024).decode())
+            models = []
+            for m in raw.get('models', []):
+                models.append({'id': m.get('model', ''), 'name': m.get('name', m.get('model', ''))})
+            return JsonResponse({'ok': True, 'models': models})
         except Exception as e:
             return JsonResponse({'ok': False, 'error': str(e)})
 
@@ -349,6 +353,10 @@ def api_provider_verify(request, provider_id):
 
     if provider_id == 'ollama':
         url = f'{base_url}/api/tags'
+        try:
+            validate_service_url(url)
+        except UnsafeURLError as e:
+            return JsonResponse({'ok': False, 'error': str(e)}, status=400)
         req = urllib.request.Request(url, method='GET')
     else:
         if not api_key:
@@ -360,10 +368,10 @@ def api_provider_verify(request, provider_id):
         req = urllib.request.Request(url, headers=endpoint['headers'](api_key), method='GET')
 
     try:
-        with urllib.request.urlopen(req, timeout=15) as resp:
-            provider.key_verified_at = timezone.now()
-            provider.save(update_fields=['key_verified_at', 'updated_at'])
-            return JsonResponse({'ok': True, 'api_key_masked': provider.get_masked_key()})
+        safe_urlopen(req, timeout=15, validator=validate_service_url, max_bytes=5 * 1024 * 1024)
+        provider.key_verified_at = timezone.now()
+        provider.save(update_fields=['key_verified_at', 'updated_at'])
+        return JsonResponse({'ok': True, 'api_key_masked': provider.get_masked_key()})
     except urllib.error.HTTPError as e:
         return JsonResponse({'ok': False, 'error': f'HTTP {e.code}'})
     except Exception as e:
@@ -388,6 +396,10 @@ def api_provider_sync_models(request, provider_id):
 
     if provider_id == 'ollama':
         url = f'{base_url}/api/tags'
+        try:
+            validate_service_url(url)
+        except UnsafeURLError as e:
+            return JsonResponse({'ok': False, 'error': str(e)}, status=400)
         req = urllib.request.Request(url, method='GET')
     else:
         if not api_key:
@@ -399,37 +411,36 @@ def api_provider_sync_models(request, provider_id):
         req = urllib.request.Request(url, headers=endpoint['headers'](api_key), method='GET')
 
     try:
-        with urllib.request.urlopen(req, timeout=15) as resp:
-            raw = json.loads(resp.read().decode())
-            fetched_models = _normalize_models(provider_id, raw)
+        raw = json.loads(safe_urlopen(req, timeout=15, validator=validate_service_url, max_bytes=5 * 1024 * 1024).decode())
+        fetched_models = _normalize_models(provider_id, raw)
 
-            custom_models = list(AIModel.objects.filter(provider=provider, is_custom=True).values_list('model_id', flat=True))
+        custom_models = list(AIModel.objects.filter(provider=provider, is_custom=True).values_list('model_id', flat=True))
 
-            existing = {m.model_id: m for m in AIModel.objects.filter(provider=provider, is_custom=False)}
+        existing = {m.model_id: m for m in AIModel.objects.filter(provider=provider, is_custom=False)}
 
-            for fm in fetched_models:
-                if fm['id'] in existing:
-                    obj = existing[fm['id']]
-                    obj.name = fm['name']
-                    obj.save(update_fields=['name'])
-                else:
-                    AIModel.objects.create(
-                        provider=provider,
-                        model_id=fm['id'],
-                        name=fm['name'],
-                        is_custom=False,
-                        tags=[],
-                    )
+        for fm in fetched_models:
+            if fm['id'] in existing:
+                obj = existing[fm['id']]
+                obj.name = fm['name']
+                obj.save(update_fields=['name'])
+            else:
+                AIModel.objects.create(
+                    provider=provider,
+                    model_id=fm['id'],
+                    name=fm['name'],
+                    is_custom=False,
+                    tags=[],
+                )
 
-            fetched_ids = {fm['id'] for fm in fetched_models}
-            stale_ids = [mid for mid, obj in existing.items() if mid not in fetched_ids]
-            if stale_ids:
-                AIModel.objects.filter(provider=provider, model_id__in=stale_ids, is_custom=False).delete()
+        fetched_ids = {fm['id'] for fm in fetched_models}
+        stale_ids = [mid for mid, obj in existing.items() if mid not in fetched_ids]
+        if stale_ids:
+            AIModel.objects.filter(provider=provider, model_id__in=stale_ids, is_custom=False).delete()
 
-            provider.models_synced_at = timezone.now()
-            provider.save(update_fields=['models_synced_at', 'updated_at'])
+        provider.models_synced_at = timezone.now()
+        provider.save(update_fields=['models_synced_at', 'updated_at'])
 
-            return JsonResponse({'ok': True, 'count': len(fetched_models)})
+        return JsonResponse({'ok': True, 'count': len(fetched_models)})
     except urllib.error.HTTPError as e:
         return JsonResponse({'ok': False, 'error': f'HTTP {e.code}'})
     except Exception as e:

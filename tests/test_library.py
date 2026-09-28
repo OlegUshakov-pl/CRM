@@ -1,4 +1,7 @@
+from unittest.mock import patch
+
 from django.contrib.auth.models import User
+from django.contrib.messages import get_messages
 from django.test import TestCase, Client
 from django.urls import reverse
 
@@ -162,3 +165,47 @@ class LibraryViewTest(TestCase):
         response = self.client.get(reverse('library:list') + '?content_type=article')
         self.assertContains(response, 'Test Article')
         self.assertNotContains(response, 'File Only')
+
+
+class ImportUrlSecurityTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='importer', password='testpass')
+        self.client = Client()
+        self.client.login(username='importer', password='testpass')
+
+    def _post(self, url):
+        return self.client.post(reverse('library:import_url'), {'url': url})
+
+    def _messages(self, response):
+        return [m.message for m in get_messages(response.wsgi_request)]
+
+    def test_file_scheme_rejected(self):
+        response = self._post('file:///C:/Windows/win.ini')
+        self.assertEqual(LibraryItem.objects.count(), 0)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(any('http' in m for m in self._messages(response)))
+
+    def test_internal_urls_rejected(self):
+        for url in (
+            'http://127.0.0.1:8000/admin/',
+            'http://169.254.169.254/latest/meta-data/',
+            'http://localhost/db.sqlite3',
+            'http://192.168.1.1/',
+        ):
+            response = self._post(url)
+            self.assertEqual(LibraryItem.objects.count(), 0, url)
+            self.assertTrue(self._messages(response), url)
+
+    def test_requires_login(self):
+        self.client.logout()
+        response = self._post('http://93.184.216.34/')
+        self.assertEqual(response.status_code, 302)
+
+    def test_public_url_imported_when_fetch_is_mocked(self):
+        html = b'<html><head><title>Ok Page</title></head><body><p>Hello world</p></body></html>'
+        with patch('library.views.safe_urlopen', return_value=html), \
+                patch.object(LibraryItem, 'save_as_md'):
+            self._post('http://93.184.216.34/article')
+        item = LibraryItem.objects.get()
+        self.assertEqual(item.title, 'Ok Page')
+        self.assertEqual(item.source_url, 'http://93.184.216.34/article')
