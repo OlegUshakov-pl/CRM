@@ -119,7 +119,7 @@ SECURE_COOKIES=False
 
 | Layer | Technology |
 |-------|-----------|
-| Backend | Django 6.x, Python 3.14+, SQLite |
+| Backend | Django 6.1, Python 3.14+, SQLite |
 | Frontend | Tailwind CSS 4 (CLI + CDN), Alpine.js 3.x, HTMX 2.0.4, Lucide Icons, Montserrat |
 | AI | Ollama, Anthropic, OpenAI, Google, Mistral, Groq, DeepSeek, OpenRouter, OpenCode |
 | Build | Tailwind CLI v4 (`npm run dev` / `npm run build`) |
